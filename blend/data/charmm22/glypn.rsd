@@ -1,0 +1,13 @@
+nter NH2 (neutral N-terminal patch for GLY)
+
+parameter_set = charmm22
+number_of_atoms = 4
+! charge=0.00
+
+atoms
+!i  id   type charge chir nb bonded_atoms
+ 0  N:N   NH2  -0.93   0  2  1 2
+ 1  HT1,HN1:H HC   0.34   0  1  0
+ 2  HT2,HN2   HC    0.34   0  1  0
+ 3  CA:CA CT2   0.07   0  0 
+

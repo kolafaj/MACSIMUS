@@ -1,0 +1,52 @@
+molecule HEME
+
+parameter_set = charmm19
+number_of_atoms = 43
+! charge=-2.00000
+! WARNING: FE-NP bond changed in param file
+
+atoms
+!i  id   type charge chir nb bonded_atoms
+ 0  FE    FE    0.24   0  4  1 2 3 4
+ 1  N~A    NP   -0.18   0  3  0 5 10
+ 2  N~B    NP   -0.18   0  3  0 8 13
+ 3  N~C    NP   -0.18   0  3  0 11 16
+ 4  N~D    NP   -0.18   0  3  0 14 7
+ 5  C1A   CR56   0.03   0  3  1 17 6
+ 6  CHA   CR1E  0.04   0  2  7 5
+ 7  C4D   CR56   0.02   0  3  37 4 6
+ 8  C1B   CR56   0.03   0  3  9 2 25
+ 9  CHB   CR1E  0.04   0  2  10 8
+10  C4A   CR56   0.02   0  3  19 1 9
+11  C1C   CR56   0.03   0  3  12 3 30
+12  CHC   CR1E  0.04   0  2  13 11
+13  C4B   CR56   0.02   0  3  27 2 12
+14  C1D   CR56   0.03   0  3  15 4 35
+15  CHD   CR1E  0.04   0  2  16 14
+16  C4C   CR56   0.02   0  3  32 3 15
+17  C2A   C    -0.02   0  3  5 19 18
+18  CAA   CH2E  0.04   0  2  17 21
+19  C3A   C     0.02   0  3  17 10 20
+20  CMA   CH3E -0.04   0  1  19
+21  CBA   CH2E -0.10   0  2  18 22
+22  CGA   C     0.30   0  3  21 23 24
+23  O1A   OC   -0.50   0  1  22
+24  O2A   OC   -0.50   0  1  22
+25  C2B   C     0.02   0  3  8 27 26
+26  CMB   CH3E -0.04   0  1  25
+27  C3B   C    -0.05   0  3  25 13 28
+28  CAB   CR1E  0.03   0  2  27 29
+29  CBB   CH2E -0.10   0  1  28
+30  C2C   C     0.02   0  3  11 32 31
+31  CMC   CH3E -0.04   0  1  30
+32  C3C   C    -0.05   0  3  30 16 33
+33  CAC   CR1E  0.03   0  2  32 34
+34  CBC   CH2E -0.10   0  1  33
+35  C2D   C     0.02   0  3  14 37 36
+36  CMD   CH3E -0.04   0  1  35
+37  C3D   C    -0.02   0  3  35 7 38
+38  CAD   CH2E  0.04   0  2  37 39
+39  CBD   CH2E -0.10   0  2  38 40
+40  CGD   C     0.30   0  3  39 41 42
+41  O1D   OC   -0.50   0  1  40
+42  O2D   OC   -0.50   0  1  40

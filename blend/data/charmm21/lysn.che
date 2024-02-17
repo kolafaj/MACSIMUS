@@ -1,0 +1,12 @@
+aminoacid K LYS lysine neutral (charges according to CH3-NH2/JK but H not HC)
+parameter_set = charmm21
+! charge=0.00
+        |
+        NP^n.35-Hp.25
+          |                                H.15
+          |                               /
+          CH1E.1--CH2Ev-CH2E-CH2E-CH2Ev-NTn.3
+          |                               \
+          |                                H.15
+ On.55=C^p.55
+        |

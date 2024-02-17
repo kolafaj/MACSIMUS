@@ -1,0 +1,9 @@
+nter ACE acetoamine group
+parameter_set = gromos96
+! charge=0.00
+
+          CH3
+          |      
+          |      
+ On.38=CO^p.38
+        |

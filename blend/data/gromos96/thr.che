@@ -1,0 +1,12 @@
+aminoacid T THR threonine
+parameter_set = gromos96
+! charge=0.00
+        |
+       N^n.28-Hp.28
+          |         OH^^n.548-H^.398
+          |        /    
+          CH1--CH1^.15
+          |        \
+          |        CH3
+ On.38=CO^p.38
+        |

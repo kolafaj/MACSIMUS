@@ -1,0 +1,7 @@
+cter CT3 N-Methylamide C-terminus
+parameter_set = gromos96
+! charge=0.00
+        |
+       N^n.28-Hp.28
+        |
+      CH3

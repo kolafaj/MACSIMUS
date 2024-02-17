@@ -1,0 +1,10 @@
+2 methoxy ethyl acetat
+parameter_set=charmm21
+
+   HA             HA HA            On.25
+   |               |  |            /
+HA-CT.25-OEn.5-CT.25-CT.25-OSn.5-C.5
+   |              |  |            \ 
+   HA             HA HA           CT-HA
+                                  |\
+                                 HA HA

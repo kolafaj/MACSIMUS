@@ -1,0 +1,12 @@
+aminoacid G GLY glycine protonated terminal (instead of GLY+NTER)
+parameter_set = charmm21
+! charge=0.00
+
+       HC^^p.35
+        |
+ HCp.35-NH3^n.30-HCp.35
+        |    
+        CH2E.25
+        |    
+        C^p.51=On.51
+        |

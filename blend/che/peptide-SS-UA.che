@@ -1,0 +1,95 @@
+peptide
+
+parameter_set = charmm21
+
+       HC^.35
+        |
+ HCv.35-NTn.3-HCv.35
+        |             CH3E^
+        |            /
+       CH1Ev.25--CH1E                                   ! VAL
+        |            \
+        |            CH3Ev
+        |
+       C.55-Ovn.55
+         |
+         |
+         NPn.35-Hv.25
+            \
+             \
+              \
+STn.19-CH2E.19-CH1E^.1                                  ! CYS for -S-S-
+|             /
+|            /
+|           /
+|        C.55-Ovn.55
+|        |
+|        |
+|       NPn.35-Hv.25
+|       |             CH3E^
+|       |            /
+|      CH1Ev.1---CH1E                                   ! VAL
+|       |            \
+|       |            CH3Ev
+|      C.55-Ovn.55
+|       |
+|       |
+|       NPn.35-Hv.25
+|       |          H^.3-N5Rn.4==C5RE.3
+|       |              /         |
+|      CH1Ev.1--CH2E-C5R.1       |                     ! HIS
+|       |              \         |
+|       |               C5RE.1==N5Rn.4
+|      C.55-Ovn.55
+|       |
+|       |
+|       NPn.35-Hv.25
+|       |
+|       |
+|      CH1Ev.1---CH2E--CH2E.06-SEn.12--CH3E.06           ! MET
+|       |
+|       |
+|      C.55-Ovn.55
+|       |
+|       |
+|       NPn.35-Hv.25
+|       |             CH3E^
+|       |            /
+|      CH1Ev.1---CH1E-CH2E                              ! ILE
+|       |                 \
+|       |                  CH3E
+|      C.55-Ovn.55
+|       |
+|       |
+|       NPn.35-Hv.25
+|       |
+|       |
+|      CH1Ev.1---CH3E                                   ! ALA
+|       |
+|       |
+|      C.55-Ovn.55
+|       |
+|       |
+|       NPn.35-Hv.25
+|       |                  CH3Ev
+|       |                 /
+|      CH1Ev.1---CH2E-CH1E                              ! LEU
+|       |                 \
+|       |                  CH3Ev
+|      C.55-Ovn.55
+|       |
+|       |
+|       |
+|       NPn.35-Hv.25
+|           \
+|            \
+|             \
+STn.19-CH2E.19-CH1E^.1                                  ! CYS for -S-S-
+              /
+             /
+            /
+       C.140
+      /    \
+ OC^n.57  OCvn.57
+
+

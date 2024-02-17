@@ -1,0 +1,14 @@
+G GLY glycine neutral (instead of GLY+NTERN)
+parameter_set = charmm22
+! charge=0.00
+
+HC^^p.34 HC^^p.34
+       \ /              !
+       NH2^n.93         ! guess using methylamine (top_all22_model.inp)
+        |    
+        |    
+HBp.09-CT2p.07-HBp.09
+        |    
+        |    
+  On.51=C^p.51
+        |

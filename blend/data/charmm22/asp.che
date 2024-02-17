@@ -1,0 +1,12 @@
+aminoacid D ASP aspartic acid
+parameter_set = charmm22
+! charge=-1.00
+        |              
+        NH1^n.47-Hp.31        
+        |       HAvp.09     OC^n.76
+        |        |         /
+HBvp.09-CT1p.07-CT2n.28--CCp.62
+        |        |         \
+        |       HAvp.09    OC^n.76      
+ On.51=C^p.51                      
+        |                      

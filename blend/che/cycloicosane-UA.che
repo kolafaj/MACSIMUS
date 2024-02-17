@@ -1,0 +1,13 @@
+molecule cycloicosane-UA
+
+  CH2E-CH2E-CH2E-CH2E-CH2E-CH2E 
+   |                        |   
+  CH2E                     CH2E 
+   |                        |   
+  CH2E                     CH2E 
+   |                        |   
+  CH2E                     CH2E 
+   |                        |   
+  CH2E                     CH2E 
+   |                        |   
+  CH2E-CH2E-CH2E-CH2E-CH2E-CH2E 

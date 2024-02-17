@@ -1,0 +1,16 @@
+cter CT3 N-Methylamide C-terminus
+
+parameter_set = charmm22
+number_of_atoms = 8
+! charge=0.00
+
+atoms
+!i  id   type charge chir nb bonded_atoms
+ 0  C:C   C     0.51   0  2  2 1
+ 1  O:C   O    -0.51   0  1  0
+ 2  NT    NH1  -0.47   0  3  0 3 4
+ 3  HNT   H     0.31   0  1  2
+ 4  CAT   CT3  -0.11   0  4  2 5 6 7
+ 5  HT1   HA    0.09   0  1  4
+ 6  HT2   HA    0.09   0  1  4
+ 7  HT3   HA    0.09   0  1  4

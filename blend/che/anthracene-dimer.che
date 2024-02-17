@@ -1,0 +1,22 @@
+anthracene-dimer
+
+HA.1   HA.1          HA.1              HA.1   HA.1        
+|        |             |               |      |         
+C6Rn.1--C6Rn.1--CR66--C6Rn.1:b--CR66--C6Rn.1--C6Rn.1
+|                 |             |             |     
+|                 |             |             |     
+C6Rn.1--C6Rn.1--CR66--C6Rn.1:a--CR66--C6Rn.1--C6Rn.1
+|        |             |               |      |         
+HA.1   HA.1          HA.1             HA.1    HA.1       
+
+
+HA.1   HA.1          HA.1              HA.1   HA.1             
+|        |             |               |      |              
+C6Rn.1--C6Rn.1--CR66--C6Rn.1:d--CR66--C6Rn.1--C6Rn.1     
+|                 |             |             |             
+|                 |             |             |             
+C6Rn.1--C6Rn.1--CR66--C6Rn.1:c--CR66--C6Rn.1--C6Rn.1     
+|        |             |              |       |             
+HA.1   HA.1          HA.1             HA.1    HA.1            
+
+#connect a c b d

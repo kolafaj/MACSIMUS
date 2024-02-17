@@ -1,0 +1,12 @@
+aminoacid Y TYR tyrosine
+parameter_set = charmm19
+! charge=0.00
+        |         
+        NH1^n.35-Hp.25
+          |              CR1E-CR1E
+          |              /       \ 
+          CH1E.1--CH2E^-C        C.25-OH1n.65
+          |              \       /        \
+          |              CR1E-CR1E        H.4
+ On.55=C^p.55     
+        |         

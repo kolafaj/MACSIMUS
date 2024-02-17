@@ -1,0 +1,12 @@
+aminoacid C CYS cysteine
+parameter_set = charmm21
+! charge=0.00
+        |    
+        NP^n.35-Hp.25
+          |
+          |
+          CH1E.1--CH2E^.19-SH1En.19
+          |
+          |
+ On.55=C^p.55
+        |         

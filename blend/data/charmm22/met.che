@@ -1,0 +1,12 @@
+aminoacid M MET methionine
+parameter_set = charmm22
+! charge=0.00
+        |                                      
+        NH1^n.47-Hp.31                                
+        |       HAvp.09   HA^p.09         HA^p.09  
+        |        |        |                |      
+HBvp.09-CT1p.07--CT2n.18--CT2n.14--Sn.09--CT3n.22--HAvp.09
+        |        |        |                |      
+        |       HAvp.09   HA^p.09          HA^p.09  
+ On.51=C^p.51                                    
+        |                                    

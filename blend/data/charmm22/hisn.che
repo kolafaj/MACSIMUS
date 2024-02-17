@@ -1,0 +1,12 @@
+aminoacid H HIS histidine (uncharged with proton on ND1), charmm name HSD
+parameter_set = charmm22
+! charge=0.00
+        |                    Hp.32        HR1p.13
+        NH1^n.47-Hp.31        |          /
+        |        HAvp.09     NR1n.36--CPH2p.25
+        |        |          /            |
+HBvp.09-CT1p.07--CT2n.09--CPH1n.05       |
+        |        |          \            |
+        |        HAvp.09     CPH1p.22--NR2n.70
+  On.51=C^p.51                |
+        |                   HR3p.10

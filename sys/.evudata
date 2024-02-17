@@ -1,0 +1,75 @@
+c=299792458[m s-1]          ! def                  *** SI 20 May 2019 ***
+h=6.62607015e-34[J s]       ! def
+e=1.602176634e-19[C]        ! def, atomic unit of charge
+NA=6.02214076e23[mol-1]     ! def
+k=1.380649e-23[J K-1]       ! def
+kB=1.380649e-23[J K-1]      ! def
+alpha=1/137.035999084       ! (21) 2018
+eps0=e^2/(2*alpha*h*c)      ! vacuum permittivity
+mu0=2*alpha*h/(e^2*c)       ! vacuum permeability
+g=9.80665[m/s2]
+TC=273.15[K]
+pst=101325[Pa]
+cst=1[mol dm-3]
+hbar=h/2/pi                 ! atomic unit of angular momentum
+R=NA*k
+me=9.1093837015e-31[kg]     ! (28)
+Me=me*NA
+mp=1.67262192369e-27[kg]    ! (51)
+Mp=mp*NA
+Rinf=alpha^2*me*c/(2*h)
+F=e*NA
+G=6.67430e-11[m3 kg-1 s-2]  ! (15)
+a0=hbar/(me*c*alpha)        ! Bohr radius, atomic unit of length
+muB=e*hbar/me/2             ! Bohr magneton
+mue=-9.2847647043e-24[J/T]  ! (28), mag.moment of electron
+Eh=me*(c*alpha)^2           ! Hartree, atomic unit of energy
+Rinf=alpha^2*me*c/2/h       ! Rydberg constant
+au_t=hbar/Eh                ! atomic unit of time
+au_v=alpha*c                ! atomic unit of velocity
+au_f=Eh/a0                  ! atomic unit of force
+au_T=Eh/k                   ! atomic unit of temperature
+au_E=Eh/(e*a0)              ! atomic unit of electric field
+Hartree=Eh*NA               ! Hartree per mol
+A=1.17618[L0.5 mol-0.5]     ! at 25 deg, per concentration
+B=1[L0.5 mol-0.5]           ! at 25 deg, per concentration
+sigma=2*pi^5*k^4/(15*h^3*c^2)
+to W
+to N
+to Pa
+to C
+to V
+to S
+to S/m
+to S m2/mol
+to Ohm
+to F
+to F/m
+to H
+to T
+to Wb
+to C/mol
+to C/m2
+to J/mol
+to J/mol K
+to J/K
+to V/m
+to g/mol
+to mol/L
+to mol/kg
+to J s
+to N/m
+to L0.5 mol-0.5
+to J
+! Celsius to Kelvin; e.g., 25 oC -> 298.15 [K]
+def oC *1[K]+TC
+! Fahrenheit to Kelvin; e.g., 0 oF -> 255.37222 [K]
+def oF *5[K]/9+2298.35[K]/9
+! BUG: cannot use def X=EXPR in this file, use def X (EXPR)
+! Student's distribution t_nu(x)
+def Student (exp(lgamma(nu/2+.5)-lgamma(nu/2))/(1+x^2/nu)^(nu/2+.5)/sqrt(nu*pi))
+! integrated Student's distribution function
+def student p=integ x=t,33 Student
+! gravitational acceleration on Earth, height=0, latitude phi (consider deg)
+def gphi (9.7803253359[m/s2]*(1+0.0019318504*sin(phi)^2)/\(1-0.006694384442*sin(phi)^2))
+0

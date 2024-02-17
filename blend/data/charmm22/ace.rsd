@@ -1,0 +1,14 @@
+nter ACE acetoamine group
+
+parameter_set = charmm22
+number_of_atoms = 6
+! charge=0.00
+
+atoms
+!i  id      type charge chir nb bonded_atoms
+ 0  CA,CAY,CH3   CT3  -0.27   0  4  1 2 3 4
+ 1  HA1,HY1  HA    0.09   0  1  0
+ 2  HA2,HY2  HA    0.09   0  1  0
+ 3  HA3,HY3  HA    0.09   0  1  0
+ 4  C,CY     C     0.51   0  2  0 5
+ 5  O,OY     O    -0.51   0  1  4

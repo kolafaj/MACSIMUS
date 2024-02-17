@@ -1,0 +1,14 @@
+aminoacid W TRP tryptophan
+parameter_set = gromos96
+! charge=0.00
+        |                        HCp.1
+       N^n.28-Hp.28                |
+          |                      CR6n.1
+          |                      /    \
+          CH1--CH2^-CR5^n.14---CRF    CR6n.1-HCp.1
+          |           |         |      |
+          |         CR5n.1     CRF    CR6n.1-HCp.1
+ On.38=CO^p.38       /  \      / \    /
+        |          HCp.1 NR5n.05  CR6n.1
+        |                   |       |
+        |                 H.19     HCp.1

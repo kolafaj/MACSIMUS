@@ -1,0 +1,15 @@
+#!/bin/bash
+if [ $# -lt 1 ]; then 
+  echo "Show .cfg file, .mol,.gol needed. Call by:"
+  echo "  showcfg NAME[.cfg]"
+  exit
+fi
+N="${1/%.cfg/}"
+[ -e "$N".cfg.cfg ] && rm "$N".cfg.*
+
+cp "$N".cfg "$N".cfg.cfg
+cp "$N".mol "$N".cfg.mol
+cp "$N".gol "$N".cfg.gol
+cfg2plb "$N".cfg
+show -I%i "$N".cfg
+rm "$N".cfg.{cfg,mol,gol,plb}

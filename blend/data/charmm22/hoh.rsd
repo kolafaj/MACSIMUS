@@ -1,0 +1,11 @@
+water TP3M (TIP3P water model)
+
+parameter_set = charmm22
+number_of_atoms = 3
+! charge=0.000
+
+atoms
+!i  id   type charge chir nb bonded_atoms
+ 0  H1    HT   0.417   0  1  2 
+ 1  H2    HT   0.417   0  1  2 
+ 2  O,OH2   OT   -0.834   0  2  0 1

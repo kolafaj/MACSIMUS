@@ -1,0 +1,5 @@
+molecule N2
+
+parameter_set=gases
+
+N-N

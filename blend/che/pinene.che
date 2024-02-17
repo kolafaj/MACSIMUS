@@ -1,0 +1,19 @@
+pinene
+parameter_set=charmm21
+   HA         HA^^
+   |          |
+HA-CT-HA   HA-CT^-HA^^
+    \        /
+     \      /
+      \    /
+       CTp0
+      /    \
+     / HAvv \
+    /   |    \
+HA-CT---CTv--CT-HA
+   |    |    |
+HA-CT   HAvv |     HA
+  / |        |    /
+HA  CUA1---CUA1-CT-HA
+    |           |
+    HA          HA

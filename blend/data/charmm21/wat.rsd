@@ -1,0 +1,11 @@
+water TIPS3P water model
+
+parameter_set = charmm21
+number_of_atoms = 3
+! charge=0
+
+atoms
+! i  atomid  atomtype charge chiral nbonds bound-index
+  0  H1      HT       0.417    0    1      2
+  1  H2      HT       0.417    0    1      2
+  2  OW      OW       -0.834   0    2      0 1 

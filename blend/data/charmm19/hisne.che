@@ -1,0 +1,12 @@
+aminoacid H HIS histidine (uncharged isomer w. proton on NE2), charmm name HSE
+parameter_set = charmm19
+! charge=0.00
+        |                  
+        NH1^n.35-Hp.25     
+          |               NRn.4--CR1E.3
+          |              /        |
+          CH1E.1--CH2E^-C.1       |
+          |              \        |
+          |               CR1E.1--NH1n.4-H.3
+ On.55=C^p.55
+        |

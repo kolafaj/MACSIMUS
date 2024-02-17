@@ -1,0 +1,14 @@
+nter NACT acetamide (N-terminal patch)
+
+parameter_set = charmm21
+number_of_atoms = 6
+! charge=0
+
+atoms
+! i  atomid  atomtype charge chiral nbonds bound-index
+  0  N:N     NP       -0.35    0    3      1 2 3
+  1  1H:H    H        0.25     0    1      0
+  2  CA:CA   CH1E     0.1      1    1      0
+  3  CNT     C        .55      0    3      0 4 5
+  4  ONT     O        -.55     0    1      3
+  5  CT2     CH3E     0        0    1      3

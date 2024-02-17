@@ -1,0 +1,17 @@
+sucrose
+parameter_set = charmm21
+
+    H-OT HA HA
+        \| /
+      HA CT HA
+      |  | /        HA HA
+H-OT-CT--CT--OE HA   | /
+     |        |/     CT-OT-H
+H-OT-CT--CT--CT      |           HA
+      |  | \   \     |          /
+     HA  OT HA  OE--CT---OE---CT-CT-HA
+          |          \        /  | \
+          H        HA-CT----CT  HA  OT-H    
+                      |     | \
+                   H-OT   H-OT HA
+! not correct conformation!!!

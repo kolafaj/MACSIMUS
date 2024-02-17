@@ -1,0 +1,62 @@
+! exp-6 with Busing combining rules and r^-12, shell-core model
+! Li+ Al+++ Cl- I- NCS- Na+, compatible to the old AlCl+LiI salt project
+
+all_dihedrals=0  ! all dihedrals
+ar_dih_limit=1   ! inclusion limit for dihedrals in aromatic rings
+all_impropers=0  ! one improper per central atom
+column_X=0       ! column X disabled (all atoms match = all X=1)
+sqrt_rule=15     ! 15=Busing
+factor14=0       ! multiplicative factor for 1-4 interactions
+distance14=6     ! these interactions are 1-6
+polar=1          ! polarizability included
+;
+
+atoms
+!
+! X : if the atom can match wildcard atom X in the tables of dihedrals
+!     and impropers
+! A : if the atom is a member of an aromatic ring
+! mass : atomic mass in g/mol
+! shell : el shell (for MD aux charge) (WARNING: a sort of random numbers)
+!
+!i name  X A    mass    Z col description
+  1 LI   0 0   6.941     3 H  Li+ (color as hydrogen)
+  2 CL   0 0  35.45300  17 X  Cl-
+  3 AL   0 0  26.9815   13 M  Al+++
+  7 I    0 0 126.9045   53 C  I- (color as carbon)
+ 10 NA  0 0  22.9898   11  M  Cation Na+
+
+Buckingham+12
+!atom alpha   A           B      C        D
+LI      0       1.4804947e+46 83.015945 0       518.84968 
+AL      0       3.6479304e+09 10.204085 0       0       
+CL      0       10209.984 2.1008398 10044.928 1968806.1 
+I       0       10415.338 1.7301044 33873.825 4942437.3 
+NA      0       1.4881705e+17 20.753986 0       518.84968 
+
+nbfixes
+LI LI 0 1 0 518.84968
+
+polaratoms
+!atom  alpha shell Esat      arep
+!       A^3      e    kcal/mol  1/e
+CL      2       -1000  0    0.22439024
+I       4.5     -1000  0    0.37037037
+
+shellrep
+! atom
+LI
+AL
+NA
+
+polarbonds
+! atom --> atom 
+
+polarangles
+! atoms     alpha  alphazz Esat
+
+bonds
+
+angles
+
+

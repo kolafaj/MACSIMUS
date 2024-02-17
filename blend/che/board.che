@@ -1,0 +1,17 @@
+board
+         HA      HA      HA      HA      HA      HA      HA      HA      HA      HA      HA
+         |       |       |       |       |       |       |       |       |       |       |
+        C6R     C6R     C6R     C6R     C6R     C6R     C6R     C6R     C6R     C6R     C6R
+       /   \   /   \   /   \   /   \   /   \   /   \   /   \   /   \   /   \   /   \   /   \
+      /     C6R     C6R     C6R     C6R     C6R     C6R     C6R     C6R     C6R     C6R     \
+     /        |       |       |       |       |       |       |       |       |       |      \
+HA-C6R        |       |       |       |       |       |       |       |       |       |     C6R-HA
+    |         |       |       |       |       |       |       |       |       |       |      |
+    |         |       |       |       |       |       |       |       |       |       |      |
+HA-C6R        |       |       |       |       |       |       |       |       |       |     C6R-HA
+     \        |       |       |       |       |       |       |       |       |       |      /
+      \     C6R     C6R     C6R     C6R     C6R     C6R     C6R     C6R     C6R     C6R     /
+       \   /   \   /   \   /   \   /   \   /   \   /   \   /   \   /   \   /   \   /   \   /
+        C6R     C6R     C6R     C6R     C6R     C6R     C6R     C6R     C6R     C6R     C6R
+         |       |       |       |       |       |       |       |       |       |       |
+         HA      HA      HA      HA      HA      HA      HA      HA      HA      HA      HA

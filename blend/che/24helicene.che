@@ -1,0 +1,103 @@
+screw24
+         HA       HA
+          |       |
+          C6R---C6R
+          /        \
+  HA^-C6R^          \
+         |           C6R^
+  HA^^-C6R^^        /    \     HA^^^^^^
+            \      /      \    |
+             C6R^^^-C6R^^^-+-C6R^^^-C6R^^^
+                      |     \      /      \
+               HA^^^^^^      \    /        C6R^^-HA^^
+                              C6R^          |
+                                  \         C6R^-HA^
+                                   \       /
+                                    C6R---C6R
+                                   /       \
+                                  /         C6Rv-HAv
+                              C6Rv          |
+               HAvvvvvv      /    \        C6Rvv-HAvv
+                      |     /      \      /
+             C6Rvvv-C6Rvvv-+-C6Rvvv-C6Rvvv
+            /      \      /    |
+  HAvv-C6Rvv        \    /     HAvvvvvv
+         |           C6Rv
+  HAv-C6Rv          /
+          \        /
+          C6R---C6R
+          /        \
+  HA^-C6R^          \
+         |           C6R^
+  HA^^-C6R^^        /    \     HA^^^^^^
+            \      /      \    |
+             C6R^^^-C6R^^^-+-C6R^^^-C6R^^^
+                      |     \      /      \
+               HA^^^^^^      \    /        C6R^^-HA^^
+                              C6R^          |
+                                  \         C6R^-HA^
+                                   \       /
+                                    C6R---C6R
+                                   /       \
+                                  /         C6Rv-HAv
+                              C6Rv          |
+               HAvvvvvv      /    \        C6Rvv-HAvv
+                      |     /      \      /
+             C6Rvvv-C6Rvvv-+-C6Rvvv-C6Rvvv
+            /      \      /    |
+  HAvv-C6Rvv        \    /     HAvvvvvv
+         |           C6Rv
+  HAv-C6Rv          /
+          \        /
+          C6R---C6R
+          /        \
+  HA^-C6R^          \
+         |           C6R^
+  HA^^-C6R^^        /    \     HA^^^^^^
+            \      /      \    |
+             C6R^^^-C6R^^^-+-C6R^^^-C6R^^^
+                      |     \      /      \
+               HA^^^^^^      \    /        C6R^^-HA^^
+                              C6R^          |
+                                  \         C6R^-HA^
+                                   \       /
+                                    C6R---C6R
+                                   /       \
+                                  /         C6Rv-HAv
+                              C6Rv          |
+               HAvvvvvv      /    \        C6Rvv-HAvv
+                      |     /      \      /
+             C6Rvvv-C6Rvvv-+-C6Rvvv-C6Rvvv
+            /      \      /    |
+  HAvv-C6Rvv        \    /     HAvvvvvv
+         |           C6Rv
+  HAv-C6Rv          /
+          \        /
+          C6R---C6R
+          /        \
+  HA^-C6R^          \
+         |           C6R^
+  HA^^-C6R^^        /    \     HA^^^^^^
+            \      /      \    |
+             C6R^^^-C6R^^^-+-C6R^^^-C6R^^^
+                      |     \      /      \
+               HA^^^^^^      \    /        C6R^^-HA^^
+                              C6R^          |
+                                  \         C6R^-HA^
+                                   \       /
+                                    C6R---C6R
+                                   /       \
+                                  /         C6Rv-HAv
+                              C6Rv          |
+               HAvvvvvv      /    \        C6Rvv-HAvv
+                      |     /      \      /
+             C6Rvvv-C6Rvvv-+-C6Rvvv-C6Rvvv
+            /      \      /    |
+  HAvv-C6Rvv        \    /     HAvvvvvv
+         |           C6Rv
+  HAv-C6Rv          /
+          \        /
+          C6R---C6R
+          |       |
+         HA       HA
+

@@ -1,0 +1,13 @@
+! cookewslcP1 LiI li180i180
+no=10000
+LJcutoff=10.95
+cutoff=LJcutoff
+init=2
+thermostat="Berendsen" tau.T=1
+bulkmodulus=2e10
+tau.P=5
+tau.rho=0
+rescale="XYZCM"
+rdf.grid=25
+rdf.cutoff=cutoff
+;

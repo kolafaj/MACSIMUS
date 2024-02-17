@@ -1,0 +1,12 @@
+aminoacid F PHE phenylalanine
+parameter_set = gromos96
+! charge=0.00
+        |                HCp.1      HCp.1          
+       N^n.28-Hp.28       |         |      
+          |             CR6n.1--CR6n.1
+          |            /            \
+          CH1-CH2^--CR6             CR6n.1--HCp.1  
+          |            \            /
+          |             CR6n.1--CR6n.1
+ On.38=CO^p.38            |         |    
+        |               HCp.1       HCp.1        

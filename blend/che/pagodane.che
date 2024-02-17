@@ -1,0 +1,21 @@
+pagodane
+               HA
+               |          
+  HA-CT4------CT4-------CT4-HA
+      |\   HA  |   HA   /|
+      | \ /    |     \ / |
+   HA-+-CT4   CT4-HA CT4-+-HA
+      |   \  /   \  /    |
+      | HA-CT4   CT4-HA  |
+      |     |     |      |
+     CT4:a-CT4---CT4----CT4:b
+      |     |     |      |
+      | HA-CT4   CT4-HA  |
+      |   /  \   /  \    |
+   HA-+-CT4   CT4-HA CT4-+-HA
+      | / \    |     / \ |
+      |/   HA  |   HA   \|
+  HA-CT4------CT4-------CT4-HA
+               |          
+               HA
+#connect a b

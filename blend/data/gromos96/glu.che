@@ -1,0 +1,12 @@
+aminoacid E GLU glutamic acid (negative)
+parameter_set = glutamic
+! charge=-1.00
+        |                    
+       N^n.28-Hp.28               
+          |               OMn.635
+          |              /
+          CH1-CH2^-CH2-CO.27
+          |              \
+          |               OMn.635
+ On.38=CO^p.38                    
+        |                    

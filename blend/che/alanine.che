@@ -1,0 +1,14 @@
+alanine
+! for CHARMM21.3
+
+       HC^.35
+        |
+ HCv.35-NTn.3-HCv.35
+        |
+        |
+       CH1Ev.25---CH3E                                   ! ALA
+        |
+        |
+       C.14
+      /    \
+ OC^n.57  OCvn.57

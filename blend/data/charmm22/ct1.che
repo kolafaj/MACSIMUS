@@ -1,0 +1,14 @@
+cter CT1 - methylated C-terminus
+parameter_set = charmm22
+! charge=0.00
+        |       
+HBvp.09-CT1p.17-!<<< HBp.09-CT2n.02-,HBvp.09-CT1p.07-,HBvp.09-CP1p.02 of previous aminoacid to be replaced 
+        |       
+        |       
+OBn.52=CD^p.63
+        |
+        OSn.34
+        |
+HAp.09-CT3^n.14--HAp.09
+        |
+       HA^p.09

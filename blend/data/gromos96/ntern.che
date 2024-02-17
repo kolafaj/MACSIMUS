@@ -1,0 +1,10 @@
+nter NH2 (neutral N-terminal patch for all aminoacids but PRO and GLY)
+parameter_set = gromos96
+! charge=0
+    H.415  H.415  
+      \    /
+      NTn.83       !
+         |       !
+         |       !
+        CH1----!>>> CH1
+        |

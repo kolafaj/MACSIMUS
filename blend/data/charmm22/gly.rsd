@@ -1,0 +1,15 @@
+aminoacid G GLY glycine
+
+parameter_set = charmm22
+number_of_atoms = 7
+! charge=0.00
+
+atoms
+!i  id   type charge chir nb bonded_atoms
+ 0  N     NH1  -0.47   0  2  1 2
+ 1  H,HN    H     0.31   0  1  0
+ 2  CA    CT2  -0.02   0  4  0 5 3 4
+ 3  HA1   HB    0.09   0  1  2
+ 4  HA2   HB    0.09   0  1  2
+ 5  C     C     0.51   0  2  2 6
+ 6  O     O    -0.51   0  1  5

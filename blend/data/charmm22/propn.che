@@ -1,0 +1,15 @@
+P PRO proline neutral - terminal (instead of PRO+NTERN)
+parameter_set = charmm22
+! charge=0.00
+
+   HC^^p.34  HAvp.09 HAp.09
+        |        \  /
+       NH1^n.87--CP3.13  HAvp.09
+        |          \    /
+        |          CP2n.18
+        |          /     \
+HBvp.09-CP1p.13--CP2n.18  HA^p.09
+        |        /  \
+        |   HAvp.09  HAp.09
+  On.51=C^p.51
+        |

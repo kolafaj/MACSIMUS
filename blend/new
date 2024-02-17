@@ -1,0 +1,1281 @@
+This file contains history of blend and pdb until 2008.
+See `macsimus/history.txt' for the history since 2009.
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+version 1.00:
+  -u added
+  -v extended to sites - prints also atom id
+  -v negative arg: suppress tables
+  -c changed!
+also: if no improper, calc. chir is in .mol file e.g. TRY - N5R
+cutoffs implemented (options -t -[ -]) #define CUTOFF
+... can be short if missing atoms are filled in
+1.01:extended -w to ascii .3dt
+1.02:unknown atoms filling simplified and generalized
+
+blendimp as separate module (blendimp.c+blendimp.h)
+
+1.06:
+NBFIX exception re-implemented: slower but less memory consuming
+(the old version needed N*N memory, problems e.g.@ for protein in water
+treated as one `molecule')
+nbfix tables removed, slower, less memory consuming
+(make ss[site][site] tables as in cook later !!!)
+
+1.10:
+.par version check
+(Nov 94) Split molecules (option -n with negative arg)
+
+missing: say if only WANTED atoms minimized and other INJAIL!!!
+
+1.12: (11/94)
+option -j (.jet file of constraints) added. example:
+!REMARK : Distances to keep tail from folding up:
+! wrong #, nearest CA used
+!REMARK :   CA 25 - CA1244: 61 A
+!REMARK :   CA170 - CA1244: 52 A
+!REMARK :   CA202 - CA1244: 84 A
+! id      id    K length
+ASN3CA TYR159CA 1 61
+LEU22CA TYR159CA 1 52
+ALA26CA TYR159CA 1 84
+
+--------------------------------------------------
+! file wat.mol
+! number_of_atoms = 3
+! cluster sizes: 3
+
+! 1 cluster(s) found
+! reading wat.2db
+! reading wat.2dt
+! random initial configuration, min distance > 1.41421
+! wat.2dt chiralities checked <<< wrong message !
+
+(22 Dec 94) Option @kbd{-k} extended to negative values (single 
+atoms always free)
+
+1.14: -h improved: remove overdetermined bonds
+
+1.15 : option -y added (control of center-of-mass)
+
+1.2 : alpha=0 now means sqrt(eps1*eps2) combining rule
+
+1.21 : FIXED: -o
+
+1.22 : FIXED: nspec X newnspec
+       NOTE: molecule split into parts only if output
+
+1.3 :  options -@ and -\ added to control sqrt(eps1*eps2) comb. rules
+       sqrt_rule in *.par file
+       shell column added to atoms table in *.par = number of shell electrons
+          for polar version of cook
+
+pdb 1.12: FIXED: (double defined SS bond, eg. by option -c and SSBOND,
+    caused wrong message `cannot find CYS')
+
+1.31 : id-field in *.che files (after `:')
+       chirality calculations changed from simplex-volume to distance of the
+       central atom from the plane of three which is a bit more accurate
+
+pdb 1.2 : options -i and -d added
+       HETATM may apply to molecules
+       BUG : resins not used in all cases to distinguish residues.
+             pdb may fail in some cases for residues of the same number
+             and chain distinguished by resins only
+       released checking (if XX is unique atom name in a residue, then
+         it may match any XX in the pdb-file irrespective of leading and
+         trailing digits in either *.rsd or *.pdb file.  Turned OFF if 
+         patch used!)
+       file pdb.c now split into several modules
+1.33 : temp file name now unique--can run several blends at the same time
+
+1.40 : distance14 added
+       FIXED: if there is 1-4 NBFIX then 1-4 interactions are always
+              included (this may be inefficient but is sure)
+
+1.41-1.43 : reading *.che format, optional id supported (after semicolon)
+1.44 : LJsigma added 
+
+1.5a,1.5b: parinfoline added, # of dec digits on some .ble items increased
+
+TO BE IMPROVED: 
+(1) Error -> ERROR, WARNING, DISASTER >>>DONE
+(2) file.par or file.bin in options should override those in .mol/.che
+    with WARNING only, not Error
+(3) in DOS: blendpath to .bgi driver
+(4) ? remove all par options - enough to have in .par files ?
+(5) make accuracy of .ble output variable >>>DONE
+
+PDB: version 1.3 (11/95 USA)
+    paste back playback to pdb (option -p)
+    -p cancels -m, -b and -t are for input
+    use by:
+    pdb -p# [other options] PDBNAME MOLNAME
+    must be PDBNAME!=MOLNAME
+    #>0 : take cfg # from *.plb
+    -p-1 take last cfg from *.plb (from the eof)
+   -b-1 means now endian change, -b2 and -b-2 the header and names .plb or .plt
+
+blend 1.5c: (10/95, Prague)
+            option -_ ( accuracy of .ble output)
+blend 1.5d: (11/95, USA)
+            new-style error messages
+            bak-files with ~ appended (UNIX only)
+blend 1.5e: blendedt.c , blendedt.h added (simple mol-file editing)
+
+blend 1.6a: dummy variable added to LJ_t (is in bin par-file) to increase
+            32bit-64bit portability 
+
+blend 1.6b: Removes extra angles in the planar cases like:
+
+     B
+     |
+  A--X--C
+     |
+     D
+
+  where A-X-C and B-X-D should not be included if the equilibrium
+  angle is 90 deg
+
+pdb 1.3b: spaces inside string fields (atom type and residue) replaced by ~
+
+pdb 1.3c: ACE now recognized as 1st residue properly.  Similar for the
+        other residues provided that they are marked as cter or nter.
+    selection of residues via sel-file added.  
+    the same residues CANNOT BE COMBINED WITH -n-1 (no check!)
+
+blend 1.6c : -u-# prints # pairs with MINIMUM energy
+
+blend 1.6d (Guelph Apr 96): alpha-helix (option -r6)
+
+blend 1.6e (USA Jul 96): 
+           X-windows version (emulating Turbo graphics)
+           FIXED: string overflow for -v2
+                  -n-1 option: .ble file
+                  -n-1 now works even if the order of atoms in clusters is 
+                       interlaced (sites are renumbered so that clusters are 
+                       contiguous
+           Carbons made cyan by default, use 'b' to toggle gray/cyan
+
+blend 1.6f (USA)
+           mouse support added:
+             left button: rotate
+             mid button: move
+             right button: z-rot + rescale
+             click any button on atom: get info
+             click other atom: get also distance
+             partial charge replacement supported
+
+pdb 1.3d (USA)
+           HIS residues renamed and included into the -n option
+           (default is now charged HIS, -n selects the neutral HISN)
+           PDBNAME.rep file now tried if MOLNAME.rep not found
+
+pdb 1.3e (Odense)
+           option -u added
+
+GROMOS force field added: (.gro residue files)
+
+pdb 1.3f (Prague)
+         option -fFORCE_FIELD added
+         omit residue statistics
+
+blend 1.7a (Prague)
+          color column added to force fields
+blend 1.7b
+          all_impropers&2 now allows swap central and ending atom
+          in finding the impropers
+          all_impropers=2 for CHARMM (not very important, affects few
+            obscure terms)
+blend 1.7c
+          nbfix optimized
+
+          Added support for `dependants' = massless sites, exported in
+            a table of `dependants' to the ble-file (but not used by `blend',
+            it always uses `soft' force field - vibrating bonds, impropers,..)
+          The following patterns are recognized
+          (D=dependant, X=any atom, eventually bonded to more atoms)
+
+          linear patterns:  X-D-X   X-X-D
+
+                            X-D-X   X-X-X
+          planar patterns:    |       |   (as e.g. TIP4P water)
+                              X       D
+
+                            X-D-X   X-X-X
+          3D patterns:       / \     / \
+                            X   X   D   X
+
+          Caveats:
+            *It is necessary to mark angles not containing the massless
+             site as constrainable by option -h or -h-1.
+            *badly determined multiple dependants not checked
+            *for blend, it is generally necessary to add an improper or
+             other terms to guarantee planarity/linearity
+          Linearity and planarity: field `err=' in the table of
+            dependants (in ble-file) contains the deviation from
+            linearity/planarity and should be small (<1e-12 for free
+            simple molecules as e.g. TIP4P water, <1e-2 if the group is
+            a part of more complex molecule)
+            For 3D patterns, err should be always very small (<1e-12).
+          Good for e.g. TIP4P water
+
+blend 1.7?
+          set[env] MOUSEMAP added
+          e.g. (DOS) set MOUSEMAP=132 swaps right and middle mouse buttons
+
+          BUG: does not print correct info on constrained light angles if
+               massless sites are involved
+
+blend 1.7d FIXED: colors of atoms
+          equivalent K now given for bonds from `constrained angles'
+
+blend 1.7e: -r4 reads the last configuration (frame) from *.plb file,
+         -r4:# reads frame of given # (1st frame has #=1)
+         -r4:-# counts frames from the end (-1=last)
+! for compatibility reasons, frame #'s in show start now from 1
+
+blend 1.7f: the value of the dihedral angle printed in the table
+         `dihedrals' now contains oriented dihedral angle (i.e. with
+         sign)
+
+ramachan.c: produces Ramachandran plots (... maybe with
+         some sign wrong) from the ble-files:
+           ramachan < xxx.ble > phi_psi
+         Bugs: * proline sometimes is not included (for force fields
+                 with only one dihedral when several are possible, like
+                 Gromos). Works fine with CHARMM21.
+               * head and tail residues not included
+               * currently, only CHARMM21 and GROMOS atom names are
+                 recognized
+
+blend 1.7? + blend 1.7g:
+          chem. reaction support updated, see blendedt.c
+          (line zero_energy in mol-files)
+
+blend 1.7h dependants extended:
+          dependant info read from file MOLFILE.dep (if exists)
+          cannot be combined with automatic selection of massless
+          dependent sites
+          example of MOLFILE.dep:
+! this is comment
+7 8 9 : 11 12 13 14 ! sites 7,8,9 depend on 11,12,13,14 (using site numbers)
+H1 : CA1 CA2 CA3    ! site H1 depends on CA1,CA2,CA3 (using atom ID)
+          another example:
+* : CA1 CA2 13      ! CA1,CA2, and atom # 13 are fixed, all other dependent
+
+blend 1.7i: PDB output - not very sophisticated
+           -w10 : creates pdb info from backbone analysis, to be used
+                  for *.che input
+                  BUGS: non-standard numbering of H and other atoms
+                        no support for residues like HEM, etc.
+                        one backbone only
+           -w20 : re-creates pdb file from id names in mol-file, to be used
+                  for files created by the pdb converter
+                  BUGS: 1 backbone only
+                        changes order of atoms
+           -w30 : selects -w10 or -w20 automatically
+           -w11, etc.: -w10 and then -w1 (creates pdb and also writes .3db)
+           recommended option: -w31
+           option -r4 fixed (could not read frame 1 from pdb)
+
+blend 1.7j: MOLFILE.rea extended -- see react() in blendedt.c
+blend 1.7k: FIXED alpha-helix: new algorithm used (old version = -r5)
+
+pdb 1.3g: problems with matching C11 : C1 solved (at least I hope)
+
+pdb to do: CONECT and extra hydrogens
+           auto connect or check using distances and/or CONECT info
+
+blend 1.7l: moving and marking individual molecules/parts added
+blend 1.7m: -w40 added (write .atm file)
+blend 1.7n: option -~ = -^ added, which reads MOLFILE.plb and produces:
+            MOLFILE.rms = CP of mass-weighed RMSD (root mean square
+              displacement)
+            MOLFILE.ang = angles analyzed to get set of independent angles
+            MOLFILE.# = angles (in rad) for the set of angles as above
+            WARNING: the algorithm is simple and analyzes only 5- and 6-rings.
+                     particularly, it fails for many fused rings (Heme) and
+                     longer cycles (cystein S-S bridges)
+            -~ implies -d0 and -w0
+            -~#: #>0 all as above by # frames
+                 #<0 only rmsd (by -# frames)
+            ! only if #define TINY !
+
+------------
+New option is -~. It will generate both rmsd-files and angle-files.
+Option -r4 should be used to read *.plb as input.
+Example:
+  blend -r4 -~ XXX
+will read XXX.plb (and XXX.mol) and will generate files:
+  XXX.rms - development of rmsd from the 1st frame read
+  XXX.ang - protocol about angle analysis
+  XXX.0, XXX.1, ... angle files
+    [[[ would be more logical if begun with XXX.1 ... next time ]]]
+optional number after option -~ means (-~#)
+  if positive: only each #-th frame used
+  if negative: no angle analysis, rmsd only (by -# frames)
+-~ implies -w0 (no *.3db saved), -m0 (no minimization), and -d0
+  (one dihedral per bond)
+
+The angle analyzing algorithm takes into account only the following
+structures:
+  3- and 4- bonded atoms: 1 dependent angle is removed, 2 angles and 1
+                          improper are left
+  6-cycles: of 6 dihedrals and 6 angles, 6 are removed
+  5-cycles: of 5 dihedrals and 5 angles, 6 are removed
+  merged rings: 1 additional improper removed
+NOT SOLVED:
+  other cycles than 5- and 6- (like if there are CYS-CYS bridges)
+  complex merged rings (like in the heme)
+Actually, the topological analysis to get only independent angles is
+not easy.  The formula 2*ns-5 works for trees only (no cycles).
+-------------
+
+NEW #define TINY = some extra things removed:
+  writePDB, writeATM (options -w10 and higher)
+  analyze (option -~)
+  alphahelix (options -r5,-r6)
+  help
+
+blend 1.7o: -v2 info printed fixed, LJ and qq added
+blend 1.7p: mol-->pdb fixed (ACE0CH3E gave bad res # in PDB)
+
+Digital C compiler bug: in blendmin.c and blendgen.c, warnings
+- there is no prototype for "dihedralpot" 
+- there is no prototype for "improperpot"
+are incorrectly printed
+
+blend 1.7q: options -[ and -] removed
+            option -t-# added (ifndef TINY): e.g. -t-12345 sets range of
+              the cutoff switch function to [12.3,12.3+4.5]=[12.3,16.8]
+            option -t# not changed (e.g. -t12=range [11,13])
+
+            NEW: option -[ = normal mode analysis (#ifndef TINY), see below
+
+NORMAL MODE FREQUENCIES
+^^^^^^^^^^^^^^^^^^^^^^^
+
+Theory:
+~~~~~~~                      1   d2U  
+at energy minimum U = U    + - ------- (ri-ri   )(rj-rj   )
+                       min   2 dri drj       min       min
+
+where numerically we use the 2nd order formula
+  d2U      1 [ fi(rj+dr)-f(rj-dr)   fj(ri+dr)-f(ri-dr) ]
+------- =  - [ ------------------ + ------------------ ]
+dri drj    2 [        2 dr                  2 dr       ]
+
+By diagonalizing matrix U'ij=(1/2) d2U/dridrj /sqrt(mi mj) we get
+eigenvalues = squared circular frequencies (2PIf)^2 at the diagonal.
+
+Blend:
+~~~~~~
+The input configuration should be well minimized: use -mBIG_NUMBER or
+cg=BIG_NUMBER and wait until the minimization stops; to be on a very
+safe side, repeat once more with -m-100 or sd=100.
+The output of blend, file MOLNAME.nmf, contains frequencies f in THz and
+wave numbers in cm^-1, ordered.
+If the eigenvalue is negative, then f printed is negative, too.
+
+Option -[:
+ -[ = -[1 : dr=1e-5, eps=1e-11, this is the recommended default
+ -[-1 : dr=1e-5, eps=1e-16
+ -[#:
+   |#|>1: uses dr=exp(-|#|) to calculate d2U/drdr
+   negative # : uses eps=1e-16 as error eps for Jacobi iterations
+   positive # : uses eps=1e-11 as error eps for Jacobi iterations
+Option -p# changes its meaning (in version 1.7r):
+  #>0: produce max # files nm####.plb with 2 frames of # normal
+     vibrations with the lowest frequencies, normalized to max +-0.15
+     amplitude
+  #<0: as above, max # highest frequencies
+  #=0 (default): no nm####.plb files
+Then, show may be used to watch the moves; recommended hot keys: either
+`[' and `]', or `i' and type several times `b'
+
+Accuracy:
+~~~~~~~~~
+If dr~machine precision^(1.3)~1e-5 then U' is known with precision of
+1e-10.
+Six (for a general molecule) eigenvalues corresponding to rotations
+and translations should be zeros ==> they will be calculated with
+relative (to other eigenvalues) precision of about 1e-10.  Since the
+frequencies are square roots of eigenvalues, they will be given with
+relative precision of 1e-5.
+Consequently, frequencies slower than 1e-5 of the fastest ones,
+i.e. slower than about 1GHz, cannot be calculated.
+
+Diagonalization method: threshold Jacobi method
+
+Example:
+  blend -p tip3p        (to generate tip3p.gol,  as data enter `cg=0;')
+  blend -p999 -[ tip3p  (calc. all frequencies and eigenvectors, produce
+                         files tip3p.nmf and nm0000.plb,...)
+  show tip3p nm0006     (to show nm0006.plb: type `$' `i' `b' `b' ...)
+
+  note: nm0000.plb--nm0005.plb are translations and rotations,
+  nm0006.plb,nm0007.plb,nm0008.plb are the three normal vibrations
+
+Another example (especially didactic):
+------------- file biphenyl.che -----------
+biphenyl
+
+          HA    HA^
+          |     |
+ HA-C6R--C6R   C6R^--C6R^-HA^
+    |     |     |     |
+ HA-C6R  C6RP--C6RP  C6R-HA
+    |     |     |     |
+ HA-C6R--C6R   C6Rv--C6Rv-HAv
+          |     |
+          HA    HAv
+---------------- eof -------------
+then do the following:
+  blend -[ -p999 biphenyl
+    cg=1000; ! to continue minimizing another 1000 steps
+    cg=0; ! ... when enough minimized
+  (biphenyl.nmf and nm0000.plb, ... created)
+  show biphenyl nm0006
+    rotate the molecule (left mouse button)
+    type hot keys: `$' `i' `b' `b' ... Esc Esc
+
+BUG: cannot be used for models with zero masses of some particles (as
+TIP4P water)
+
+blend 1.7r: playback output for normal mode analysis added, option -p modified
+            when used with -[; see "NORMAL MODE FREQUENCIES" above
+
+blend 1.7s: essential dynamics, option -], CA atoms only
+            to be cleaned soon
+            example:
+              blend "-]" -p15 -m- -w- -r4 x
+            -p15 = will write (max) 15 plb-files with essential motion,
+                   file names = ess####.plb
+            -r4 = needed to read plb-file for analysis (whole file read!)
+            -]# has the same meaning as -[#
+            x.ess = eigenvalues, ess.mol = for CA atoms (should be
+                  edited by hand) 
+
+blend 1.7A:
+  options changed:
+  -r4:FROM:TO:BY[:FILENAME] selects frames to read for ess.dyn. and similar 
+       functions; FILENAME is optional name of plb-file (with extension),
+       the default is MOLFILE.plb
+IMPORTANT:  -r4 has now 1st frame as the default
+
+  "extra" options:
+    -E@ = essential dynamics
+         1. reads frames and matches frames with the 1st frame which means 
+            that r is rotated and displaced so that SUM (r_i-r0_i)^2 is min
+            (simple MC minimization)
+         2. calculates covarinace matrix Cov(r_i r_j) (all coord separate, 
+            i.e. rank=3*#_of_atoms)
+         3. calc. its eigenvalues
+      @: -EA uses all atoms
+         -EB backbone only
+         -EH heavy atoms (no Hydrogens)
+         -EC alpha carbons only
+         (derived from atom id which is expected to be derived from PDB)
+      generates also ess.mol (not if -EA) which should be edited (:-()
+     
+    -N# = normal mode frequencies, #=dr for num.deriv. [1e-5A]
+    -M# = amplitude for plb, normal-mode: atom max +- #A
+                             ess.dyn: +- # stdev.
+          (default = 1)
+    -J# = accuracy for Jacobi method
+    -R = rms
+    -A = angle file
+    -F# = # of output frames for normal mode and ess.dyn. visualization
+          (default=2)
+          positive: motion is harmonic (cos)
+          negative: motion is linear
+          (of course, -F-2 = -F2, -F-3=-F3)
+    -P# # of plb files for normal mode and ess.dyn. visualization
+          (default=0)
+  
+still to clean/improve:
+  re-use match of previous frame (?!)
+
+blend 1.7B : FIXED and improved essential dynamics
+           * essential dynamics ess####.plb files now shown
+             using the average frame as the center, not the last one 
+           * this average frame is also written as essr0.plb (if -F# is odd,
+             this is the same is the central frame)
+           * the amplitude of ess. motion in ess####.plb is the same as to 
+             reproduce the stdev (mean square amplitude), i.e. cos-amplitude 
+             is sqrt(2)*stdev and linear /\/\/\ amplitude=sqrt(3)*stdev
+             (i.e., if the ess.motions were harmonic or /\/\/\ ,
+             respectively, the ess####.plb would show the correct motion)
+             This holds for -M1 (the default), -M# just multiplies
+             the motion by #
+           * "ess.cp" written containing development of coordinates in the 
+             basis of eigenvectors, there are -P# items (columns) in ess.cp
+             use showcp -a-1 or showcp -p-10 etc. to analyze "ess.cp", 
+             ignore bad headers of columns 0 (Etot) and 1 (T)
+
+blend 1.7C : FIXED: -p has not worked since 1.7A
+
+blend 1.7D : format of editing (commands aw and af) extended:
+             af ID TYPE CHARGE [anything [X,Y,Z]]
+             aw [anything [X,Y,Z [#]]]
+             where X,Y,Z are absolute coordinates (in the case of water, of O)
+             there must not be spaces in X,Y,Z !
+             blend should be called with option -y0, evt. -y2
+
+             FIXED show grid
+
+blend 1.7E   added:
+             pf ID TYPE CHARGE [GRID [SHELL [NforPLB]]] 
+             pw [GRID [SHELL [NforPLB]]]
+             This requests `probing' a molecule for .....
+             -w- or -w0 now causes even *.mol not to be updated
+               (this happens e.g. if -e is requested)
+
+blend 1.7F   pw optimized by a special patch
+             compile-time option causing ommitting all atoms kept on place 
+             from energy calculations (#ifdef OMITKEPT in blendmin.c)
+
+blend 1.7G   af aw may have format aw = X Y Z
+
+blend 1.7H   af wf may have only the following new format:
+               af ID TYPE CHARGE = X Y Z
+               aw = X Y Z
+
+blend 1.8a   Urey-Bradley potential added to angles
+             -v4 causes parm reading debugging
+             -n-1 updated
+             POLAR version of blend: see polar.tex for details.
+               2 more atom parameters:
+               Esat [kcal/mol] : saturation energy, in formula
+                 mu = alpha . E / (1+E.mu/Esat)
+               Esat=0 means linear polarizability (Esat=infty)
+               kappa 
+             format of *.par changed, unique cook/blend interface:
+                sim/XXX/sitesite.c and sim/XXX/sitesite.h
+
+# force field is selected using the sim/XXX directory
+# valid values are (7/99):
+#---------------------------------------------------------------------------
+# subdir     SS_TABLE                  Explanation
+#---------------------------------------------------------------------------
+# sim/lj     Lennard-Jones             For charmm, gromos, etc.
+# sim/busing Busing-exp-6              exp-6 potential, Busing form
+#   the following are probably not updated with respect to new blend/cook:
+# sim/replj  repulsive-Lennard-Jones   LJ with dispersion forces removed
+# sim/exp6   exp-6                     exp-6 potential, Buckingham form
+# sim/exp6   repulsive-exp-6           exp-6 with dispersion forces removed
+#                                        (with -DREPULSIVE)
+#---------------------------------------------------------------------------
+# SS_TABLE is #defined in sitesite.h and refers to the name of the table 
+# containing atom potential parameters: RvdW, EvdW, parm[SS_PARMS]
+
+             command rm (remove molecule or cluster) implemented to blendedt.c
+
+             TO FINISH: 
+               blendgen.c: export info on axial bonds and angles to *.ble
+
+
+
+
+(?)        program pdb2pdb.c to reorder a PDB-file so that the order of
+                the atoms in each residue is N-CA-C-O[-sidechain]
+
+blend 1.8b FIXED: could not handle comment (!) after some lines in *.par
+                      (on some machines -- strtok incompatibility)
+           hotkeys I k K added:
+I = invert marking (marked <--> not marked)
+k = show keep status, i.e. atoms which are to be kept are marked
+K = opposite to k = marked atoms will be kept in the next minimization
+    step; in addition, get data is forced
+           control change: if -m0 -g and show is ESCaped, get data appears
+           (this was suppressed in previous versions)
+
+blend 1.8c: FIXED grid (hotkeys = #) shown at z=0
+            (simplified: shown if the atom or bond is below the z=0 plane
+            and not shown if it is above, i.e., no intersecting grid with
+            spheres)
+            rotated or edited molecule is now always copied to the .3db file
+            (in old versions, this copy was enabled only if minimized)
+            default parameter set is (again) charmm21.par
+
+   inefficiency in blendmin.c:
+   evaluation of Upot() is sometimes unnecessarily duplicated
+   should store individual terms (dihedrals, ...) and print them separately
+   arrays r,f,... unnecessarily allocated
+   backcopy from rotated (by show) site[].r to r0 inefficient and cumbersome
+
+blend 1.8d:
+   TIP3P water compatibility with `cook' enhanced:
+   1/ command `aw' now adds water sites in order H H O which is `standard'
+      and recognized by cook* to be rigid TIP3P water model (it only is
+      recognized if blend -o SYSNAME is called with -n-1 option!)
+   2/ to treat old files with water added by `aw' with order of sites  
+      O H H, option -[3 (namely, -\[3) should be used (in addition to -n-1)
+      (Precisely, -n-1 -[# causes #-atom clusters to be reordered so
+      that H go first)
+   3/ then, in the result of blend -n-1 water line `species xxx.1'
+      should be edited to `species TIP3P', or there should be the
+      following table in charmm21.par:
+waters
+TIP3P 3 HT .417 HT .417 OT -.834
+      which causes that `species TIP3P' is recognized (and passed to
+      cook*) automatically
+
+blend 1.8e: (POLAR only)
+   parameter Ksat added (saturated repulsive core antipolarization)
+   max # of polar iterations should be an option -- now 1000 fixed
+   PLAN: change options -x -a -d -i (??? also -\ -f)
+   needed: max # of iterations for POLAR
+
+blend 1.8f: 
+   FIXED: option -\# (combining rule) did not work (when bin-file
+     used), though reported
+   hotkey 'G' added
+
+   POLAR changes:
+     option -I gives now max # of iterations for POLAR
+     Ksat removed (see blend18e)
+     busing12 added
+     technical note: now f and frep is distinguished: f is total force
+       (but elst) while frep is part entering `repulsive antipolarization'
+       this is unified in busing, too
+     remaining to OPTIMIZE: calling SS_AB when frep only needed
+     also repeated Busing (exp) evaluation, see sim/busing*/sitesite.?
+
+   EMX (32 bit flat memory model protected mode) version with graphics
+   revisited: 
+   - mouse is not available
+   - some graphics functions do not work correctly
+   - option -g# starts graphics in VGA 320x200x256 color mode
+   - option -g-# starts graphics in VGA 640x480x256 color mode; this
+     generates core dump on my machine, but it used to work -- there
+     is a chance for good behavior with another video card, version of
+     DOS/Win, etc.
+   - EMX executable requires the following memory extenders:
+     pure DOS (VCPI): emx.exe
+     DOS box under Windoze or OS/2 (DPMI): rsx.exe
+       with seting `set EMX=WHEREIS\rsx.exe'
+     OS/2: emx.dll
+   - graphics requires the following settings:
+       set EMXOPT=-acm
+     or
+       set RSXOPT=-acm
+   - note that the *.bin files are not compatible with the 16 bit
+     version (blendt.exe)
+
+
+Jacobi diagonalization protocol is printed for -v1 and higher
+To set -v1 for Jacobi and use -v0 otherwise, use something like this:
+  blend -v1 -J1e-11 -v0
+
+blend 1.8g: 
+    option -G added = inertia matrix analysis + radius of gyration
+    reads a series of plb files (needs option -r4:from:to:by:file)
+    produces three files:
+      inertia.cp of 7 items: I_xx I_yy I_zz R_x R_y R_z Rgyr
+      inertia.mol constant file for show to watch inertia.plb
+                  this is a `molecule' of 6 atoms
+      inertia.plb playback file with principle axes, multiplied by R_i
+     then, the following Cartesian cross or `molecule':
+
+          O
+          |  O
+          | /
+          |/
+     O----+----O
+         /|
+        / |
+       O  |
+          O
+
+     where the masses of `atoms' O are 1/2 and the lengths of
+     radiusvectors are R_x, R_y, R_z, has the same tensor (matrix) of
+     inertia as the original molecule 
+     BUG: the sign of both vectors in each O---O `bond' is undefined.
+          This does not cause any problems while `show'-ing, but might
+          cause problems in further calculations
+
+    Theory:
+    ^^^^^^^
+    I calculate the inertia matrix first
+    
+      IM = sum_i m_i dr_i * dr_i
+    
+    * = is direct or tensor product
+    dr_i = r_i - r_CM
+    
+    Then I diagonalize it, so that
+    
+      U IM U^-1 = (E1,E2,E3)
+    
+    And the moment of inertia is I_zz=E1+E2, etc.  
+    In the same spirit of "radius of gyration", the following 
+    "partial radii" are defined:
+    
+      Rg_i = sqrt(Ei / totalmass)
+    
+    Then 
+    
+      Rgyr = sqrt(Rg_1^2 + Rg_2^2 + Rg_3^2)
+
+11/99: default place for force field etc. was changed into $HOME/blend/data
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+1/2000:
+blend 1.8h:
+  FIXED: 
+  * edit command `af' did not work without nbr -- fixed (already in
+    some 1.8g)
+  * POLAR: kappa was wrong with axial polarizability -- fixed
+  * sometimes 3 tetrahedrally filled atoms got wrong conformation, like
+      HC HC
+       |/
+     -NT-HC
+     -- parameters of random method changed, warning printed if
+        suspicious, but slower now...
+  * for all_impropers=2, swapping of central (C) and outer (K) atoms
+    was allowed even if the improper was `chiral' (as for CH1E).  This
+    might lead to wrongly assigned chiral improper.  Chiral atoms now
+    are excluded from this swapping.
+    (NOTE: see seppass.c for a version of blendgen.c with matching of
+    impropers with swapped central (C) and outer (K) atoms done in a
+    separate pass so that unswapped matches have always higher
+    priority)
+
+  NEW FEATURES:
+  * `*' in front of atom id in che-file keeps atom in place (cf. * in 
+     mol-file; but this `*' is not copied from che to mol-file)
+  * POLAR: axial polarizability now printed to the ble-file, too (tables
+     polarbonds and polarangles)
+  * POLAR: dipole moment of a molecule is now reported along with the
+     charge (if the molecule is charged, then the dipole moment is
+     related to the centre of squared charges)
+  * hot key ',' added - summary of `escape' keys in show window is:
+    .   = end minimization/viewer and continue, the same as ESC and data cg=0;
+    ^C  = quit blend immediately (nothing saved!)
+    ,   = minimize again, if cg=0 then change to cg=1
+    ESC = quit minimization/viewer and ask for data
+  * command "react" added to the edit module
+      react REA-FILE
+    where REA-FILE is file of extension ".rea".  Thus, `reaction' can
+    be performed during editing, not only before as if FILE.rea is
+    specified on a command line.  Example:
+      af prot HP 1 16-OAC .8
+      react p.rea
+      .
+
+TO DO:
+   pdb: omit pdb lines not matched from pasted (pdb -p) pdb file
+   pdb: check or at least generate a mol file also if -p for check
+
+blend 1.8h or g: hotkey ' added: toggles centers for showing balls
+
+blend ???: shell (# of outer shell electrons) removed from table `atoms',
+     used in table `polaratoms' only, but not fixed in par-files (like
+     gromos.par)
+
+blend 1.9a: hotkey 'E' added (X11 only, very ugly implementation)
+   atomic numbers added to table `atoms' in *.par.  These are used to
+   calculate dipole moments of charged species with respect to nuclear
+   charge centroid.
+
+   printing sites was not suppressed for -vNEGATIVE (=non-interactive
+     default) -- fixed
+
+   hotkey ; added: as , (minimize again) but uses first steepest descent
+     with sd=cg (or sd=1 if cg==0), then conj.grad.
+     Useful when far from minimum (cg may crash)
+
+BUG:
+  in X11, U=ENERGY info sometimes disappears
+FIXED:
+  `blend -r13 xxx.che' says it wants to read xxx.che.3dt if no xxx.3dt
+     (wrong message only, simplified and fixed in 1.9c)
+  hotkey `,' causes infinite loop with g>1 if energy already minimized
+     (fixed in 1.9c but the `,' etc. control still awkward)
+
+blend 1.9a-1.9b: 
+  #include "file" statement in che-files allowed: file should contain
+  (a part of) molecule without header, just as included physically to
+  the place of #include statement.  #include statements cannot be
+  nested.
+
+  essential dynamics: writing the matched trajectory (with rotations
+  and translations removed) is now enabled if option -P (and #define
+  WRITEMATCH in blendess.c)
+
+  file MOLNAME.geo added: will print selected distances and angles on
+  hotkey `E'.  It is just file of lines with sites of bonds or angles:
+   # comment
+   1 2 # bond 1-2
+   1 2 3 # angle 1-2-3
+  BUG: very ugly implementation, should unify with `clicking', should
+      add dihedrals...
+  FIXED: code repeated TWICE, should make a subroutine // done in 1.9c
+
+  FIXED: massless angles 180deg improperly removed (e.g., for molecule
+       A-D-A, where D is massless dependant and bonds A-D and angle
+       A-D-A=180, the A-A distance was not properly reported in the
+       ble-file) 
+
+  hot keys w W added:
+    w remembers (marks or (w)rites ) a position of a molecule
+      (in fact, erases a list of translations and rotations)
+    W undoes all translations and rotations (but those made with 
+      parts of a molecule)
+    it is intended for editing a configuration which can be pasted back 
+    to cook*.  Example:
+      blend -o SYS A B C                  # prepare SYS.ble
+      cook -y-1 SYS                       # writes SYS.plb
+      molcfg A B C SYS                    # generates SYS.mol
+      blend -o SYS -n-1 -g -y0 -r4:-1 SYS # move molecules, then type W and .
+    NOTES: if original A B C consisted from non-connected parts, SYS.def 
+             (N[] info) will have to be changed)
+           option -y0 to blend is essential
+           -n-1 is required in periodic b.c. These are not treated properly 
+             in blend so that -m0 or -mSMALL is needed.  Then, -tSMALL is 
+             recommended
+    BUG: inefficient implementation, memory consuming (problems with DOS
+         version)
+
+BUG: -e with .che interacts with -e=edit after hotkey . (?)
+
+blend 1.9b
+  format for charge (# of dec digits) is now adjustable (option -_#)
+  in both ble and mol-file
+  warning is printed if a species has fractional charge
+  1-6 interactions added (because of certain dependants)
+
+FIXED in 1.9c 6/00: 
+  dependants are incorrectly printed into ble-file if the molecule is
+  split by option -n-1 
+
+  -s should read cg=something data and not stop.
+
+FIXED: bond angle=0 now treated correctly (for special force fields only)
+
+new: MOLNAME.sym can keep some conditions while minimizing
+   very primitive ...
+   example of file
+   z 0 2
+   z 3-4
+   z 5
+   .
+   instead of x,y,z one may use X,Y,Z or 0,1,2
+   z 0 2 means that sites 0 and 2 are kept symmetric with respect to z=0 plane
+   z 5 means that site is kept at z=0 plane
+   z 3-4 means that sites 3 and 4 are kept at z=0 plane
+   . stops
+   (is turned off for nmf, of course)
+
+BUG found: in the che-file format, bond crossing (+ x) does not work as the 
+    1st character denoting bond, e.g.:
+
+       CT 
+    O--+--O  ! the CT-CT bond is not recognized.
+       CT
+
+       CT
+    O--+--O  ! issues warning "no <-- bond - adding", but result OK
+       |
+       CT
+
+       CT
+       |
+    O--+--O  ! this is correct crossing
+       |
+       CT
+    This bug probably will not be fixed
+
+Rare gases recolored to green
+
+blend 1.9c (5/00): 
+  bug fixes (see above notes like `fixed in 1.9c')
+  file MOLNAME.dis no longer supported, see MOLNAME.geo instead
+    (this was undocummented and forgotten feature...)
+  message `reading <table in *.par>' now suppressed unless -v0 or higher
+
+  FIXED: bug generated in changes to 1.9c: reading .geo file (ns was wrong)
+
+  BUG: dependants do not work well in certain `nonstandard' cases like
+       Q-S-Q---C---Q-N-Q, where Q is supposed to be a dependant
+  fixes: - any site dependent on another dependant is now removed (see
+           #define REMOVENESTED in blenddep.c)
+         - in the case above, bonds S-C and C-N are missing and should be
+           added by hand from a ble-file generated with the masses of
+           dependants nonzero (may be small; it is necessary to use
+           parallelly this `mass' version of the force field also if nmf is
+           calculated)
+
+FIXED 6/00: 
+  axials are incorrectly printed into ble-file if the molecule is
+  split by option -n-1 (as are dependants)
+  they are wrongly numbered, and may appear for a wrong molecule
+
+BUG: (?) after '.' and ble output and moving parts of the molecule,
+  the energy is not recalculated
+
+BUG: CHECK this:
+  in blendgen.c, there is:
+    if (watername[0]) Hlimit=1.5; else Hlimit=abs(spec->opt_h)+0.5;
+  does this mean that registered water models are automatically
+  exported as rigid to *.ble even without option -h ?
+
+BUG: 
+  if molecules like: `Cl Al Cl' are blended with -n-1, the
+  configuration is split into 2*Cl and Al and therefore the final
+  order of molecules (clusters) is `Cl Cl Al'.  Therefore the original
+  mol files are not compatible with cook generated playbacks.  Blend
+  should allow rewriting the reordered molecule.
+
+BUG: there are problems with pdb proline at terminal positions.  To be
+   fixed shortly
+
+pdb V1.3i:
+  - BUG fixed: 
+    + selection of appropriate patches for the group around N if the 
+      N-terminus is PRO or GLY.  
+    + This is fully transparent for a user, only a message is printed.
+    + prop.rsd fixed
+    + new rsd files: propn.rsd, propcl.rsd, glyp.rsd, glypn.rsd, glypcl.rsd
+      (BUG: not for *.gro yet)
+  - option -n now works for N- and C-termini and selects the appropriate
+    charged state or counterion
+  - if options -h,-e are used, the patches specified are used unconditionaly
+    (no adjustment for PRO,GLY)
+
+  Detailed explanation:
+  ~~~~~~~~~~~~~~~~~~~~~
+  The residue files *.rsd (for charmm21) or *.gro (gromos) for aminoacids
+    contain residues as they enter the peptide chain (-N-Calpha-CO-).
+  The first aminoacid (N-terminus) must be modified as follows:
+    +charged (=protonated): there is NH3+    instead of N, patch=NTER
+    neutral (pdb -n)      : there is NH2     instead of N, patch=NTERN
+    counterion (pdb -n-1) : there is NH3+Cl- instead of N, patch=NTERCL
+  This is accomplished by applying given patch=XXX (a patch is represented 
+    by a rsd file with keyword patch in the 1st line, e.g., file nter.rsd is
+    the patch NTER for charmm21)
+  Residues PRO and GLY are exceptional and different patches must be used:
+  PRO:
+    +charged (=protonated): there is NH2+    instead of N, patch=PROP
+    neutral (pdb -n)      : there is NH      instead of N, patch=PROPN
+    counterion (pdb -n-1) : there is NH2+Cl- instead of N, patch=PROPCL
+  GLY:
+    +charged (=protonated): there is NH3+    instead of N, patch=GLYP
+    neutral (pdb -n)      : there is NH2     instead of N, patch=GLYPN
+    counterion (pdb -n-1) : there is NH3+Cl- instead of N, patch=GLYPCL
+  (The reason for a special treatment of GLY is because of CH2E instead of
+    CH1E as Calpha)
+  pdb V1.3i selects the appropriate patch automatically according to the value
+    of option -n.  However, if the patch is specified by -hPATCH, no check is
+    made and the requested patch is used.
+  WARNING: names of hydrogens vary in different versions of pdb files and they
+    need not be recognized.  In PROPN the hydrogen is called HNC while in PROP
+    the two hydrogens are called NH1 and NH2.  This is not logical, but
+    corresponds to the pdb files I have seen.  Edit the files if you meet
+    another names.  Unrecognized hydrogens may be usually safely ignored -
+    they are calculated in the blend stage.
+
+BUG: prop.gro, propn.gro, propcl.gro, glyp.gro, glypn.gro, glypcl.gro not
+    available or wrong
+
+BUG: -r6 does not work for PRO
+
+blend 1.9d: quadrupole moment now measured and printed (hot key 'E')
+   (not in TINY version - needs Jacobi)
+   not tested with POLAR (yet)
+   the definition of quadrupole moment is:
+   (this definition is usual in physics, see blend 1.9e below!!!)
+
+     tensor Q = SUM q_i ( 3 r_i r_i - r^2 I )
+                 i
+
+   where r_i r_i is a direct (tensor) product of vectors r_i
+         I is the unit tensor
+
+   this tensor is diagonalized by the Jacobi method and the diagonal
+   is printed in eA^2 and SI
+
+blend 1.9e: quadrupole moment definition was changed into 
+
+                1
+     tensor Q = - SUM q_i ( 3 r_i r_i - r^2 I )
+                2  i
+
+   This definition is usual in chemistry.  In addition, the
+   quadrupole moment is also printed in "Buckinghams", i.e. Debye
+   Angstrom
+
+   NOTE: the diagonalized tensor is not ordered and the molecule is
+         not rotated into the principal axes.  To get the
+         non-diagonalized tensor, use option -v (verbose)
+
+ramachan.c updated (peptide bond angle omega added, more options, more
+  tests)
+
+blend 1.9f: filling atoms (see version 1.8h) made faster, esp. for
+            tetrahedral cases (aliphatic hydrogens filled)
+
+POSSIBLE BUG: the end of procedure readdependants
+BUG: -w10
+
+blend 1.9g: -R renamed to -D (MSD)
+ ar_dih_limit=-1 : aromatic dihedrals looked in the table of dihedrals
+                  (it is the only logical way, but was different in
+                  old versions of charmm)
+ ar_dih_limit=-1 made default
+
+pdb V1.3j:
+ alias atom id's allowed in residues (for the case when the atom are
+ not uniquely named in PDB files)
+ option -r renamed to -\\ (hardly to be used)
+ options -f and -r changed
+ force field charmm22 implemented
+ backbone recognition generalized
+ BUG fixed: generate PDB `from scratch' (-w10)
+
+TODO:
+ - check absolute chiralities of Calpha and Cbeta
+ - equivalent (GROMOS-like) bond and angle terms (using r^2 and cos alpha)
+ - test cross section http://bowers.chem.ucsb.edu/www/theory/sigma/README.html
+ - sometimes does not print info on not found terms
+ - check zero dihedrals / CHARMM22
+
+blend 1.9g:
+ - options -i -d -x -f -\ disabled
+
+blend 2.0a:
+ - small fixes - renamed to 2.0a because of posting
+ - hot keys updated and functions simplified:
+     e = erase mode (3 values)
+     b B = bond color 
+     c = carbon color (3 values)
+     P = PPM dump
+     O = B/W PS dump
+     C = color PS dump
+ - statement #connect in che-files
+
+--------------------- MACSIMUS posted Aug 3, 2001 --------------------
+
+Wed Sep 19 2001 : view3db added
+
+Wed Sep 20 2001 : bug found (Motoya Kohtani): residues PROP,GLYP do not work
+   fix # 1: change keyword `nter' in the rsd-files back to `patch'
+   fix # 2: in file `pdbmol.c', line 179:
+      else if (moltype!=PATCH) ERROR(("%s: type `patch\' expected",fn))
+            replace by
+      else moltype=PATCH;
+
+   charmm22/prop.rsd and charmm22/glyp.rsd were wrong - fixed
+
+pdb 1.3l:
+   keyword `patch' in residue patches deprecated - nter and cter used
+   check added (useful e.g. in -h and -e options)
+
+blend 2.0b:
+Thu Sep 27 the module (blendimp) calculating unknown positions was
+   improved to handle better chains of unknown atoms.  Particularly,
+   unknown -OH group in -COOH is now filled so that it is always in
+   position trans to the backbone.  Example:
+
+       \
+        Calpha--
+       /
+   O==C
+       \
+        O
+       /
+      H 
+
+   The alhorithm scans the neighbors of carbonxyl C and determines
+   that Ca has more neighbors and puts H to the trans position.  In a
+   general case of more atoms like Calpha (more `backbones'), an
+   average is taken.
+
+Thu Sep 27: gromos96 bugs found and fixed: 
+            cter,nter residues missing
+            nterh missing angle
+
+Thu Sep 30: ramachan updated to treat simulations of identical molecules
+            (option -n).  Also -p (plot) added
+
+Sat Oct 13: blend V2.0c, options -a, -b added (scaling bonds and angles)
+
+March 2002: 
+BUGs fixed:
+  - blend: CTERM=CT2 from che-source does not recognize backbone
+  - bug (ERROR internal) in filling mising atoms fixed
+  - rndonsph() wrong.  This bug might have affected efficiency of
+    filling missing atoms etc. but could not alter results
+Related changes:
+  - makepept now solves patches, corresponding che-files updated
+  - pdb 1.3m: certain N-ter and C-ter patches are now treated even if in 
+    pdb-file
+    types of rsd files extended: 
+      cter,nter are simple files that are just merged (their names are
+        kept in mol-files)
+      cterp,nterp are patches (their names disapper and the whole
+        patched residue is named according to the aminoacid residue)
+BUGs: 
+  some C-term patches do not work for GLY, PRO as the last residues;
+    this is not in CHARMM either
+  since patched termini like CT2 (with keyword cterp, nterp) are named
+    as the patched aminoacid, the mol-file contains (for some
+    purposes) misleading information; e.g., -w20/-w30 need not work as
+    expected.  This would be too costy to fix.
+
+BUGS FIXED 5/01: 
+  - warning "charge is fractional" now only once
+  - bad MOLNAME.sym -> MOLNAME in error "atom out of range"
+
+BUG fixed 1/03:
+  - aah changed SH1E into ST-HA instead of ST-H
+
+blend 2.0e:
+  - generation of PDB from scratch (option -w10) rewritten,
+    multiple chains now supported
+    WARNING: the manual is not up-to-date
+
+pdb V1.3n:
+  - did not recognize end of chain if cterm was patched (like ct2) - fixed
+  - now only cter and nter types in *.rsd
+  - new option -z 
+    -z0: patched residue keeps name of the residue even for atoms added
+         (i.e., the added atoms are treated as part of the residue)
+    -z2: the patched part has always the name of the patch (i.e., the
+         added atoms are treated as new "residue" under the patch name)
+         If the patch is specified by -h/-e options, first three
+         letters of the patch name (in uppercase) are used.
+    -z1: = -z0 for patches specified in the PDB file
+         = -z2 for patches specified by -h/-e options
+         (this is the default)
+Known bugs:
+ - patches are (if contain N) always connected by a peptide bond
+   this may fail for some unusual patches, but simplifies simple patches
+   (though it is always possible to have this extra peptide bond in
+   the patch by listing the precious carbonyl C)
+ - it is not allowed to omit patched residues
+     
+
+blend 2.0f: dots added for showing free atoms in the bond mode
+
+pdb 1.3m: hydrogens written in PDB as 1HA etc. are now understood
+blend 2.0g : option -d (auto bonds) added
+             centers of balls simplified (hot key ')
+             keyword ff parset (or parameter_set parset) added to editing
+             threshold for warning "neighbors ... might be calculated
+               inaccurately" was weakened (from 0.25 to 0.3) to work
+               also for adding tetrahedral H to wide angles
+
+blend 2.0h : combination of options -A + -d - fixed
+             unknown molecule now gets random cfg (was: internal error)
+             adding unknown atoms improved (for rings: avoid 180deg angles)
+             option -r7 (create backbone using phi,psi,omega) added
+             PEG support partially added
+             GUI:
+               dihedral angle added to click-info
+               floodmark (mid button) does not change center of rotation
+               half-bond colors added (hot keys b B)
+
+UNFINISHED: PEG for charmm22: missing bond/angle/dihedral terms
+            blend -->PDB (-w10): 
+              generates nonstandard numbers for PEG
+              n-term not recognized if N-sidechain atom comes before N
+            makepept needs horizontal bonds to solve patches as nntern, but
+            because of bad n-term recognizing in blend there are \ bonds 
+            (e.g. in PEG)
+            residues cyss argn missing in charmm19
+
+Making multiple PDB files:
+  blend 2.0i : 
+    -r4:FROM:TO[:BY] understood with PDB output  (-w10, -w20, -w30)
+  pdb 1.3n: 
+    -pFROM:TO[:BY] understood
+
+blend 2.0j : bug in -w20 fixed (did write PDB but looped forever, if
+             one PDB requested)
+
+ramachan: summary (.sum) added
+
+blend 2.0k : -b0: minimize with all bonds fixed
+             -a0: minimize with all angles fixed
+             (cheap algorithm: steepest descent with SHAKE-like method)
+	     WARNING: not suitable for generating the ble-file in one step.
+               To generate ble, use -m0 -h<VALUE> -o
+
+=== BUG FIXES ===
+  - bug in charmm21 found: in hoh.che and water table of
+    charmm21.par, OT was incorrectly used instead of OW
+    however, `optimized potential model' was recognized via this
+    `double bug'.
+    IMPORTANT: if you want to use new MACSIMUS with the old files,
+      under charmm21, check that all your TIP3P water files contain
+      OW, not OT, and redo the ble-files
+  - command aw (of blend -e) now uses a 3-site water from table waters
+  - blend -n-1 also recognizes water as the first molecule (was: only
+      for protein in water)
+
+blend 2.0l: bug fixed: -w10 for several chains 
+            WARNINGS: residues at different chains are numbered
+                      consecutively, not from 1 again
+                      CTER/NTER patches naumbered separately
+
+TODO: factor14 separately for LJ and charges
+
+blend 2.0m: .atm (-w40) format changed to lines of
+   At x y z
+
+error internal /home/jiri/macsimus/blend/blendmed.c:837 while reading .che
+
+BUG: missing improper added to TIP4P/2005 water: 
+     dependant M for TIP4P/2005 water was slightly imprecise because molecule 
+     was not minimized enough
+
+blend 2.0n (4/2007): 
+  option -C (ref.point for dipole, quadrupole) added
+  BUG FIXED: infinite cycle with -g# and already minimized
+  WHEEL now rescales the picture as other software (the same sign
+    convention as web browsers)
+
+blend 2.0o (8/2007):
+  polarizability support extended (polar is given in the .par file):
+    see also version in the blend/metamake file!
+  polar&1: basic dipolar polarizability support (incl. axial and saturated)
+  polar&2: the shell-core model extended:
+           the repulsive antipolarization term applies for all
+           polarizable atoms: for a polarizable pair, there is one
+           term for each induced dipole
+  (polar&2)==0: no repulsive antipolarization term if BOTH atoms are polarizable
+           (i.e., anion-anion; this is the original "ionic" version
+           with cation-anion repulsive antipolarization only)
+  polar&4: also intramolecular 1-2 and 1-3 induced dipole--induced
+           dipole terms are included
+           note that then the molecular polarizability is not a sum of
+             atomic polarizabilities
+           1-4 now with factor14=1 only supported
+
+  polar can be overriden by option -\|#
+
+  grid (hot key =) now optionally in 0.1A resolution
+
+BUG: because of probable bug in gcc, a patch (void statement) was added to
+     the Jacobi diagonalization routine
+
+     -M extended to negative args (ns-based guess); -M-.2 recommended
+
+BUG: both Rvdw=0 (with LJsigma only?) and Emin=0 gives undefined energies
+
+blend 2.0p (06/2008):
+    -x added (LJ scaling)
+    the above bug fixed
+    
+blend 2.0q (06/2008):
+    -i added (angle energy check limit; e.g., pyramidal error)
+    hot key A added (average charge of marked atoms)
+    default precision increased to 6 (= option -_)        
+
+    compiler problem (?) in jacobi.c
+
+For newer changes, see file macsimus/history.txt
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

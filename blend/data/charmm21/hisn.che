@@ -1,0 +1,12 @@
+aminoacid H HIS histidine (uncharged with proton on ND1)
+parameter_set = charmm21
+! charge=0.00
+        |                  H.3
+        NP^n.35-Hp.25      |
+          |              N5Rn.4--C5RE.3
+          |              /         |
+          CH1E.1--CH2E^-C5R.1      |
+          |              \         |
+          |               C5RE.1--N5Rn.4
+ On.55=C^p.55
+        |

@@ -1,0 +1,11 @@
+biphenyl
+
+          HA    HA^
+          |     |
+ HA-C6R--C6R   C6R^--C6R^-HA^
+    |     |     |     |
+ HA-C6R  C6RP--C6RP  C6R-HA
+    |     |     |     |
+ HA-C6R--C6R   C6Rv--C6Rv-HAv
+          |     |
+          HA    HAv

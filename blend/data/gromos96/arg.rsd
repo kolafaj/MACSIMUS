@@ -1,0 +1,25 @@
+aminoacid R ARG arginine  
+
+parameter_set = gromos96
+number_of_atoms = 17
+! charge=1
+
+atoms
+! i  atomid  atomtype charge chiral nbonds bound-index
+  0  C       CO       0.38     0    2      1 16
+  1  CA      CH1      0.00     1    3      12 0 2
+  2  CB      CH2      0.00     0    2      1 4
+  3  CD      CH2      0.09     0    2      4 13
+  4  CG      CH2      0.00     0    2      2 3
+  5  CZ      CZ       0.34     0    3      13 14 15
+  6  H       H        0.28     0    1      12
+  7  HE      H        0.24     0    1      13
+  8  1HH1    H        0.24     0    1      14
+  9  2HH1    H        0.24     0    1      14
+  10 1HH2    H        0.24     0    1      15
+  11 2HH2    H        0.24     0    1      15
+  12 N       N        -0.28    0    2      1 6
+  13 NE      NE       -0.11    0    3      3 7 5
+  14 NH1     NZ       -0.26    0    3      5 8 9
+  15 NH2     NZ       -0.26    0    3      5 10 11
+  16 O       O        -0.38    0    1      0

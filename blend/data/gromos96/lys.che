@@ -1,0 +1,12 @@
+aminoacid K LYS lysine
+parameter_set = gromos96
+! charge=1.00
+        |                                      
+       N^n.28-Hp.28                                 
+          |                          Hv.248
+          |                            |
+          CH1--CH2^-CH2-CH2^-CH2.127-NL.129-Hv.248
+          |                            |
+          |                          Hv.248
+  On.38=CO^p.38                                    
+        |                                    

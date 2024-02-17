@@ -1,0 +1,8 @@
+nterp NH2 (neutral N-terminal patch for all aminoacids but PRO and GLY)
+parameter_set = charmm19
+! charge=0
+
+    H.25  H.25
+       \  /
+       NH2n.6           !>>> NH1^n.35-Hp.25
+        |   

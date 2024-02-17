@@ -1,0 +1,12 @@
+aminoacid R ARG arginine
+parameter_set = charmm22
+! charge=1.00
+        |                                          HCvvp.46
+        NH1^n.47-Hp.31                             |
+        |       HAvp.09  HA^p.09 HAvp.09 HC^p.44  NC2vn.80-HCvp.46
+        |       |        |        |      |       /          
+HBvp.09-CT1p.07-CT2n.18-CT2n.18-CT2p.20-NC2n.70-Cp.64
+        |       |        |        |              \
+        |       HAvp.09  HA^p.09 HAvp.09          NC2^n.80-HC^p.46
+  On.51=C^p.51                                     |
+        |                                          HC^^p.46

@@ -1,0 +1,20 @@
+! NSLOTS=4 cookewslcP1 n2.ble N256NPT1.get
+! initialization:
+init="crystal"         ! initial configuration
+thermostat="Berendsen" ! NVT initialization
+no=200                 ! short NVT initialization 2 ps
+;                      ! first block finished
+init="append"          ! read cfg, append convergence profiles, new statistics
+no=2000                ! equilibrating 20 ps
+tau.P=1                ! barostat time constant
+rescale="xyz"          ! atom-based rescaling, needed by NPT
+;                      ! second block finished
+key="quit";            ! stop
+! remove all data above for the productive run
+
+! productive run:
+tau.P=1          ! barostat time constant
+rescale="xyz"    ! atom-based rescaling, needed by NPT
+init="start"     ! read cfg, statistics + convergence profiles new
+no=tau.P*1000000 ! number of cycles (by noint steps)
+;;               ! every further ; repeats simulation with init="cont"

@@ -1,0 +1,13 @@
+nter NH2 (neutral N-terminal patch for all aminoacids but PRO)
+
+parameter_set = gromos96
+number_of_atoms = 4
+! charge=0
+
+atoms
+! i  atomid  atomtype charge chiral nbonds bound-index
+  0  N:N     NT       -0.83    0    3      1 2 3
+  1  1H:H    H        0.415    0    1      0
+  2  2H      H        0.415    0    1      0
+  3  CA:CA   CH1      0.00     1    1      0
+

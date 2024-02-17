@@ -1,0 +1,68 @@
+! this is comment
+# this is comment, too
+
+! LENGTHS can be given using several units:
+!   123   in "Poscript" points of inch/72
+!   123pt in "typographical" points of inch/72.27
+!   12cm  in cm
+!   99mm  in mm
+!   3in   in inches
+
+! TEXT can contain subscripts (_x), superscripts (^x) and symbols (\a)
+! example (Theta in J/mol):
+! \Q/(J mol^-^1)
+! see also utility psstring
+
+! === size of plot area (excl. labeling and margins)
+w XSIZE YSIZE
+
+! === plotting mode
+m e ! mode EPS (default)
+m l ! mode is PostScript landscape
+m p ! mode is PostScript portrait (swaps xsize <--> ysize if used after w)
+
+! === B/W mode
+b ! replaces color lines/points by different style black
+
+! === font (except Symbol denoted by \)
+s SIZE [type]
+! the default is:
+s 14 Helvetica
+
+! === x-axis labeling
+x LEFT_MARGIN RIGHT_MARGIN X-AXIS TEXT
+y BOTTOM_MARGIN TOP_MARGIN Y-AXIS TEXT
+! the text may contain spaces
+
+! === any text at x,y (# below stands for a decimal digit)
+l x y TEXT    ! string to write; can use _Index ^Exponent \Symbol
+l x y $#-TEXT ! as above, prepend by a line of style # (=1,2,3..)
+l x y $#.TEXT ! as above, prepend by a symbol of style # (=1,2,3..)
+l x y $#+TEXT ! as above, both keys (line+symbol)
+l x y $#=TEXT ! as above, errbar
+l +dx +dy STRING ! as above, with relative positioning
+! Example (use \$ in scripts!):
+l 100 100 $1-T=100 K
+l +0 +20 $2-T=200 K
+
+! === rotate the following text (applies to x,y,l):
+r ANGLE ! in degrees
+
+! === line thickness
+t LINE_THICKNESS FRAME_AND_TICK_THICKNESS
+
+! === make frame and tics - simple
+f NX NY LENGTH ! NX = approx. # of labeled ticks in x
+               ! NY = approx. # of labeled ticks in y
+               ! LENGTH = tick length
+! === make frame and tics - better
+f -DX -DY LENGTH ! DX = distance between ticks (in graph units)
+! this command may repeat, but labeling applies to the first f
+
+! === set (change) styles of lines and points
+NR R G B[,DASH,LINEWIDTH[,POINTSIZE,POINT]
+! NR = line number, #=1,2
+! R G B = color in PS style (from 0 to 1)
+! DASH = dashes in PS style (without [], in pt): LINE PAUSE LINE PAUSE..
+! POINTSIZE is in pt
+! POINT = { square fullsquare opensquare circle fullcircle opencircle diamond fulldiamond opendiamond up fullup openup down fulldown opendown plus cross star dotcircle }

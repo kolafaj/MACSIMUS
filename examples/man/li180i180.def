@@ -1,0 +1,20 @@
+N[0]=180  ! Li
+N[1]=180  ! I
+rho=3280  ! approx. crystal density
+tau.rho=2 ! density relaxation time [ps]
+
+cutoff=11.2 ! approx. half box size
+LJcutoff=cutoff
+
+L[0]=5*\(8/3) ! box shape (not in scale)
+L[1]=3*\8     ! box shape (not in scale)
+L[2]=8/3*3    ! box shape (not in scale)
+
+!load.n[0]=5   ! cell will be 5x replicated in x
+!load.n[1]=3   ! cell will be 3x replicated in y
+!load.n[2]=3   ! cell will be 3x replicated in z
+!load.N=3      ! tell cookew to ignore N=0 in the input file
+init=2        ! will read li180i180.cfg
+thermostat="Andersen" tau.T=0.1
+dt.plb=1
+;

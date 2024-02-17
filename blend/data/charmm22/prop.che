@@ -1,0 +1,15 @@
+P PRO proline protonated - terminal (instead of PRO+NTER)
+parameter_set = charmm22
+! charge=0.00
+
+   HC^^p.24  HAvp.09 HAp.09
+        |        \  /                            
+HCp.24-NP^n.07---CP3.16  HAvp.09                              
+        |          \    /
+        |          CP2n.18
+        |          /     \
+HBvp.09-CP1p.16--CP2n.18  HA^p.09
+        |        /  \
+        |   HAvp.09  HAp.09
+  On.51=C^p.51
+        |

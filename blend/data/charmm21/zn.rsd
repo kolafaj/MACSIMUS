@@ -1,0 +1,9 @@
+molecule Zn++ (for insuline)
+
+parameter_set = charmm21
+number_of_atoms = 1
+! charge=2
+
+atoms
+! i  atomid  atomtype charge chiral nbonds bound-index
+  0  ZN      MZN      2.0      0    0

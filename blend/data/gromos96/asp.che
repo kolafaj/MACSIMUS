@@ -1,0 +1,12 @@
+aminoacid D ASP aspartic acid
+parameter_set = gromos96
+! charge=-1.00
+        |              
+       N^n.28-Hp.28         
+          |           OM^n.635
+          |          /
+          CH1-CH2^--COp.27
+          |          \         
+          |           OM^n.635
+ On.38=CO^p.38                      
+        |                      

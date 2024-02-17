@@ -1,0 +1,4 @@
+molecule ZN2 (Zn++)
+parameter_set = charmm22
+! charge=2.00
+ZNp2

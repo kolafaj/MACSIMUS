@@ -1,0 +1,12 @@
+aminoacid C CYS cysteine - negative to bind to Zn2+
+parameter_set = charmm22
+! charge=0.00
+        |              
+        NH1^n.47-Hp.31        
+        |        HAvp.09
+        |        |    
+HBvp.09-CT1p.07--CT2n.28--Sn.9
+        |        |    
+        |        HAvp.09
+  On.51=C^p.51                      
+        |                      

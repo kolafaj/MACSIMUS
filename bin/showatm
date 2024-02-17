@@ -1,0 +1,14 @@
+#!/bin/bash
+if [ $# -lt  1 ]; then 
+  echo "Show NAME.atm.  Call by:"
+  echo "  showatm NAME [DIST [SHOW-OPT..]]"
+  echo "For DIST see bonds"
+  echo "See also: editatm"
+  exit
+fi
+cp $1.atm /tmp/$1~aux.atm
+cd /tmp
+bonds $1~aux.atm $2
+echo "temporary files /tmp/$1~aux.{mol,plb} will be erased after show exits"
+show -I@ $1~aux $3 $4 $5 $6 $7 $8 $9
+rm $1~aux.{mol,plb,atm}

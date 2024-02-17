@@ -1,0 +1,12 @@
+aminoacid G GLY glycine
+parameter_set = charmm21
+! charge=0.00
+        |
+        NP^n.35-Hp.25
+          |
+          |
+          CH2E.1
+          |
+          |
+ On.55=C^p.55
+        |

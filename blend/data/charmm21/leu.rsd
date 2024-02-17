@@ -1,0 +1,17 @@
+aminoacid L LEU leucine  
+
+parameter_set = charmm21
+number_of_atoms = 9
+! charge=0
+
+atoms
+! i  atomid  atomtype charge chiral nbonds bound-index
+  0  C       C        0.55     0    2      1 8 
+  1  CA      CH1E     0.10     1    3      7 0 2 
+  2  CB      CH2E     0.00     0    2      1 5 
+  3  CD1     CH3E     0.00     0    1      5 
+  4  CD2     CH3E     0.00     0    1      5 
+  5  CG      CH1E     0.00     0    3      2 3 4 
+  6  H       H        0.25     0    1      7 
+  7  N       NP       -0.35    0    2      1 6 
+  8  O       O        -0.55    0    1      0 

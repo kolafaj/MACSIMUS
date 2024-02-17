@@ -1,0 +1,12 @@
+aminoacid N ASN asparagine
+parameter_set = gromos96
+! charge=0.00
+        |              
+       N^n.28-Hp.28         
+          |          On.38      H.415
+          |          |         /
+          CH1--CH2^--CO.38-NTn.83   ! replace by NL if coordinated to Zn
+          |                    \
+          |                     H.415
+  On.38=CO^p.38                      
+        |                      

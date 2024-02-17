@@ -1,0 +1,13 @@
+molecule SO4--
+
+parameter_set = charmm19
+number_of_atoms = 5
+! charge=-2.0
+
+atoms
+!i  id   type charge chir nb bonded_atoms
+ 0  S     S      0.0   0  4  1 2 3 4
+ 1  O1    OC    -0.5   0  1  0
+ 2  O2    OC    -0.5   0  1  0
+ 3  O3    OC    -0.5   0  1  0
+ 4  O4    OC    -0.5   0  1  0

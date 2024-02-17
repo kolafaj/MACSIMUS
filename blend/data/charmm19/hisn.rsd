@@ -1,0 +1,20 @@
+aminoacid H HIS histidine
+
+parameter_set = charmm19
+number_of_atoms = 12
+! charge=0.00000
+
+atoms
+!i  id   type charge chir nb bonded_atoms
+ 0  N     NH1  -0.35   0  2  2 1
+ 1  H     H     0.25   0  1  0
+ 2  CA    CH1E  0.10   1  3  0 10 3
+ 3  CB    CH2E  0.00   0  2  2 4
+ 4  CG   CR5    0.10   0  3  3 5 7
+ 5  ND1   NH1  -0.40   0  3  4 6 9
+ 6  HD1   H     0.30   0  1  5
+ 7  CD2   CR1E  0.10   0  2  4 8
+ 8  NE2   NR   -0.40   0  2  7 9
+ 9  CE1   CR1E  0.30   0  2  5 8
+10  C     C     0.55   0  2  2 11
+11  O     O    -0.55   0  1  10

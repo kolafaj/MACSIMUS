@@ -1,0 +1,675 @@
+! Parameter File for GROMOS, version 37C4 (for water solutions)
+! changes:
+!   HP added
+!   some angles+bonds added
+! note: water is SPC
+
+all_dihedrals=0  ! one dihedral per backbone
+ar_dih_limit=1   ! inclusion limit for dihedrals in aromatic rings
+all_impropers=2  ! one improper per central atom, allows i-l swap
+column_X=0       ! column X disabled (all atoms match = all X=1)
+sqrt_rule=3      ! sqrt combining rule for LJ energies & sigmas
+factor14=1       ! multiplicative factor for 1-4 interactions
+distance14=4     ! these interactions are really 1-4
+;
+
+rsddir gromos    ! subdirectory of *.rsd files
+
+atoms
+!
+! X : if the atom can match wildcard atom X in the tables of dihedrals
+!     and impropers
+! A : if the atom is a member of an aromatic ring
+! mass : atomic mass in g/mol
+! shell : el shell (for MD aux charge) (WARNING: a sort of random numbers)
+! col : color type (differing from chem. are M=metal, X=halogen, Z=rare gas)
+!
+!i name  X A    mass    Z col description
+  1 O    1 0  15.9994   8  O  carbonyl oxygen (C=O)
+  2 OM   1 0  15.9994   8  O  carboxyl oxygen (CO-)
+  3 OA   1 0  15.9994   8  O  hydroxyl oxygen (OH)
+  4 OW   1 0  15.9994   8  O  water oxygen
+  5 N    1 0  14.0067   7  N  peptide nitrogen (N or NH)
+  6 NT   1 0  14.0067   7  N  terminal nitrogen (NH2)
+  7 NL   1 0  14.0067   7  N  terminal nitrogen (NH3)
+  8 NR5  1 1  14.0067   7  N  aromatic nitrogen (5-ring, 2 bonds)
+  9 NR5X 1 1  14.0067   7  N  aromatic nitrogen (5-ring, 3 bonds) [NR5*]
+ 10 NP   1 1  14.0067   7  N  porphyrin nitrogen
+ 11 C    1 0  12.0110   6  C  bare carbon (peptide, C=O, C-N)
+ 12 CH1  1 0  13.0190   7  C  aliphatic CH group
+ 13 CH2  1 0  14.0270   8  C  aliphatic CH2 group
+ 14 CH3  1 0  15.0350   9  C  aliphatic CH3 group
+ 15 CR51 1 1  13.0190   7  C  aromatic CH group (5-ring)
+ 16 CR61 1 1  13.0190   7  C  aromatic CH group (6-ring)
+ 17 CB   1 1  12.0110   6  C  bare carbon (5-ring, 6-ring)
+ 18 H    0 0   1.0080   1  H  hydrogen bonded to nitrogen
+ 19 HO   0 0   1.0080   1  H  hydroxyl hydrogen
+ 20 HW   0 0   1.0080   1  H  water hydrogen
+ 21 HS   0 0   1.0080   1  H  hydrogen bonded to sulphur
+ 22 S    1 0  32.0600  16  S  sulphur
+ 23 FE   1 0  55.847   26  M  iron
+ 24 ZN   1 0  65.37    30  M  zinc
+ 25 NZ   1 0  14.0067   7  N  Arg N (NH2)
+ 26 NE   1 0  14.0067   7  N  Arg N (NH)
+ 27 P    1 0  30.9738  15  P  Phosphor
+ 28 OS   1 0  15.9994   8  O  sugar or ester oxygen
+ 29 CS1  1 0  13.0190   6  C  sugar CH group
+ 30 NR6  1 1  14.0067   7  N  aromatic N (6-ring, 2 bonds)
+ 31 NR6X 1 1  14.0067   7  N  aromatic N (6-ring, 3 bonds) [NR6*]
+ 32 CS2  1 0  14.0270   6  C  sugar CH2 group
+ 33 SI   1 0  28.08    14  S  silicon
+ 34 NA   1 0  22.9898  11  M  sodium cation Na+
+ 35 CL   1 0  35.453   17  X  chlorine anion Cl-
+ 36 CA   1 0  40.08    20  M  calcium cation Ca++
+ 37 MG   1 0  24.305   12  M  magnesium cation Mg++
+ 38 HP   0 0  1.0075    1  H  proton H+ (added JK)
+
+Lennard-Jones
+!atom alpha   Emin     RvdW      [1-4]
+O    0.840 -0.412162 1.473764
+OM   2.140 -0.412162 1.473764
+OA   0.840 -0.412162 1.473764
+OW   0.840 -0.551862 1.438350
+N    1.100 -0.209534 1.670225
+NT   1.100 -0.209534 1.670225
+NL   1.100 -0.209534 1.670225
+NR5  1.100 -0.209534 1.670225
+NR5X 1.100 -0.209534 1.670225
+NP   1.100 -0.209534 1.670225
+C    1.650 -0.096987 1.886355
+CH1  1.350 -0.130044 2.374907  1.350 -0.135574 1.850095
+CH2  1.770 -0.139962 2.225111  1.770 -0.187388 1.900150
+CH3  2.170 -0.180034 2.124942  2.170 -0.232593 1.950188
+CR51 1.350 -0.120116 2.099746  1.350 -0.219232 1.900272
+CR61 1.350 -0.120116 2.099746  1.350 -0.219232 1.900272
+CB   1.650 -0.096987 1.886355
+H    0.044  0.000000 0.600000  ! should not have zero eps!!!
+HO   0.044  0.000000 0.600000
+HW   0.044  0.000000 0.600000
+HS   0.044  0.000000 0.600000
+S    0.340 -0.455443 1.856440
+FE   0.010 -0.000101 1.469327
+ZN   0.010 -0.266039 1.062528
+NZ   1.100 -0.209534 1.670225
+NE   1.100 -0.209534 1.670225
+P    3.000 -0.584837 1.900055
+OS   0.840 -0.412162 1.473764
+CS1  1.350 -0.130044 2.374907  1.350 -0.135574 1.850095
+NR6  1.100 -0.209534 1.670225
+NR6X 1.100 -0.209534 1.670225
+CS2  1.770 -0.139962 2.225111  1.770 -0.187388 1.900150
+SI   0.100 -0.584837 1.900055
+NA   0.700 -0.014764 1.445262
+CL   3.600 -0.106501 2.496379
+CA   0.010 -0.121235 1.578716
+MG   0.010 -0.074717 1.084994
+HP   0.001 -0.002    0.8      ! added JK
+
+bonds
+C    O     600   1.23
+C    OM    500   1.25
+C    OA    450   1.36
+C    N     500   1.33
+C    NT    450   1.33
+C    NL    450   1.33
+CH1  OA    400   1.43
+CH1  N     450   1.47
+CH1  NT    450   1.47
+CH1  NL    450   1.47
+CH1  C     400   1.53
+CH1  CH1   400   1.53
+CH2  OM    450   1.43
+CH2  OA    400   1.43
+CH2  N     450   1.47
+CH2  NT    450   1.47
+CH2  NL    450   1.47
+CH2  C     400   1.53
+CH2  CH1   400   1.53
+CH2  CH2   400   1.53
+CH3  N     450   1.47
+CH3  C     400   1.53
+CH3  CH1   400   1.53
+CH3  CH2   400   1.53
+CR51 NR5   500   1.33
+CR51 NR5X  500   1.33
+CR61 CH2   500   1.39
+CR61 CR61  500   1.39
+CB   O     600   1.23
+CB   OA    450   1.36
+CB   NT    450   1.33
+CB   NR5   500   1.33
+CB   NR5X  500   1.33
+CB   NP    500   1.38
+CB   C     400   1.53
+CB   CH1   400   1.53 ! added JK
+CB   CH2   400   1.53
+CB   CH3   400   1.53
+CB   CR51  500   1.33
+CB   CR61  500   1.39
+CB   CB    500   1.39
+H    N     447.5 1.0
+H    NT    447.5 1.0
+H    NL    447.5 1.0
+H    NR5X  447.5 1.0
+HO   OA    375   1.0
+HW   OW    450   1.0
+S    O     450   1.50
+S    CH1   450   1.81 ! added JK
+S    CH2   450   1.83
+S    CH3   450   1.78
+S    HS    375   1.33
+S    S     500   2.04
+FE   NR5   500   1.98
+FE   NP    500   2.09
+NZ   C     450   1.34
+NZ   H     447.5 1.0
+NE   C     450   1.34
+NE   CH2   450   1.47
+NE   H     447.5 1.0
+P    OM    450   1.48
+P    OA    300   1.61
+OS   CH2   300   1.43
+OS   P     300   1.61
+CS1  OA    300   1.43
+CS1  NR5X  300   1.48
+CS1  CH2   300   1.53
+CS1  OS    300   1.435
+CS1  CS1   300   1.52
+NR6  CR61  500   1.32
+NR6  CB    500   1.34
+NR6X CH2   400   1.48
+NR6X CH3   400   1.48
+NR6X CR61  400   1.40
+NR6X CB    400   1.40
+NR6X H     447.5 1.0
+NR6X CS1   400   1.48
+CS2  OA    300   1.43
+CS2  CR61  400   1.39
+CS2  CB    400   1.39
+CS2  OS    300   1.435
+CS2  CS1   300   1.52
+CS2  NR6X  400   1.40
+SI   CH1   300   1.87
+SI   OS    300   1.63
+
+angles
+HO   OA   C    47.5 109.47122
+HO   OA   CH1  47.5 109.47122
+HO   OA   CH2  47.5 109.47122
+HO   OA   CB   47.5 109.47122
+P    OA   HO   47.5 109.47122
+CS1  OA   HO   47.5 109.47122
+CS2  OA   HO   47.5 109.47122
+HW   OW   HW   55   109.47122 ! SPC water model
+CH1  N    C    60   122
+CH2  N    C    60   122
+CH2  N    CH1  60   116
+CH3  N    C    60   117
+CH3  N    CH1  60   125
+CH3  N    CH2  60   125
+H    N    C    35   123
+H    N    CH1  45   115
+H    N    CH2  45   115
+H    N    CH3  45   120
+H    NT   C    35   120
+H    NT   CH1  45   120
+H    NT   CH2  45   120
+H    NT   CB   35   120
+H    NT   H    40   120
+H    NL   C    45   109.47122
+H    NL   CH1  45   109.47122
+H    NL   CH2  45   109.47122
+H    NL   H    40   109.47122
+CR51 NR5  CR51 50   108
+CB   NR5  CR51 50   108
+FE   NR5  CR51 30   125
+CR51 NR5X CR51 50   108
+CB   NR5X CR51 50   108
+CS1  NR5X CR51 50   126
+CS1  NR5X CB   50   126
+H    NR5X CR51 45   126
+H    NR5X CB   45   126
+CB   NP   CB   50   108
+FE   NP   CB   50   126
+OM   C    OM   60   126
+OA   C    O    60   124
+N    C    O    60   124
+NT   C    O    60   124
+NL   C    O    60   124
+N    C    OA   60   124 ! added JK
+CH1  C    O    60   121
+CH1  C    OM   60   117
+CH1  C    OA   60   115
+CH1  C    N    60   115
+CH1  C    NT   60   115
+CH2  C    O    60   121
+CH2  C    OM   60   117
+CH2  C    OA   60   115
+CH2  C    N    60   115
+CH2  C    NT   60   115
+CH2  C    NL   60   115
+CH3  C    O    60   121
+CH3  C    N    60   115
+CB   C    O    60   121
+CB   C    N    60   115
+CB   C    NT   60   115
+NZ   C    NZ   60   120
+NE   C    NZ   60   120
+OA   C    OA   60   120 ! added JK
+C    CH1  N    55   109.47122
+C    CH1  NT   55   109.47122
+C    CH1  NL   55   109.47122
+CH1  CH1  OA   55   109.47122
+CH1  CH1  N    55   109.47122
+CH1  CH1  NT   55   109.47122
+CH1  CH1  NL   55   109.47122
+CH1  CH1  C    55   109.47122
+CH1  CH1  CH1  55   111
+CH2  CH1  OA   55   109.47122
+CH2  CH1  N    55   109.47122
+CH2  CH1  NT   55   109.47122
+CH2  CH1  NL   55   109.47122
+CH2  CH1  C    55   109.47122
+CH2  CH1  CH1  55   111
+CH2  CH1  CH2  55   109.47122
+CH3  CH1  OA   55   111
+CH3  CH1  N    55   109.47122
+CH3  CH1  NT   55   109.47122
+CH3  CH1  NL   55   109.47122
+CH3  CH1  C    55   109.47122
+CH3  CH1  CB   55   111       ! added JK
+CH3  CH1  CH1  55   111
+CH3  CH1  CH2  55   111
+CH3  CH1  CH3  55   111
+SI   CH1  CH3  55   109.47122
+S    CH1  CB   55   112.5     ! added JK
+S    CH1  CH2  55   112.5     ! added JK
+S    CH1  CH3  55   112.5     ! added JK
+C    CH2  N    55   109.47122
+C    CH2  NT   55   109.47122
+C    CH2  NL   55   109.47122
+CH1  CH2  OA   55   109.47122
+CH1  CH2  N    55   109.47122
+CH1  CH2  C    55   111
+CH1  CH2  CH1  55   109.47122
+CH2  CH2  OM   55   109.47122
+CH2  CH2  OA   55   109.47122
+CH2  CH2  N    55   109.47122
+CH2  CH2  NT   55   109.47122
+CH3  CH2  NT   55   109.47122 ! added JK
+CH2  CH2  NL   55   109.47122
+CH2  CH2  C    55   111
+CH2  CH2  CH1  55   111
+CH2  CH2  CH2  55   111
+CH3  CH2  OM   55   109.47122
+CH3  CH2  OA   55   111
+CH3  CH2  CH2  55   111
+CH3  CH2  CH1  55   111
+CB   CH2  OM   55   109.47122
+CB   CH2  CH1  55   111
+CB   CH2  CH2  55   111
+S    CH2  CH1  55   113
+S    CH2  CH2  55   113
+NE   CH2  CH2  55   109.47122
+OS   CH2  CH1  55   111
+NR6X CH2  CH1  55   111
+NR6X CH2  CB   55   109.47122
+NR6X CH2  CS1  55   109.47122
+NR5X CR51 NR5  50   108
+NR5X CR51 NR5X 50   108
+CB   CR51 NR5  50   108
+CB   CR51 NR5X 50   108
+CR61 CR61 CR61 50   120
+CB   CR61 CH2  50   126
+CB   CR61 CR61 50   120
+CB   CR61 CB   50   120
+NR6  CR61 CB   50   120
+NR6  CR61 NR6  50   120
+NR6X CR61 CR61 50   120
+NR6X CR61 CB   50   120
+CS2  CR61 CR61 50   120
+CH2  CB   NR5  50   126
+CH2  CB   NR5X 50   126
+CR51 CB   NR5  50   108
+CR51 CB   NR5X 50   108
+CR51 CB   CH2  50   126
+CR61 CB   OA   50   120
+CR61 CB   NT   50   120
+CR61 CB   NR5X 50   132
+CR61 CB   NP   50   126
+CR61 CB   C    50   120
+CR61 CB   CH2  50   120
+CR61 CB   CH3  50   120
+CR61 CB   CR61 50   120
+CB   CB   O    50   120
+CB   CB   NT   50   120
+CB   CB   NR5  50   108
+CB   CB   NR5X 50   108
+CB   CB   NP   50   108
+CB   CB   CH1  50   120 ! added JK
+CB   CB   CH2  50   126
+CB   CB   CH3  50   120
+CB   CB   CR51 50   108
+CB   CB   CR61 50   120
+CB   CB   CB   50   120
+NR6  CB   O    50   120
+NR6  CB   NT   50   120
+NR6  CB   NR5X 50   132
+NR6  CB   CH2  50   120
+NR6  CB   CR61 50   120
+NR6  CB   CB   50   120
+NR6  CB   NR6  50   120
+NR6X CB   O    50   120
+NR6X CB   NT   50   120
+NR6X CB   CR61 50   120
+NR6X CB   CB   50   120
+NR6X CB   NR6  50   120
+NR6X CB   NR6X 50   120
+CS2  CB   C    50   120
+CS2  CB   CH2  50   120
+CS2  CB   CR61 50   120
+CS2  CB   NR6  50   120
+CH3  S    O    55   107
+CH1  S    CH2  55   99.5 ! added JK
+CH2  S    CH2  55   99.5 ! added JK
+CH3  S    CH2  55   100
+CH3  S    CH3  55   97
+HS   S    CH2  47.5 96
+S    S    CH2  55   104
+NP   FE   NR5   5   115
+NP   FE   NP   50   90
+H    NZ   C    35   120
+H    NZ   H    40   120
+CH2  NE   C    60   124
+H    NE   C    35   120
+H    NE   CH2  45   116
+OM   P    OM   70   120
+OA   P    OM   47.5 109.6
+OS   P    OM   47.5 109.6
+OS   P    OA   47.5 103
+OS   P    OS   47.5 103
+P    OS   CH2  47.5 120
+P    OS   P    47.5 120
+CS1  OS   P    47.5 120
+CS1  OS   CS1  40   109.47122
+CS2  OS   P    47.5 120
+SI   OS   CS1  47.5 120
+SI   OS   CS2  47.5 120
+SI   OS   SI   47.5 155
+OS   CS1  NR5X 34   109.47122
+CS1  CS1  OA   34   109.47122
+CS1  CS1  NR5X 34   109.47122
+CS1  CS1  OS   34   109.47122
+CS1  CS1  CS1  30   109.47122
+NR6X CS1  CH2  30   109.47122
+NR6X CS1  OS   34   109.47122
+NR6X CS1  CS1  30   109.47122
+CS2  CS1  OA   34   109.47122
+CS2  CS1  NR5X 34   109.47122
+CS2  CS1  CH2  30   109.47122
+CS2  CS1  OS   34   109.47122
+CS2  CS1  CS1  30   109.47122
+CS2  CS1  NR6X 30   109.47122
+CB   NR6  CR61 50   120
+CB   NR6  CB   50   120
+CH3  NR6X CH2  50   120
+CR61 NR6X CR61 50   120
+CB   NR6X CH2  50   120
+CB   NR6X CH3  50   120
+CB   NR6X CR61 50   120
+CB   NR6X CB   50   120
+H    NR6X CH2  45   120
+H    NR6X CB   45   120
+CS1  NR6X CR61 50   120
+CS1  NR6X CB   50   120
+CS1  NR6X H    45   120
+CS2  NR6X CB   50   120
+CS2  NR6X H    45   120
+CB   CS2  CR61 50   120
+CS1  CS2  OA   34   109.47122
+CS1  CS2  OS   34   109.47122
+CS1  CS2  CS1  30   109.47122
+NR6X CS2  CB   50   120
+NR6X CS2  CS1  50   120
+CH1  SI   CH1  47.5 109.47122
+OS   SI   CH1  47.5 109.47122
+OS   SI   OS   47.5 109.47122
+
+dihedrals
+X C    OA   X  4    2  180
+X C    N    X  8    2  180
+X C    NT   X  8    2  180
+X C    NL   X  .9   3  0
+X CH1  OA   X  .3   3  0
+X CH1  N    X  .1   6  180
+X CH1  NT   X  .9   6  0
+X CH1  NL   X  .9   3  0
+X CH1  C    X  .1   6  0
+X CH1  CH1  X  1.4  3  0
+X CH2  OA   X  .3   3  0
+X CH2  N    X  .1   6  180
+X CH2  NT   X  .9   6  0
+X CH2  NL   X  .9   3  0
+X CH2  C    X  .1   6  0
+X CH2  CH1  X  1.4  3  0
+X CH2  CH2  X  1.4  3  0
+X CB   OA   X  1.7  2  180
+X CB   NT   X  8    2  180
+X CB   C    X  1.4  2  180
+X CB   CH2  X  .1   6  0
+X CB   CH1  X  .1   6  0      ! added JK
+X CB   CR61 X  10   2  180
+X S    CH2  X  .7   3  0
+X S    CH1  X  .7   3  0      ! added JK
+X S    S    X  4    2  0
+X FE   NR5  X  0    4  0
+X NZ   C    X  8    2  180
+X NE   C    X  8    2  180
+X NE   CH2  X  .1   6  180
+X P    OA   X  .25  3  0
+X P    OA   X  .75  2  0
+X OS   CH2  X  .9   3  0
+X OS   P    X  .25  3  0
+X OS   P    X  .75  2  0
+X CS1  OA   X  .3   3  0
+X CS1  NR5X X  0    2  0
+X CS1  CH2  X  1.4  3  0
+X CS1  OS   X  .9   3  0
+X CS1  CS1  X  1.4  3  0
+X CS1  CS1  X  .1   2  0     ! ?
+X CS1  CS1  X  .5   2  0     ! ?
+X NR6  CB   X  8    2  180
+X NR6X CH2  X  .1   6  0
+X NR6X CB   X  8    2  180
+X NR6X CS1  X  0    2  0
+X CS2  OA   X  .3   3  0
+X CS2  OS   X  .9   3  0
+X CS2  CS1  X  1.4  3  0
+X CS2  CS1  X  .1   2  0     ! ?
+X CS2  CS1  X  .5   2  0     ! ?
+X SI   CH1  X  1.4  3  0
+X SI   OS   X  .9   3  0
+
+impropers
+! i and l reversed
+NR5  X X NR5X  20 0 0
+NR5X X X NR5X  20 0 0
+O    X X C     20 0 0
+OM   X X C     20 0 0
+NT   X X C     20 0 0
+OA   X X CH1   40 0 35.26439
+CH1  X X CH1   40 0 35.26439
+N    X X CH2   20 0 0
+NT   X X CH2   20 0 0
+C    X X CH2   20 0 0
+CH1  X X CH2   40 0 35.26439
+CH1  X X CH3   40 0 35.26439
+NR5  X X CR51  20 0 0
+NR5X X X CR51  20 0 0
+CR51 X X CR51  20 0 0
+CR61 X X CR61  20 0 0
+O    X X CB    20 0 0
+OA   X X CB    20 0 0
+NT   X X CB    20 0 0
+NR5  X X CB    20 0 0
+NR5X X X CB    20 0 0
+NP   X X CB    20 0 0
+C    X X CB    20 0 0
+CH2  X X CB    20 0 0
+CH3  X X CB    20 0 0
+CR51 X X CB    20 0 0
+CR61 X X CB    20 0 0
+CB   X X CB    20 0 0
+N    X X H     20 0 0
+NT   X X H     20 0 0
+NL   X X H     40 0 35.26439
+NR5X X X H     20 0 0
+NP   X X FE    20 0 0
+C    X X NZ    20 0 0
+C    X X NE    20 0 0
+H    X X NE    20 0 0
+NR5X X X CS1   20 0 0
+CH2  X X CS1   40 0 35.26439
+CB   X X CS1   20 0 0
+CS1  X X CS1   40 0 35.26439
+CR61 X X NR6   20 0 0
+CB   X X NR6   20 0 0
+NR6  X X NR6   20 0 0
+CH2  X X NR6X  20 0 0
+CH3  X X NR6X  20 0 0
+CR61 X X NR6X  20 0 0
+CB   X X NR6X  20 0 0
+H    X X NR6X  20 0 0
+CS1  X X NR6X  20 0 0
+NR6  X X NR6X  20 0 0
+NR6X X X NR6X  20 0 0
+CB   X X CS2   20 0 0
+CS1  X X CS2   40 0 35.26439
+NR6X X X CS2   20 0 0
+CH1  X X SI    40 0 35.26439
+
+NBFIX
+!atom atom   Emin   sigvdW
+O    OA   -0.221370  3.269262
+O    OW   -0.193737  3.383625
+O    N    -0.150596  3.507702
+O    NT   -0.130060  3.594464
+O    NL   -0.095378  3.785157
+O    NR5X -0.158963  3.476235
+O    ZN   -0.253469  2.616742
+O    NZ   -0.136254  3.566703
+O    NE   -0.147491  3.519903
+O    P    -0.375812  3.499241
+O    NR6X -0.158963  3.476235
+O    SI   -0.375812  3.499241
+O    NA   -0.059711  3.051856
+O    CA   -0.171107  3.189649
+O    MG   -0.134327  2.644262
+OM   OA   -0.135281  3.548921
+OM   OW   -0.118395  3.673067
+OM   N    -0.092031  3.807758
+OM   NT   -0.079481  3.901942
+OM   NL   -0.034972  4.474097
+OM   NR5X -0.097144  3.773599
+OM   ZN   -0.154898  2.840583
+OM   NZ   -0.049960  4.215881
+OM   NE   -0.054080  4.160563
+OM   P    -0.137798  4.136140
+OM   NR6X -0.097144  3.773599
+OM   SI   -0.229663  3.798573
+OM   NA   -0.021894  3.607326
+OM   CA   -0.062739  3.770199
+OM   MG   -0.049253  3.125546
+OA   OA   -0.202922  3.317018
+OA   OW   -0.177592  3.433052
+OA   N    -0.138047  3.558941
+OA   NT   -0.119222  3.646971
+OA   NL   -0.087430  3.840449
+OA   NR5  -0.145716  3.527015
+OA   NR5X -0.145716  3.527015
+OA   ZN   -0.232347  2.654966
+OA   NZ   -0.124899  3.618804
+OA   NE   -0.135200  3.571320
+OA   P    -0.344494  3.550356
+OA   OS   -0.202922  3.317018
+OA   NR6  -0.145716  3.527015
+OA   NR6X -0.145716  3.527015
+OA   SI   -0.344494  3.550356
+OA   NA   -0.054735  3.096436
+OA   CL   -0.147008  4.069529
+OA   CA   -0.156848  3.236242
+OA   MG   -0.123133  2.682888
+OW   OW   -0.155425  3.553145
+OW   N    -0.120815  3.683438
+OW   NT   -0.104340  3.774547
+OW   NL   -0.076516  3.974794
+OW   NR5  -0.127527  3.650395
+OW   NR5X -0.127527  3.650395
+OW   ZN   -0.203344  2.747841
+OW   NZ   -0.109309  3.745395
+OW   NE   -0.118324  3.696250
+OW   P    -0.301493  3.674553
+OW   OS   -0.177592  3.433052
+OW   NR6  -0.127527  3.650395
+OW   NR6X -0.127527  3.650395
+OW   SI   -0.301493  3.674553
+OW   NA   -0.047903  3.204754
+OW   CL   -0.128658  4.211887
+OW   CA   -0.137270  3.349450
+OW   MG   -0.107763  2.776739
+N    NR5  -0.099130  3.784254
+N    OS   -0.138047  3.558941
+N    NR6  -0.099130  3.784254
+N    CL   -0.100009  4.366336
+NT   NR5  -0.085612  3.877857
+NT   OS   -0.119222  3.646971
+NT   NR6  -0.085612  3.877857
+NT   CL   -0.086371  4.474337
+NL   NR5  -0.062782  4.083584
+NL   OS   -0.087430  3.840449
+NL   NR6  -0.062782  4.083584
+NL   CL   -0.063339  4.711709
+NR5  NR5X -0.104637  3.750306
+NR5  ZN   -0.166846  2.823049
+NR5  NZ   -0.089689  3.847907
+NR5  NE   -0.097086  3.797417
+NR5  P    -0.247377  3.775126
+NR5  NR6X -0.104637  3.750306
+NR5  SI   -0.247377  3.775126
+NR5  NA   -0.039305  3.292468
+NR5  CA   -0.112631  3.441125
+NR5  MG   -0.088420  2.852739
+NR5X OS   -0.145716  3.527015
+NR5X NR6  -0.104637  3.750306
+NR5X CL   -0.105565  4.327167
+ZN   OS   -0.232347  2.654966
+ZN   NR6  -0.166846  2.823049
+ZN   CL   -0.168326  3.257282
+NZ   OS   -0.124899  3.618804
+NZ   NR6  -0.089689  3.847907
+NZ   CL   -0.090484  4.439780
+NE   OS   -0.135200  3.571320
+NE   NR6  -0.097086  3.797417
+NE   CL   -0.097947  4.381524
+P    OS   -0.344494  3.550356
+P    NR6  -0.247377  3.775126
+P    CL   -0.249572  4.355804
+OS   NR6X -0.145716  3.527015
+OS   SI   -0.344494  3.550356
+OS   NA   -0.054735  3.096436
+OS   CA   -0.156848  3.236242
+OS   MG   -0.123133  2.682888
+NR6  NR6X -0.104637  3.750306
+NR6  SI   -0.247377  3.775126
+NR6  NA   -0.039305  3.292468
+NR6  CA   -0.112631  3.441125
+NR6  MG   -0.088420  2.852739
+NR6X CL   -0.105565  4.327167
+SI   CL   -0.249572  4.355804
+NA   CL   -0.039653  3.798906
+CL   CA   -0.113630  3.970428
+CL   MG   -0.089205  3.291538
+HP   O    -0.001     1.1
+HP   OM   -0.003     1.5
+HP   NT   -0.002     1.3
+

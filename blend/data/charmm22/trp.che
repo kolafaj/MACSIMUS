@@ -1,0 +1,14 @@
+aminoacid W TRP tryptophan
+parameter_set = charmm22
+! charge=0.00
+        |                                      HPp.115
+        NH1^n.47-Hp.31                          |
+        |        HAvp.09                      CAn.115
+        |         |                          /    \
+HBvp.09-CT1p.07--CT2n.18---CYn.03-----CPTn.02      CAn.115-HPp.115
+        |        |          |          |            |
+        |        HAvp.09   CAp.035    CPTp.13      CAn.115-HPp.115
+ On.51=C^p.51              /    \      /    \      /
+        |           HPp.115      NYn.61      CAn.115
+        |                           |          |
+        |                         Hp.38      HPp.115

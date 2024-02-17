@@ -1,0 +1,25 @@
+aminoacid Q GLN glutamine
+
+parameter_set = charmm22
+number_of_atoms = 17
+! charge=0.00
+
+atoms
+!i  id   type charge chir nb bonded_atoms
+ 0  N     NH1  -0.47   0  2  1 2
+ 1  H,HN    H     0.31   0  1  0
+ 2  CA    CT1   0.07   0  4  4 0 15 3
+ 3  HA    HB    0.09   0  1  2
+ 4  CB    CT2  -0.18   0  4  2 7 5 6
+ 5  HB1   HA    0.09   0  1  4
+ 6  HB2   HA    0.09   0  1  4
+ 7  CG    CT2  -0.18   0  4  4 10 8 9
+ 8  HG1   HA    0.09   0  1  7
+ 9  HG2   HA    0.09   0  1  7
+10  CD    CC    0.55   0  3  7 12 11
+11  OE1   O    -0.55   0  1  10
+12  NE2   NH2  -0.62   0  3  10 13 14
+13  HE21  HCIS  0.32   0  1  12
+14  HE22  HTRA  0.30   0  1  12
+15  C     C     0.51   0  2  2 16
+16  O     O    -0.51   0  1  15

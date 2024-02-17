@@ -1,0 +1,40 @@
+! for 'Oumuamua
+
+all_dihedrals=1  ! all dihedrals
+ar_dih_limit=1   ! inclusion limit for dihedrals in aromatic rings
+! all_impropers=0 ! old
+all_impropers=2  ! one improper per central atom, can swap central:out (NEW)
+column_X=0       ! column X disabled (all atoms match = all X=1)
+comb_rule=0      ! Kirkwood-Slater for EvdW, additive diameters
+factor14=0.5     ! multiplicative factor for 1-4 interactions
+distance14=4     ! these interactions are really 1-4
+;
+
+atoms
+!i name  X A    mass   Z  col description
+ 1  CT   1 0  12.01100 6   C  Aliphatic carbon (tetrahedral)
+
+Lennard-Jones
+!       alpha     EMIN         Rmin     These columns used for
+!       [A^3]  (kcal/mol)      (A)      1-4 interactions
+CT       1.65     0            1.800   
+
+bonds
+!atom atom  K          length
+CT   CT     268.0       1.529 
+
+angles
+CT   CT   CT      58.35    109.471220634
+
+dihedrals
+
+
+aromatics
+
+
+nbfixes
+
+
+waters
+
+

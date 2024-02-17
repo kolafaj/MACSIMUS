@@ -1,0 +1,24 @@
+aminoacid E GLU glutamic acid protonated
+
+parameter_set = charmm22
+number_of_atoms = 16
+! charge=0.00
+
+atoms
+!i  id   type charge chir nb bonded_atoms
+ 0  N     NH1  -0.47   0  2  1 2
+ 1  H,HN    H     0.31   0  1  0
+ 2  CA    CT1   0.07   0  4  4 0 13 3
+ 3  HA    HB    0.09   0  1  2
+ 4  CB    CT2  -0.18   0  4  2 7 5 6
+ 5  HB1   HA    0.09   0  1  4
+ 6  HB2   HA    0.09   0  1  4
+ 7  CG    CT2  -0.21   0  4  4 10 8 9
+ 8  HG1   HA    0.09   0  1  7
+ 9  HG2   HA    0.09   0  1  7
+10  CD    CD    0.75   0  3  7 12 11
+11  OE1   OB   -0.55   0  1  10
+12  OE2   OH1  -0.61   0  1  10
+13  C     C     0.51   0  2  2 14
+14  O     O    -0.51   0  1  13
+15  HE2   H     0.44   0  1  12

@@ -1,0 +1,12 @@
+aminoacid M MET methionine
+parameter_set = charmm21
+! charge=0.00
+        |    
+        NP^n.35-Hp.25
+          |
+          |
+          CH1E.1--CH2E^-CH2E.06-SEvn.12-CH3E.06
+          |
+          |
+ On.55=C^p.55
+        |         

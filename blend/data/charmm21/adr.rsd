@@ -1,0 +1,27 @@
+molecule adrenaline
+
+parameter_set = charmm21
+number_of_atoms = 18
+! total charge = 1.0
+
+atoms
+! i  atom-id  a-type charge chir nbonds bound_atoms
+  0 H7         HO    0.4000  0    1  4
+  1 1-HO       HO    0.4000  0    1  6
+  2 C2         C6RE  0.0000  0    2  3 7
+  3 C3         C6RE  0.0000  0    2  2 8
+  4 O3         OT   -0.6500  0    2  0 10
+  5 H8         HC    0.3500  0    1  11
+  6 O1         OT   -0.6500  0    2  7 1
+  7 C1         C6R   0.2500  0    3  6 13 2
+  8 C4         C6R   0.0000  0    3  9 14 3
+  9 C7         CH2E  0.1000  0    2  8 10
+ 10 C8         CH1E  0.4000  1    3  9 11 4
+ 11 N1         NT   -0.3000  0    4  10 12 5 15
+ 12 12-HC      HC    0.3500  0    1  11
+ 13 C6         C6R   0.2500  0    3  14 7 17
+ 14 C5         C6RE  0.0000  0    2  13 8
+ 15 H9         HC    0.3500  0    1  11
+ 16 16-HO      HO    0.4000  0    1  17
+ 17 O2         OT   -0.6500  0    2  16 13
+

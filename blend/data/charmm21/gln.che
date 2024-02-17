@@ -1,0 +1,12 @@
+aminoacid Q GLN glutamine
+parameter_set = charmm21
+! charge=0.00
+        |
+        NP^n.35-Hp.25
+          |                           H.3
+          |                          /
+          CH1E.1-CH2E^-CH2E-C.55--NPn.6
+          |                 |        \
+          |                 On.55     H.3
+ On.55=C^p.55
+        |

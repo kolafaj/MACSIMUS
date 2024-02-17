@@ -1,0 +1,13 @@
+! cookceslcP1 crambinw
+init="start"        ! start simulation (from .cfg)
+dt.plb=1            ! write playback every 0.1 ps
+dt.prt=1            ! write line to prt every 1 ps
+tau.T=1             ! thermostat time constant
+tau.rho=0           ! turn off fixed box
+bulkmodulus=2e9     ! for Berendsen barostat
+tau.P=5             ! barostat constant
+no=1000             ! number of cycles (by h*noint=0.01 ps)
+;                   ! end of data set
+init="append"       ! restart measurements but append playback and .cp
+no=1000             ! another 10 ps
+;                   ! end

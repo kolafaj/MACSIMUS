@@ -1,0 +1,24 @@
+aminoacid V VAL valine
+
+parameter_set = charmm22
+number_of_atoms = 16
+! charge=0.00
+
+atoms
+!i  id   type charge chir nb bonded_atoms
+ 0  N     NH1  -0.47   0  2  1 2
+ 1  H,HN    H     0.31   0  1  0
+ 2  CA    CT1   0.07   0  4  4 0 14 3
+ 3  HA    HB    0.09   0  1  2
+ 4  CB    CT1  -0.09   0  4  2 6 10 5
+ 5  HB    HA    0.09   0  1  4
+ 6  CG1   CT3  -0.27   0  4  4 7 8 9
+ 7  HG11  HA    0.09   0  1  6
+ 8  HG12  HA    0.09   0  1  6
+ 9  HG13  HA    0.09   0  1  6
+10  CG2   CT3  -0.27   0  4  4 11 12 13
+11  HG21  HA    0.09   0  1  10
+12  HG22  HA    0.09   0  1  10
+13  HG23  HA    0.09   0  1  10
+14  C     C     0.51   0  2  2 15
+15  O     O    -0.51   0  1  14

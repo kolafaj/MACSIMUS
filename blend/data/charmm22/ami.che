@@ -1,0 +1,10 @@
+cter CT2 - amidated C-terminus
+parameter_set = charmm22
+! charge=0.00
+        |
+ On.55=CC^p.55  !<<< On.51=C^p.51 of previous aminoacid to be replaced
+        |
+      NH2n.62
+      /   \
+HCISp.32  HTRAp.30
+

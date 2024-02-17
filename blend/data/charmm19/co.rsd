@@ -1,0 +1,10 @@
+molecule CO
+
+parameter_set = charmm19
+number_of_atoms = 2
+! charge=0.00000
+
+atoms
+!i  id   type charge chir nb bonded_atoms
+ 0  C     CM   0.021   0  1  1
+ 1  O     OM   -0.021   0  1  0

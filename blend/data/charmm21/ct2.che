@@ -1,0 +1,7 @@
+cter CT2 - amidated C-terminus
+parameter_set = charmm21
+! charge=0.00
+        |
+      NPn.6
+      /   \
+   Hp.3   Hp.3

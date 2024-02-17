@@ -1,0 +1,14 @@
+aminoacid A ALA alanine  
+
+parameter_set = gromos96
+number_of_atoms = 6
+! charge=0
+
+atoms
+! i  atomid  atomtype charge chiral nbonds bound-index
+  0  C       CO       0.38     0    2      1 5
+  1  CA      CH1      0.00     1    3      4 0 2
+  2  CB      CH3      0.00     0    1      1
+  3  H       H        0.28     0    1      4
+  4  N       N        -0.28    0    2      1 3
+  5  O       O        -0.38    0    1      0

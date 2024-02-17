@@ -1,0 +1,12 @@
+aminoacid S SER serine
+parameter_set = charmm21
+! charge=0.00
+        |    
+        NP^n.35-Hp.25
+          |             OTvn.65-HOv.4
+          |            /
+          CH1E.1--CH2E.25
+          |
+          |
+ On.55=C^p.55     
+        |         

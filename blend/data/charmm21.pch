@@ -1,0 +1,50 @@
+! CHARMM21 partial charges
+! does not support HIS and ARG - these must be defined in *.rsd files
+! however, the ARG side-chain >N-H group gets the general charge,
+! which is by 0.05 lower (no big problem, I guess)
+
+! >C=O (the problematic carbonyl - charges too high)
+C=0.55     O=-0.55 
+
+! -NH2
+NT=-0.3    H=0.15     H=0.15
+
+! -COOH needs 2 terms (warning printed), charges strange anyway
+C=0.55     OAC=-0.55  OT=0
+OT=-0.4    C=0.15     H=0.25
+
+! >N-H in aminoacid chain etc.
+NP=-0.35   H=0.25     CH2E=0.1
+NP=-0.35   H=0.25     CH1E=0.1
+
+! -NH3+
+NT=-0.3    HC=0.35    HC=0.35   HC=0.35 CH2E=0.25
+NT=-0.3    HC=0.35    HC=0.35   HC=0.35 CH1E=0.25
+
+! -COO(-)
+C=0.36     OC=-0.6    OC=-0.6   CH2E=-0.16
+! as above for c-term (bit cheating)
+C=0.14     OC=-0.57   OC=-0.57  CH1E=0
+
+! in groups like -CO-NH2
+NP=-0.6    H=0.3      H=0.3
+
+! OH groups:
+OT=-0.65   HO=0.4     C6R=0.25
+OT=-0.65   HO=0.4     C5R=0.25
+OT=-0.65   HO=0.4     CH1E=0.25
+OT=-0.65   HO=0.4     CH2E=0.25
+
+! MET:
+SE=-0.12   CH2E=0.06  CH3E=0.06
+
+! CYS:
+SH1E=-0.19 CH2E=0.19
+SE=-0.19   CH2E=0.19         
+
+! PRO
+NX=-0.2 CH2E=0.1 CH1E=0.1
+
+! good for TRP, but not general enough
+CR56=0.1   C5R=-0.03  C6RE=-0.03 CR56=-0.04
+N5R=-0.36  C5RE=0.06  H=0.3      CR56=0

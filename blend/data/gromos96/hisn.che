@@ -1,0 +1,12 @@
+aminoacid H HIS histidine (uncharged with proton on ND1), charmm name HSD
+parameter_set = gromos96
+! charge=0.00
+        |            H.19   
+       N^n.28-Hp.28   |
+          |           NR5-----CR1p.26
+          |          /             |
+          CH1-CH2^-CR5             |
+          |          \             |
+          |           CR1p.13-NR5n.58
+  On.38=CO^p.38   
+        |         

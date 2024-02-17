@@ -1,0 +1,71 @@
+! TraPPE - UA [J. Phys. Chem. B 2004, 108, 17596-17605]
+
+all_dihedrals=1 ! several dihedrals per central bond
+ar_dih_limit=1  ! inclusion limit for dihedrals in aromatic rings
+all_impropers=0 ! one improper per central atom
+column_X=0      ! column X disabled (all atoms match = all X=1)
+sqrt_rule=1     ! sqrt combining rule for LJ energies, additive diameters
+factor14=0.5    ! multiplicative factor for `1-4' interactions (if not nbfixes)
+distance14=4    ! these interactions are really 1-4
+LJsigma=1       ! 'vdW' columns contain Lennard-Jones sigma
+polar=0         ! no polarizability
+;
+
+atoms
+!
+! X : if the atom can match wildcard atom X in the tables of dihedrals
+!     and impropers (irrelevant for TraPPE)
+! A : if the atom is a member of an aromatic ring (irrelevant for TraPPE)
+! mass : atomic mass in g/mol 
+! shell : el shell (for MD aux charge) (irrelevant for TraPPE)
+! C color type
+!
+!i name X A  mass shell C description
+1  CH1  1 0 13.0190 5  C An extended atom carbon with one hydrogen
+2  CH2  1 0 14.0270 6  C An extended atom carbon with two hydrogens
+3  CH3  1 0 15.0350 7  C An extended atom carbon with three hydrogens
+
+Lennard-Jones
+! Emin=-epsilon, converted to kcal/mol (1 K = 0.0019872065 kcal/mol)
+!name  alpha    Emin[kcal/mol]   sigma[A]
+CH1    1      -0.019872065     4.68
+CH2    1      -0.091411499     3.95
+CH3    1      -0.19474624      3.75
+! alpha is irrelevant for TraPPE
+
+bonds
+! K is not used in MD (cook)
+! atom  atom      K[kcal/mol/A^2]  r0[A]
+CH1   CH1,CH2,CH3  200         1.54
+CH2   CH2,CH3      200         1.54
+CH3   CH3          200         1.54
+
+angles
+! note that TraPPE uses U=K/2*(theta-theta0)^2
+! while MACSIMUS U=K*(theta-theta0)^2
+! atom  atom atom    K[kcal/mol]  theta0[deg]
+CH1 CH2  CH1,CH2,CH3    62.100203   114  
+CH2 CH2  CH2,CH3        62.100203   114
+CH3 CH3  CH3            62.100203   114
+
+dihedrals
+! U(phi) = K (phi - phi0)2 for n=0 (NOT TraPPE)
+! U(phi) = K [1 + cos (n phi - phi0)] for n>0 
+! all terms with different n>0 are summed
+! note the opposite sign of c2 for TraPPE
+! MACSIMUS does not support c0 (additive constant)
+! but all_dihedrals=3 will set the minimum to zero
+! atom  atom atom atom K[kcal/mol]  n phi0
+CH3 CH2 CH2 CH3        0.66577379   1  0
+CH3 CH2 CH2 CH3        0.13550761   2  0
+CH3 CH2 CH2 CH3        1.57251625   3  0
+
+nbfixes
+! should be added for pairs H [alcohol] - O
+! MACSIMUS does not support just r^-12 terms, so please choose a very
+! small epsilon (negligible attraction) and calculate sigma so that the
+! desired term ax/r^12 is reproduced
+! a line should look like this:
+!   H O Emin sigma
+! However, this will apply for all such pairs, not only 1-5
+

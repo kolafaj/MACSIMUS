@@ -1,0 +1,10 @@
+anion CL
+! total charge = -1
+
+parameter_set = undefined
+number_of_atoms = 1
+
+atoms
+! i Crad/atom-id  a-type  charge chir nbonds bound_atoms
+  0 G080/0-CL       CL    -1.0000  0    0
+

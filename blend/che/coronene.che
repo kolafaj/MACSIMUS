@@ -1,0 +1,17 @@
+[6]circulene
+
+              HA-C6R--C6R-HA   
+                 |    |           
+    HA--C6R---CR66    CR66---C6R-HA
+        |        |    |        |   
+  HA---C6R      CR66-CR66     C6R-HA 
+        |        |    |        |
+        CR66--CR66    CR66--CR66
+        |        |    |        |
+  HA---C6R      CR66-CR66     C6R-HA
+        |        |    |        |       
+        C6R---CR66    CR66---C6R    
+        |        |    |        |   
+       HA       C6R--C6R      HA
+                 |    |    
+                HA    HA   

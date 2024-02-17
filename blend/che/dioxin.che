@@ -1,0 +1,13 @@
+2,3,7,8-tetrachlor dibenzo-p-dioxin
+
+       HA          HA
+       |            |
+      C6R    OS    C6R   
+     /   \  /  \  /   \  
+XCL-C6R  C6R    C6R  C6R-XCL
+     |    |       |    | 
+XCL-C6R  C6R    C6R  C6R-XCL
+     \   /  \  /  \   /  
+      C6R    OS    C6R   
+       |            |
+       HA          HA

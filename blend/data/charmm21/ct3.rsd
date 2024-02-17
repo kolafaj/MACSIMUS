@@ -1,0 +1,13 @@
+cter CMAM methylamide (C-terminal patch for aminoacids)
+
+parameter_set = charmm21
+number_of_atoms = 5
+! charge=0
+
+atoms
+! i  atomid  atomtype charge chiral nbonds bound-index
+  0  C:C     C        0.55   0      2      1 2
+  1  O:O     O       -0.55  0      1      0
+  2  NCT,NT,N  NP       -0.35  0      3      0 3 4
+  3  HCT,HNT H        0.25  0      1      2
+  4  CTB,CA,CT  CH3E     0.1   0      1      2

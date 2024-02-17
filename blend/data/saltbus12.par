@@ -1,0 +1,150 @@
+! exp-6 with the Busing combining rules and r^-12, shell-core model
+! Li+ Al+++ Cl- I- NCS- Na+, identical to the old AlCl+LiI salt project
+
+all_dihedrals=0  ! all dihedrals
+ar_dih_limit=1   ! inclusion limit for dihedrals in aromatic rings
+all_impropers=0  ! one improper per central atom
+column_X=0       ! column X disabled (all atoms match = all X=1)
+comb_rule=0      ! 0=Busing, other not supported
+factor14=0       ! multiplicative factor for 1-4 interactions
+distance14=6     ! these interactions are 1-6
+polar=1          ! polarizability included
+;
+
+atoms
+!
+! X : if the atom can match wildcard atom X in the tables of dihedrals
+!     and impropers
+! A : if the atom is a member of an aromatic ring
+! mass : atomic mass in g/mol
+! shell : el shell (for MD aux charge) (WARNING: a sort of random numbers)
+!
+!i name  X A    mass    Z col description
+  1 LI   0 0   6.941     3 H  Li+ (color as hydrogen)
+  2 CL   0 0  35.45300  17 X  Cl-
+  3 AL   0 0  26.9815   13 M  Al+++
+  4 C    0 0  12.01100   6 C  C
+  5 N    0 0  14.00670   7 N  N  (TEMPORARILY LESS BY 1 aux maxx)
+  6 S    0 0  32.060    16 S  S (TEMPORARILY LESS BY 2 aux masses)
+  7 I    0 0 126.9045   53 C  I- (color as carbon)
+  8 Q   0 0   0         0  S  aux site (TO BE MASSLESS)
+  9 R   0 0   0         0  S  aux site (TO BE MASSLESS)
+ 10 NA  0 0  22.9898   11  M  Cation Na+
+
+! ionic radii:
+! NA 0.97
+! CL 1.8
+! AL 0.51
+
+! f=16.603189 old
+! f=16.603185 new CODATA
+
+Busing+12
+! alpha here not used
+! Eref=f*rho
+!atom alpha   Eref        R       C  D
+LI      0     0           0.65    0  22.778272
+AL      0     0.813556    1.055   0    0
+CL      0     3.95156     1.705  100.22439  1403.1415
+I       0     4.79832     2.02   184.04843  2223.1593
+S       0     4.488935815450    1.873667387801    135.81657  2000
+C       0     4.280295282361    1.095299932029   50.112195 500
+N       0     3.579075316110    1.455684604758   50.112195 500
+Q       0     0           1      0  0
+R       0     0           1      0  0
+NA      0     0.4       0.958    0   22.778272
+! this used to export to Buckingham
+!LI      0     0.1           0.65    0  22.778272
+
+nbfixes
+!atom atom   Emin   sigvdW  xi
+Q LI 0 1 0 0
+Q AL 0 1 0 0
+Q CL 0 1 0 0
+Q I 0 1 0 0
+Q S 0 1 0 0
+Q C 0 1 0 0
+Q N 0 1 0 0
+R LI 0 1 0 0
+R AL 0 1 0 0
+R CL 0 1 0 0
+R I 0 1 0 0
+R S 0 1 0 0
+R C 0 1 0 0
+R N 0 1 0 0
+R Q 0 1 0 0
+
+polaratoms
+!atom  alpha shell Esat      arep
+!       A^3      e    kcal/mol  1/e
+CL      2       -1000  0    0.22439024
+I       4.5     -1000  0    0.37037037
+! for C N S polarizabilities, see also table polarangles
+!N      1.86333 -1000 70
+!S      6.12    -1000 70
+N       1       -1000  0 0.220186171518
+S       3       -1000  0 0.269982142932
+!C    XalphaCX -1000 0 XkappaCX
+
+shellrep
+! atom
+LI
+AL
+NA
+!R ?
+!C ?
+
+polarbonds
+! atom --> atom 
+
+polarangles
+! atoms     alpha  alphazz Esat
+! N  C  S    1.41   2.77    100
+! S  C  N    4.49   9.38    100
+ S  C  N    1.778067956369 5.670388228545     0
+ N  C  S    0.867154139235 0.800543461584     0
+
+bonds
+!V(bond) = Kb(b - b0)**2
+!
+!Kb: kcal/mole/A**2
+!b0: A
+!
+!atom type Kb          b0
+!
+! C  S      450         1.683
+! C  N      1200         1.205
+! P.W. Shultz, G.E. Leroi, J.F. Harrison, MP 88, 217 (1996), ab initio,
+! get 1979 and 745 /cm
+C S  386 1.671
+C N  940 1.208
+Q S 5000 0.607638451274
+R S 5000 0.346183048838
+Q N 5000 0.500460313531
+R N 5000 0.238946045997
+
+angles
+!
+!V(angle) = Ktheta(Theta - Theta0)**2
+!
+!V(Urey-Bradley) = Kub(S - S0)**2
+!
+!Ktheta: kcal/mole/rad**2
+!Theta0: degrees
+!Kub: kcal/mole/A**2 (Urey-Bradley)
+!S0: A
+!
+!atom types Ktheta    Theta0   Kub     S0
+!
+! S  C  N   XKSCNX       180   100 2.879 
+! S  C  N    40        180   XUSCNX 2.879 
+ S  C  N    40        180   100 2.879 
+ Q S C 4000 180
+ R S C 4000 0 
+ R S Q 4000 180
+ Q N C 4000 180
+ R N C 4000 0 
+ R N Q 4000 180
+
+
+! UFF: DI/DCl=2.6838564 (D=coeff. at r^-12, this is sqrt of I-I/CL-CL term)

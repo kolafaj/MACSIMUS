@@ -1,0 +1,14 @@
+cter AMI amide (amidated C-terminus)           
+
+parameter_set = charmm21
+number_of_atoms = 5
+! charge=0
+
+atoms
+! i  atomid  atomtype charge chiral nbonds bound-index
+  0  C:C     C       .55     0      2      1 2
+  1  O:O     O        -.55   0      1      0
+  2  NT,NCT,N   NP      -0.6    0      3      0 3 4
+  3  HT1,HCT1   H        0.3    0      1      2
+  4  HT2,HCT2   H        0.3    0      1      2
+

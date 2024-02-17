@@ -1,0 +1,12 @@
+nter NTER -NH3+ (N-terminal patch for all aminoacids but PRO and GLY)
+parameter_set = charmm22
+! charge=1
+
+     HC^^p.33
+        |               !
+HCp.33-NH3^n.30-HCp.33  !
+        |    
+        |    
+        |    
+HBvp.10-CT1p.21-!>>> HBvp.09-CT1p.07- replace in next residue
+        |

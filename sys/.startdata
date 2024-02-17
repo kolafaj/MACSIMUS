@@ -1,0 +1,185 @@
+# data for utility start/starts: see macsimus/c/start.c
+# associated applications are separated by TAB, the 1st is the default
+# %s.%s is replaced by FILE.EXT
+# %s is replaced by FILE
+# "%s.%s" is needed if spaces etc (but not $) are parts of file names
+# ext	application	[application...]
+ppm	display	jkv
+pgm	display	jkv
+pbm	display	jkv
+# this is recognized only by GIMP:
+pnm	display	jkv
+gif	display	jkv	mz
+bmp	display	jkv
+tga	display	jkv
+jpg	display	jkv
+thm	display	jkv
+jpeg	display	jkv
+tif	display	jkv
+tiff	display	jkv
+pcx	display	jkv
+png	display	jkv
+xpm	display	jkv
+webp	display	jkv
+jkv	foto "-@%s.%s"
+heic	jkv
+heif	jkv
+xcf	gimp
+mht	google-chrome
+htm	mz	google-chrome
+html	mz	google-chrome
+xml	glade-3	mz	google-chrome
+php	mz	google-chrome
+php3	mz	google-chrome
+asp	mz	google-chrome
+cgi	mz	google-chrome
+svg	mz	google-chrome
+ps	gv	jkvps
+eps	gv	jkv	atril
+djvu	atril
+pdf	atril	xournal	gv	jkvpdf	pdfprt2.sh	xpdf	acroread
+xoj	xournal
+fdf	acroread	xpdf
+dvi	xdvi
+md	okular
+
+mpg	vlcautorot	vlc	mplayer -fs -zoom -framedrop -subcp cp1250
+webm	vlcautorot	vlc	mplayer -fs -zoom -framedrop -subcp cp1250
+wm	vlcautorot	vlc	mplayer	mplayer -fs -zoom -framedrop -subcp cp1250
+wmv	vlcautorot	vlc	mplayer	mplayer -fs -zoom -framedrop -subcp cp1250
+swf	vlcautorot	vlc	mplayer	iceweasel
+flv	vlcautorot	vlc	mplayer	iceweasel
+3gp	vlcautorot	vlc	mplayer -fs -zoom -framedrop -vf rotate=2
+3g2	vlcautorot	vlc	mplayer -fs -zoom -framedrop -vf rotate=2
+wma	vlcautorot	vlc	mplayer
+pwi	vlcautorot	vlc	mplayer
+mpeg	vlcautorot	vlc	mplayer	mplayer -fs -zoom -framedrop -subcp cp1250
+mp4	vlcautorot	vlc	mplayer	mplayer -fs -zoom -framedrop -subcp cp1250
+qt	vlcautorot	vlc	mplayer	mplayer -fs -zoom -framedrop -subcp cp1250
+mov	vlcautorot	vlc	mplayer	mplayer -fs -zoom -framedrop -subcp cp1250
+avi	vlcautorot	vlc	mplayer	mplayer -fs -zoom -framedrop -subcp cp1250
+m4v	vlcautorot	vlc	mplayer	mplayer -fs -zoom -framedrop -subcp cp1250
+
+mp3	vlc	mplayer
+ogg	vlc	mplayer
+ra	vlc	mplayer
+ram	vlc	mplayer
+mid	vlc
+wav	vlc	mplayer
+
+mkv	avidemux2.7_qt5	vlc
+osp	openshot
+#  //mp3	xterm -fn \-biznet-courier-medium-r-*-*-*-110-*-*-*-*-*-*\ -bg \#000080\ -fg \#ffff80\ +sb -e mp3blaster
+vid	showvid
+
+tar	tar tvf "%s.%s" | less
+tgz	tar tfz "%s.%s" | less
+gz	startwrapper.sh "%s" .gz
+bz2	startwrapper.sh "%s" .bz2
+xz	startwrapper.sh "%s" .xz
+tbz2	tar tfj "%s.%s" | less
+tbz	tar tfj "%s.%s" | less
+txz	tar tfJ "%s.%s" | less
+zip	unzip -v "%s.%s" | rarpp z | less
+#rar	unrar-free -t "%s.%s" | rarpp r | less
+rar	rar l -t "%s.%s" | less
+doc	oo
+docx	oo
+docm	oo
+dot	oo
+dotx	oo
+rtf	oo
+xls	oo
+xlsx	oo
+sxw	oo
+sdw	oo
+sxc	oo
+sxd	oo
+sxi	oo
+sda	oo
+sdd	oo
+csv	oo	gnumeric
+gnumeric	gnumeric
+ppt	oo
+pptx	oo
+pptm	oo
+pps	oo
+ppsx	oo
+odg	oo
+odm	oo
+odt	oo
+odp	oo
+ods	oo
+wmf	oo
+maple	xmaple
+mw	xmaple
+mws	xmaple-mws
+nb	mathematica
+nbp	mathematica
+prn	lpr
+a	ar tv "%s.%s" | less
+sh	sh "%s.%s"
+rpm	rpm -q -i -p "%s.%s"
+deb	dpkg -I	dpkg -c
+py	python
+
+tex	e
+
+# `run the first line' of a file - it is assumed that the 1st line
+# of the file contains (after a comment mark) the statement to execute
+# Script `go' may be:
+#   head -n1 $1 | cut -c3- | sh
+c	go
+# res	go
+dat	go
+
+# MACSIMUS extensions
+pdb	pdb -fcharmm21 "%s"
+che	che.sh "%s.%s"
+mol	blend -g5 "%s.%s"
+3db	view3db
+atm	showatm "%s"
+rsd	rsd "%s"
+cp	showcp -p	showcp -a	cppak
+cpz	showcp -p	showcp -a	cppak
+cpa	plotcpa
+plb	show -I%%i "%s" &
+gol	show -I%% "%s" &
+pla	showpla "%s"
+plz	showplz	plbpak
+sta	staprt -k "%s.%s"	staprt "%s.%s" | less
+rdf	rdfg "%s.%s" -g -p	rdfg "%s.%s" -c -p
+g	plot
+z	plot "%s.%s":1:2 :3 :4 :5 :6 :7 :8 :9 
+get	go
+def	go
+nff	ray -n "%s" -t -vdisplay
+zbuf	stereo "%s" -vdisplay	display	jkv
+com	showcom "%s" &	gaussian "%s"
+log	gaussian2plb "%s"
+loc	stop.sh
+cfg	showcfg
+prt	showprt.sh "%s.%s"
+sim	simolant
+sf3d	sf3d.sh
+sfr	plot "%s.%s":1:2 :3 :4 :5
+nmf	shownmf.sh
+xyz	showhs
+
+# NSK extensions
+img	nsk "%s"
+res	echo "diagram=0 key=-55;" | /home/jiri/soft/nsk/cubic/nsk -o "%s.%s"
+hip	nskh "%s"
+
+# miscellaneous local
+gp	gnuplot -geometry 1000x710+5+5 -background white "%s.%s" -
+ev	evtex.sh "%s"
+evu	evutex.sh "%s"
+tev	tev.sh "%s"
+cor	plot "%s.%s":1:2 :1:3
+txt	gedit.sh
+how	pluma
+iso	kostnice2 -u -8 < "%s.%s" | less
+sh3d	sweethome3d
+url	runlines firefox < %s.%s
+json	heartrate.sh "%s.%s"

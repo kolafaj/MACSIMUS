@@ -1,0 +1,56 @@
+molecule Heme - charge -2
+
+parameter_set = gromos96
+number_of_atoms = 47
+! total charge = -2.00
+! 4 dihedrals (FE-NRH-CRH-..) not used (`not found')
+
+atoms
+! i  atom-id  a-type charge chir nbonds bound_atoms
+  0 CMA        CH3   0.0000  0    1  4
+  1 CMB        CH3   0.0000  0    1  6
+  2 O2A        OM   -0.635   0    1  8
+  3 CAA        CH2   0.0000  0    2  9 10
+  4 C3A        CR5   0.0000  0    3  0 10 11
+  5 CHB        CR6  -0.1000  0    3  11 12 44
+  6 C2B        CR5   0.0000  0    3  12 1 13
+  7 CBB        CH2   0.0000  0    1  14
+  8 CGA        CO    0.2700  0    3  9 2 15
+  9 CBA        CH2   0.0000  0    2  8 3
+ 10 C2A        CR5   0.0000  0    3  3 16 4
+ 11 C4A        CRH   0.0000  0    3  4 17 5
+ 12 C1B        CRH   0.0000  0    3  5 18 6
+ 13 C3B        CR5   0.0000  0    3  14 6 19
+ 14 CAB        CR1   0.0000  0    2  13 7
+ 15 O1A        OM   -0.635   0    1  8
+ 16 C1A        CRH   0.0000  0    3  17 10 20
+ 17 N~A        NRH  -0.1     0    3  16 11 21
+ 18 N~B        NRH  -0.1     0    3  19 12 21
+ 19 C4B        CRH   0.0000  0    3  18 13 22
+ 20 CHA        CR6  -0.1     0    3  24 16 43
+ 21 FE         FE    0.4     0    4  17 25 18 26
+ 22 CHC        CR6  -0.1000  0    3  19 27 45
+ 23 O1D        OM   -0.635   0    1  28
+ 24 C4D        CRH   0.0000  0    3  25 20 30
+ 25 N~D        NRH  -0.1     0    3  24 31 21
+ 26 N~C        NRH  -0.1     0    3  27 21 32
+ 27 C1C        CRH   0.0000  0    3  26 33 22
+ 28 CGD        CO    0.2700  0    3  29 23 34
+ 29 CBD        CH2   0.0000  0    2  28 35
+ 30 C3D        CR5   0.0000  0    3  35 24 36
+ 31 C1D        CRH   0.0000  0    3  36 25 37
+ 32 C4C        CRH   0.0000  0    3  37 26 38
+ 33 C2C        CR5   0.0000  0    3  27 38 39
+ 34 O2D        OM   -0.635   0    1  28
+ 35 CAD        CH2   0.0000  0    2  29 30
+ 36 C2D        CR5   0.0000  0    3  30 40 31
+ 37 CHD        CR6  -0.1000  0    3  31 32 46
+ 38 C3C        CR5   0.0000  0    3  32 33 41
+ 39 CMC        CH3   0.0000  0    1  33
+ 40 CMD        CH3   0.0000  0    1  36
+ 41 CAC        CR1   0.0000  0    2  38 42
+ 42 CBC        CH2   0.0000  0    1  41
+ 43 HHA        HC    0.1     0    1  20
+ 44 HHB        HC    0.1     0    1  5
+ 45 HHC        HC    0.1     0    1  22
+ 46 HHD        HC    0.1     0    1  37

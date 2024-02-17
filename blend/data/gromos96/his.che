@@ -1,0 +1,12 @@
+aminoacid H HIS protonated histidine (GROMOS name: HISH)
+parameter_set = gromos96
+! charge=1.00
+        |            H.3 
+       N^n.28-Hp.28   |
+          |           NR5.38--CR1n.24
+          |          /             |
+          CH1-CH2^-CR5n.05         |
+          |          \             |
+          |           CR1-----NR5p.31-H.3
+  On.38=CO^p.38   
+        |         

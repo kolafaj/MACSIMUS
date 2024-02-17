@@ -1,0 +1,71 @@
+peptide ace A3PT hisn ct1
+parameter_set = charmm22
+! nter ACE acetoamine group
+       HAvp.09
+        |
+HAp.09-CT3n.27-HAp.09
+        |
+        |    
+ On.51=C^p.51
+        |
+        | ! aminoacid A ALA alanine
+        NH1^n.47-Hp.31
+        |         HAvp.09
+        |        /
+HBvp.09-CT1p.07-CT3n.27-HAp.09
+        |         \
+        |         HAvp.09
+ On.51=C^p.51
+        |
+        | ! aminoacid A ALA alanine
+        NH1^n.47-Hp.31
+        |         HAvp.09
+        |        /
+HBvp.09-CT1p.07-CT3n.27-HAp.09
+        |         \
+        |         HAvp.09
+ On.51=C^p.51
+        |
+        | ! aminoacid A ALA alanine
+        NH1^n.47-Hp.31
+        |         HAvp.09
+        |        /
+HBvp.09-CT1p.07-CT3n.27-HAp.09
+        |         \
+        |         HAvp.09
+ On.51=C^p.51
+        |
+        |   HAvp.09  HAp.09 ! aminoacid P PRO proline
+        |        \  /                            
+        N^n.29---CP3     HAvp.09                              
+        |          \    /
+        |          CP2n.18
+        |          /     \
+HBvp.09-CP1p.02--CP2n.18  HA^p.09
+        |          /    \
+        |        HAvp.09 HAp.09
+  On.51=C^p.51
+        |
+        |     ! aminoacid T THR threonine
+        NH1^n.47-Hp.31
+        |          OH1vn.66--Hvp.43
+        |         /
+HBvp.09-CT1p.07--CT1p.14-HAp.09    
+        |         \          
+        |          CT3vn.27--HAvp.09
+ On.51=C^p.51         /   \        
+        |         HAvp.09  HAp.09  
+        |                    Hp.32        HR1p.13 ! aminoacid H HIS histidine (uncharged with proton on ND1), charmm name HSD
+        NH1^n.47-Hp.31        |          /
+        |        HAvp.09     NR1n.36--CPH2p.25
+        |        |          /            |
+HBvp.09-CT1p.17--CT2n.09--CPH1n.05       |
+        |        |          \            |
+        |        HAvp.09     CPH1p.22--NR2n.70
+OBn.52=CD^p.63                |
+        |                   HR3p.10
+        OSn.34
+        |
+HAp.09-CT3^n.14--HAp.09
+        |
+       HA^p.09

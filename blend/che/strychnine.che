@@ -1,0 +1,23 @@
+strychnine
+! chiralities not defined - try to change them to find the minimum energy
+
+              HA HA       HA
+               \ |        /
+                CT-------CT-HA
+                |   HA    | 
+                |   |     |    
+HA   HA         |  CT----NP   HA
+|     |         | /  \     \ /
+C6R--C6R--C6R---CT   CT-HAv CT-HA
+|           |    | HA |\    |
+|           |    |/   | HAv |
+C6R--C6R--C6R    CT  CT-----CUA1
+|     |      \  / \ / \     |
+HA   HA       NP   CT  HA   CUA1-HA
+              |    | \       |
+              |    |  HA     |
+        On.5-C.5  CT.2-OEn.4-CT.2
+               \  / \        |   \
+                CT  HA       HA   HA
+               / \
+              HA HA

@@ -1,0 +1,11 @@
+nter ACE acetoamine group
+parameter_set = charmm22
+! charge=0.00
+
+       HAvp.09
+        |
+HAp.09-CT3n.27-HAp.09
+        |
+        |    
+ On.51=C^p.51
+        |

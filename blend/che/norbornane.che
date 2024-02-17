@@ -1,0 +1,16 @@
+molecule norbornane
+
+   HAv                  HAv
+   |                    |
+HA-CT------CT----------CT-HA
+   |       | \         |
+   |       |  \  HA^^  |
+   |       |   \ |     |
+   |       |    CT^^   |
+   |       |    /|     |
+   |       |   / HA^   |
+   |       |  /        |
+   |       | /         |
+HA-CT------CT----------CT-HA
+   |                   |
+   HAv                 HAv

@@ -1,0 +1,13 @@
+aminoacid E GLU glutamic acid protonated
+parameter_set = gromos96
+! charge=0.00
+        |              
+       N^n.28-Hp.28         
+          |              On.38
+          |             /
+          CH1-CH2^-CH2-COp.53
+          |             \         
+          |              OHn.548-HO.398
+ On.38=CO^p.38                      
+        |                      
+        |                      

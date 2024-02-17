@@ -1,0 +1,12 @@
+aminoacid L LEU leucine
+parameter_set = charmm21
+! charge=0.00
+        |
+        NP^n.35-Hp.25
+          |                 CH3E
+          |                /
+          CH1E.1--CH2E-CH1E^
+          |                \
+          |                 CH3E
+  On.55=C^p.55     
+        |         

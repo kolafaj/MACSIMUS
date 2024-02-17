@@ -1,0 +1,14 @@
+aminoacid P PRO proline
+parameter_set = charmm22
+! charge=0.00
+        |   HAvp.09  HAp.09
+        |        \  /                            
+        N^n.29---CP3     HAvp.09                              
+        |          \    /
+        |          CP2n.18
+        |          /     \
+HBvp.09-CP1p.02--CP2n.18  HA^p.09
+        |          /    \
+        |        HAvp.09 HAp.09
+  On.51=C^p.51
+        |

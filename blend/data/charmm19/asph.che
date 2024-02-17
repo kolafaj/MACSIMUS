@@ -1,0 +1,12 @@
+aminoacid E GLU glutamic acid protonated
+parameter_set = charmm19
+! charge=0
+        |
+        NH1^n.35-Hp.25
+          |                OH1n.4-H.25
+          |                /
+          CH1E.1--CH2E^-C.7
+          |               \
+          |                On.55
+ On.55=C^p.55
+        |

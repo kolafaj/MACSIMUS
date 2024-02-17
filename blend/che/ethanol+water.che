@@ -1,0 +1,12 @@
+ethanol + water
+parameter_set = charmm21
+
+   HA HA
+    |  |
+HA-CT-CT.25
+    |  |  \
+   HA HA   OTn.65-HO.4
+            HT.417
+             /           
+HT.417^--OWn.834
+

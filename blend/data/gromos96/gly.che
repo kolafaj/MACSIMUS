@@ -1,0 +1,12 @@
+aminoacid G GLY glycine
+parameter_set = gromos96
+! charge=0.00
+        |
+       N^n.28-Hp.28
+          |      
+          |      
+          CH2
+          |      
+          |      
+ On.38=CO^p.38
+        |

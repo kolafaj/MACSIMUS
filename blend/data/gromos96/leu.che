@@ -1,0 +1,12 @@
+aminoacid L LEU leucine
+parameter_set = gromos96
+! charge=0.00
+        |       
+       N^n.28-Hp.28
+          |          CH3^
+          |          /
+          CH1--CH2^-CH1
+          |          \
+          |          CH3
+ On.38=CO^p.38 
+        |       

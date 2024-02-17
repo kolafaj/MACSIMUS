@@ -1,0 +1,12 @@
+aminoacid T THR threonine
+parameter_set = charmm21
+! charge=0.00
+        |
+        NP^n.35-Hp.25
+          |             OTvn.65-HOv.4
+          |            /
+          CH1E.1--CH1E.25
+          |            \
+          |            CH3Ev
+ On.55=C^p.55
+        |

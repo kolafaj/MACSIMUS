@@ -1,0 +1,8 @@
+molecule ethylene
+
+ HA          HA
+   \        /
+    CUA1-CUA1
+   /         \
+ HA          HA
+

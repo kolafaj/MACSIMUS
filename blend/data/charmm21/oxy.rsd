@@ -1,0 +1,9 @@
+cter OC (oxygen at the C-end of aminoacid residue)
+
+parameter_set = charmm21
+number_of_atoms = 1
+! charge=-0.57
+
+atoms
+! i  atomid  atomtype charge chiral nbonds bound-index
+  0  OH      OC       -0.57  0      0

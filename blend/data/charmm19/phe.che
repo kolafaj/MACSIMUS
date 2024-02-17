@@ -1,0 +1,12 @@
+aminoacid F PHE phenylalanine
+parameter_set = charmm19
+! charge=0.00
+        |    
+        NH1^n.35-Hp.25
+          |               CR1E-CR1E
+          |              /        \
+          CH1E.1--CH2Ev-C         CR1E
+          |              \        /
+          |               CR1E-CR1E
+ On.55=C^p.55
+        |         

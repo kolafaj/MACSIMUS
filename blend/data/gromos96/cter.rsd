@@ -1,0 +1,11 @@
+cter COO- (C-terminal patch for aminoacids)
+
+parameter_set = gromos96
+number_of_atoms = 3
+! charge=-1
+
+atoms
+! i  atomid  atomtype charge chiral nbonds bound-index
+  0  C:C     CO        0.27   0      2      1 2
+  1  OC1:O   OM       -0.635 0      1      0
+  2  OC2     OM       -0.635 0      1      0

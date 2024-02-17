@@ -1,0 +1,7 @@
+cter COO- (standard C-terminus)
+parameter_set = charmm21
+! charge=-1.00
+        |
+      C^p.14    !<<< On.55=C^p.55 of previous aminoacid be replaced
+      /    \
+ OCn.57   OCn.57

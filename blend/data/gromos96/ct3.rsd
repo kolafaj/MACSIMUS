@@ -1,0 +1,11 @@
+cter CT3 N-Methylamide C-terminus
+
+parameter_set = gromos96
+number_of_atoms = 3
+! charge=0.00
+
+atoms
+! i  atom-id  a-type charge chir nbonds bound_atoms
+  0 HNT        H     0.2800  0    1  1
+  1 NT         N    -0.2800  0    2  0 2
+  2 CAT,CH3,CA CH3   0.0000  0    1  1

@@ -1,0 +1,13 @@
+nter PRO protonated (terminal patch for PRO instead of NTER)
+
+parameter_set = charmm21
+number_of_atoms = 5
+! charge=1
+
+atoms
+! i  atomid  atomtype charge chiral nbonds bound-index
+  0  N:N     NT       -0.20    0    4      1 2 3 4
+  1  NH1     HC       0.35     0    1      0
+  2  NH2     HC       0.35     0    1      0
+  3  CD:CD   CH2E     0.25     0    1      0
+  4  CA:CA   CH1E     0.25     1    1      0

@@ -1,0 +1,17 @@
+aminoacid D ASP aspartic acid (negatively charged)
+
+parameter_set = charmm21
+number_of_atoms = 9
+! charge=-1
+
+atoms
+! i  atomid  atomtype charge chiral nbonds bound-index
+  0  C       C        0.55     0    2      1 6 
+  1  CA      CH1E     0.10     1    3      5 0 2 
+  2  CB      CH2E     -0.16    0    2      1 3 
+  3  CG      C        0.36     0    3      2 7 8 
+  4  H       H        0.25     0    1      5 
+  5  N       NP       -0.35    0    2      1 4 
+  6  O       O        -0.55    0    1      0 
+  7  OD1     OC       -0.60    0    1      3 
+  8  OD2     OC       -0.60    0    1      3 

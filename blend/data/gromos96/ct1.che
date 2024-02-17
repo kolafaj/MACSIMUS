@@ -1,0 +1,7 @@
+cter CT1 - methylated C-terminus
+parameter_set = gromos96
+! charge=0.00 // charges of -O-CH3 just guess
+        |
+        OEn.2
+        |
+       CH3p.2

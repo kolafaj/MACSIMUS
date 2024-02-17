@@ -1,0 +1,12 @@
+aminoacid K LYS lysine
+parameter_set = charmm21
+! charge=1.00
+        |
+        NP^n.35-Hp.25
+          |                                HC^.35
+          |                                |
+          CH1E.1--CH2Ev-CH2E-CH2E-CH2Ev.25-NTn.3-HCv.35
+          |                                |
+          |                                HC^.35
+ On.55=C^p.55
+        |

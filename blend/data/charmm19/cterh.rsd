@@ -1,0 +1,11 @@
+cter COOH (C-terminal patch for aminoacids protonated)
+
+number_of_atoms = 4
+! charge=0
+
+atoms
+! i  atomid  atomtype charge chiral nbonds bound-index
+  0  C:C     C        0.7   0      2      1 2
+  1  OC1:O   O        -0.55  0      1      0
+  2  OC2     OH1      -0.4  0      2      0 3
+  3  HC      H        0.25     0    1      2 

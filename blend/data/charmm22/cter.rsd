@@ -1,0 +1,11 @@
+cter CTER COO- (C-terminal patch for aminoacids)
+
+parameter_set = charmm22
+number_of_atoms = 3
+! charge=-1.00
+
+atoms
+!i  id   type charge chir nb bonded_atoms
+ 0  C:C   CC    0.34   0  2  2 1
+ 1  OC1,OT1:O OC   -0.67   0  1  0
+ 2  OC2,OT2   OC   -0.67   0  1  0

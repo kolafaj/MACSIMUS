@@ -1,0 +1,9 @@
+molecule CAL (Ca++)
+
+parameter_set = charmm22
+number_of_atoms = 1
+! charge=2.00
+
+atoms
+!i  id   type charge chir nb bonded_atoms
+ 0  CAL   CAL   2.00   0  0 

@@ -1,0 +1,7 @@
+cter CT2 - amidated C-terminus
+parameter_set = gromos96
+! charge=0.00
+        |
+       NTn.83
+       / \
+   H.415  H.415

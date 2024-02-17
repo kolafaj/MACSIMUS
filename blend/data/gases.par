@@ -1,0 +1,68 @@
+! https://doi.org/10.1080/00268978400101351
+! NB: https://cccbdb.nist.gov/exp2x.asp?casno=7727379 N2=1.0977
+
+all_dihedrals=1  ! all dihedrals
+ar_dih_limit=1   ! inclusion limit for dihedrals in aromatic rings
+all_impropers=2  ! one improper per central atom, can swap central:out (NEW)
+column_X=0       ! column X disabled (all atoms match = all X=1)
+comb_rule=1      ! sqrt combining rule for LJ energies, diameters additive
+factor14=0.5     ! multiplicative factor for 1-4 interactions
+distance14=4     ! these interactions are really 1-4
+LJsigma=1        ! LJ sigma given
+;
+
+atoms
+!
+! X : if the atom can match wildcard atom X in the tables of dihedrals
+!     and impropers
+! A : if the atom is a member of an aromatic ring
+! mass : atomic mass in g/mol
+! shell : el shell (for MD aux charge) (WARNING: a sort of random numbers)
+! col : color type (differing from chem. are M=metal, X=halogen, Z=rare gas)
+!
+!i name  X A    mass  Z col description
+1  O    0 0  15.9994  8 O  SPCE water oxygen
+2  H    0 0   1.008   1 H  SPCE water hydrogen
+3  N    1 0  14.00670 7 N  Nitrogen
+
+Lennard-Jones
+!       alpha     EMIN         Rmin     These columns used for
+!       [A^3]  (kcal/mol)      (A)      1-4 interactions
+! SPC/SPCE: ( 0.840 -0.1554  3.166 )
+! SPC[/E] by orig. Berendsen:
+! (.3428/r)^12-(.37122/r)^6 , kJ/mol and nm
+! sigma_vdw=3.55321859 eps=0.65016958 kJ/mol = 0.155394259 kcal_th/mol
+O     0.840 -0.15539426 3.16555780
+H     0.044  0.000000   1.7
+N     1     -0.072876717 3.3078
+
+bonds
+H	O		555  1.00	! K only for blend
+N       N               1000 1.0889278
+! N       N               1000 1.0977 ! newer
+
+angles
+H	O	H	55   109.47122  ! K only for blend
+
+dihedrals
+
+impropers
+
+nbfixes
+
+waters
+! must be in standard order recognized by cook
+SPCE  3 H .4238 H .4238 O -.8476
+SPC   3 H .41   H .41   O -.82  
+! recommended SPCE.che:
+! water SPC/E water model
+! parameter_set = sealb
+! Hp0.4238 Hp0.4238
+!     \    /
+!      On.8476
+
+! water SPC water model
+! parameter_set = sealb
+! Hp0.41   Hp0.41
+!     \    /
+!      On.82

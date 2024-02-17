@@ -1,0 +1,15 @@
+aminoacid P PRO proline  
+
+parameter_set = charmm21
+number_of_atoms = 7
+! charge=0
+
+atoms
+! i  atomid  atomtype charge chiral nbonds bound-index
+  0  C       C        0.55     0    2      1 6 
+  1  CA      CH1E     0.10     1    3      5 0 2 
+  2  CB      CH2E     0.00     0    2      1 4 
+  3  CD      CH2E     0.10     0    2      5 4 
+  4  CG      CH2E     0.00     0    2      2 3 
+  5  N       NX       -0.20    0    2      1 3 
+  6  O       O        -0.55    0    1      0 

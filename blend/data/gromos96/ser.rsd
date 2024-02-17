@@ -1,0 +1,16 @@
+aminoacid S SER serine
+
+parameter_set = gromos96
+number_of_atoms = 8
+! charge=0
+
+atoms
+! i  atomid  atomtype charge chiral nbonds bound-index
+  0  C       CO       0.38     0    2      1 6
+  1  CA      CH1      0.00     1    3      5 0 2
+  2  CB      CH2      0.15     0    2      1 7
+  3  H       H        0.28     0    1      5
+  4  HG      H        0.398    0    1      7
+  5  N       N        -0.28    0    2      1 3
+  6  O       O        -0.38    0    1      0
+  7  OG      OH       -0.548   0    2      2 4

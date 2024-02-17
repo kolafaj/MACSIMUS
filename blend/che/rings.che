@@ -1,0 +1,26 @@
+rings.che
+! chained bi-cyclo-dekane
+        HA  HA  HAv  HA HA^  HA
+        |     \ |    | /     |
+     HA-CT-----CTv   CT^-----CT-HA
+        /        \   /        \
+       /          \ /          \
+HAv   /            +    HAv     \    HA
+  \  /            / \  /         \  /
+HA-CT       HA^-CT^  CTv-HAvv     CT-HAv
+    |          / |     |          |
+HAv |        HA^ |     |  HA^     |  HA
+  \ |            |     | /        | /
+   CT        HA-CT-HA^ CT         CT
+  / |            |     | \        | \
+HA  |        HAv |     |  HAv     |  HAv
+    |          \ |     |          |
+HA-CT       HAv-CTv  CT^-HA^^     CT-HA
+  /  \            \ /  \         /  \
+HAv   \            +    HA^     /    HAv
+       \          / \          /
+        \        /   \        /
+     HA-CT-----CT^   CTv-----CT-HA
+        |     / |    | \     |
+        HAv  HA HA^  HA HAv  HA
+

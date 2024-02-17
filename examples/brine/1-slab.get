@@ -1,0 +1,11 @@
+! NSLOTS=4 cookgcp0slcP1 NaCl.ble slab
+init="crystal"  ! just to pack molecules
+! init="bias" cannot be used because of exp-6 sigularity
+thermostat="Berendsen"
+tau.T=0.5       ! time constant
+center.K[2]=0.2 ! force center the slab [K/AA2]
+no=500          ! # of cycles
+;
+center.K[2]=0   ! turn off the force
+no=1000;
+

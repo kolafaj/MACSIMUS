@@ -1,0 +1,29 @@
+x=31.4
+L[0]=x L[1]=x L[2]=x*2.6 ! box size
+N[0]=12       ! number of cations 
+N[1]=12       ! number of anions
+N[2]=1000     ! number of waters
+tau.rho=1     ! box adjustment speed [ps]
+el.grid=256   ! splines for electrostatics will use grid 100/AA2
+No.cell[0]=8  ! for the linked-cell list method
+              ! No.cell[0] should be a multiple of NSLOTS
+No.cell[1]=8  ! for the linked-cell list method
+No.cell[2]=20 ! for the linked-cell list method
+cutoff=13     ! elst cutoff
+LJcutoff=12   ! LJ cutoff
+T=298         ! temperature [K]
+!scf.omega=0.718 ! SCF mixing, to be optimized
+scf.eps=10    ! threshold of dipole reiteration, to be optimized
+noint=6       ! MD steps/cycle
+h=0.01/noint  ! timestep 
+corr=0        ! no homogeneous cutoff correction of the potential
+slab.geom="slab" ! slab geometry
+slab.K=16     ! number of k-vectors for slab cutoff correction 
+slab.grid=250 ! the grid for z-profiles
+slab.sp=-9    ! all molecules used to center the slab for measurement
+slab.sym=-1   ! monitor symmetry of cation+anion
+slab.prt=21   ! print z-profiles: .site.AA-3.z, .cm.AA-3.z, .q.eAA-3.z
+el.corr="z"   ! Yeh-Berkowitz correction
+dt.prt=1      ! one line of info by 1 ps
+dt.plb=1      ! one frame if the trajectory (playback) written every 1 ps
+;

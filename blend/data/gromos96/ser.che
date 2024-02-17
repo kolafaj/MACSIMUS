@@ -1,0 +1,12 @@
+aminoacid S SER serine
+parameter_set = gromos96
+! charge=0.00
+        |
+       N^n.28-Hp.28
+          |         OHn.548-H.398
+          |         /    
+          CH1--CH2^.15
+          |      
+          |      
+ On.38=CO^p.38
+        |

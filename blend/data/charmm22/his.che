@@ -1,0 +1,12 @@
+aminoacid H HIS protonated histidine (charmm name: HSP)
+parameter_set = charmm22
+! charge=1.00
+        |                    Hp.44        HR2p.18
+        NH1^n.47-Hp.31         |          /
+        |        HAvp.09    NR3n.51--CPH2p.32
+        |        |          /          |
+HBvp.09-CT1p.07--CT2n.05--CPH1^p.19    |
+        |        |          \          |
+        |        HAvp.09    CPH1p.19--NR3n.51      
+  On.51=C^p.51                   |          \
+        |                    HR1p.13        Hp.44

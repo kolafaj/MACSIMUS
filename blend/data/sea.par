@@ -1,0 +1,133 @@
+! THIS IS OLD VERSION
+! see JC+SPCE.par for new version with all JC+SPCE ions and more
+! water + ions, approximate, inconsistent sources
+! FOR TEACHING PURPOSES ONLY!
+! Joung, Cheatham: J. Phys. Chem. B 2008, 112, 9020–9041 
+! SPCE water
+! Lorentz-Berthelot combining rule
+! other ions may be insonsistent with the Lorentz-Berthelot combining rule
+! [SD]=Smith, D. E.; Dang, L. X. J. Chem. Phys. 1994, 100, 3757.
+! [DE]=Deublein etal, JCP 136, 084501 (2012)
+! [D]=Dang, JACS 117,6954 (1995)
+! water: SPCE or SPC
+! added from CHARMM: AR KR XE
+
+all_dihedrals=1  ! all dihedrals
+ar_dih_limit=1   ! inclusion limit for dihedrals in aromatic rings
+all_impropers=2  ! one improper per central atom, can swap central:out (NEW)
+column_X=0       ! column X disabled (all atoms match = all X=1)
+comb_rule=1      ! Lorentz-Berthelot: sqrt combining rule for LJ energies, diameters additive
+factor14=0.5     ! multiplicative factor for 1-4 interactions
+distance14=4     ! these interactions are really 1-4
+LJsigma=1        ! LJ sigma given, no vdW diameter
+;
+
+atoms
+!
+! X : if the atom can match wildcard atom X in the tables of dihedrals
+!     and impropers
+! A : if the atom is a member of an aromatic ring
+! mass : atomic mass in g/mol
+! shell : el shell (not needed here)
+! col : color type (differing from chem. are M=metal, X=halogen, Z=rare gas)
+!
+!i name   X A    mass    Z col description
+1  O      0 0  15.9994   8  O  water oxygen (SPC, SPCE)
+2  H      0 0   1.008    1  H  water hydrogen
+3  NASD   1 0 22.9898   11  M  Cation Na+ [SD] (sqrt comb.rule needed!)
+4  CLSD   1 0 35.45300  17  X  Anion Cl-  [SD] (sqrt comb.rule needed!)
+5  MG     1 0 24.305    12  M  Magnesium (++ ?) charmm21
+6  CA     1 0  40.080   20  M  Calcium   (++ ?) charmm21
+7  LI     1 0   6.941    3  M  Lithium    (+ ?) charmm21
+11 HE     1 0   4.00260  2  Z  Helium
+12 NE     1 0  20.179   10  Z  Neon
+13 AR     1 0  39.948   18  Z  Argon
+14 KR     1 0  83.80    36  Z  Krypton
+15 XE     1 0 131.29    54  Z  Xenon
+16 CLDE   1 0 35.45300  17  X  Anion Cl- [DE]
+17 NADE   1 0 22.9898   11  M  Cation Na+
+18 CLD    1 0 35.45300  17  X  Anion Cl- [D]
+19 NAD    1 0 22.9898   11  M  Cation Na+
+20 CR56   1 1 12.01100   6  C  Aromatic carbon-merged six membered rings
+21 HEX    1 0  4.00260   2  Z  Helium
+22 NEX    1 0 20.179    10  Z  Neon
+23 ARX    1 0 39.948    18  Z  Argon
+24 KRX    1 0 83.80     36  Z  Krypton
+25 XEX    1 0 131.29    54  Z  Xenon
+26 NA     1 0 22.9898   11  M  Cation Na+ [JC]
+27 CL     1 0 35.45300  17  X  Anion Cl- [JC]
+
+Lennard-Jones
+!       alpha     EMIN        LJsigma   These columns used for
+!       [A^3]  (kcal/mol)      (A)      1-4 interactions
+! SPC/SPCE: ( 0.840 -0.1554  3.166 )
+! SPC[/E] by orig. Berendsen:
+! (.3428/r)^12-(.37122/r)^6 , kJ/mol and nm
+! sigma_vdw=3.55321859 eps=0.65016958 kJ/mol = 0.155394259 kcal_th/mol
+O     0.840 -0.15539426 3.1655579
+H     0.044  0.000000   1.500000
+CL    3.6   -0.0127850  4.8304528 ![JC]
+NA    0.7   -0.3526418  2.1595385 ![JC]
+CLSD  3.6   -0.1        4.4
+NASD  0.7   -0.13       2.35
+CLDE  3.6   -0.19872371 4.441
+NADE  0.7   -0.19872371 1.89
+CLD   3.6   -0.1        4.401
+NAD   0.7   -0.1        2.584
+HEX   0.1   -0.02166    1.911 ! size  ?
+HE    0.1   -0.021215705 2.6459692 ! mbnexplorer - see below
+NEX    0.5  -0.0934     2.72
+NE   0.5    -0.083017976 2.761786  ! mbnexplorer - see below
+ARX   1     -0.23806843 3.405     ! LJ parms OK, polaris. not
+AR    1     -0.28364475 3.3854151 ! mbnexplorer - see below
+KRX   3     -0.3319     3.6705027 ! vdvR=2.060
+KR    3     -0.39664144 3.5635949 ! mbnexplorer - see below
+XEX   6     -0.5115     3.9240525 ! vdvR=2.2023  rare gases: K.E. Gubbins, in: K. Singer (Ed.), Statistical Mechanics, vol. 1, 1973.
+XE    6     -0.56037134 3.9199544 ! http://www.mbnexplorer.com/users-guide/c-parameters-some-interatomic-interactions/c1-noble-gas-atoms
+CA    0.00  -0.3353     3.1074547 ! 1.744  CHARMM
+MG    0.00  -0.4677     2.5640065 ! 1.439  CHARMM
+LI    0.025 -0.0676     1.636 !Aqvist, J.Phys Chem 95, 8021 (1990)
+! CR56  1.65  -0.0500     3.6348668 ! 2.040 CHARMM
+CR56  1.65  -0.0557     3.816371 ! J. Phys. Chem. C, 2015, 119 (37), pp 21664–21673,10.1021/acs.jpcc.5b03307
+
+bonds
+!arom atom         K[kcal/mol/A^2] r0
+H       O          555             1.00     ! K only for blend
+CR56    CR56       450.0           1.48
+
+angles
+H       O       H       51    109.47122  ! K only for blend
+CR56    CR56    CR56    70.0  108.0
+
+dihedrals
+X    CR56  CR56   X        3.1  2  180.0
+
+impropers
+CR56    X    X    CR56    90.0  0    0.0
+
+nbfixes
+! approx. by Boucek scaled by 0.98
+! site site  Emin[kcal/mol] sigmavdW[A]
+O NASD -0.13928851 2.6729149
+O CLSD -0.12216409 3.6574428
+O CR56 -0.093034726 3.4757651 
+! O-CR56 TO BE CHECKED, GUFF?
+!CR56  1.65  -0.0557     3.816371 ! J. Phys. Chem. C, 2015, 119 (37), pp 21664–21673,10.1021/acs.jpcc.5b03307
+!O     0.840 -0.15539426 3.1655579 ! SPCE GEOMETRIC RULE
+
+waters
+! must be in standard order recognized by cook
+SPCE  3 H .4238 H .4238 O -.8476
+SPC   3 H .41   H .41   O -.82
+! recommended SPCE.che:
+! water SPC/E water model
+! parameter_set = sea
+! Hp0.4238 Hp0.4238
+!     \    /
+!      On.8476
+
+! water SPC water model
+! parameter_set = sea
+! Hp0.41   Hp0.41
+!     \    /
+!      On.82

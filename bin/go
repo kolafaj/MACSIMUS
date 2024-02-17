@@ -1,0 +1,30 @@
+#!/bin/bash
+if [ $# -lt 1 ]; then 
+  echo "Execute a comand written in the first line after omitting"
+  echo "the first two characters (= comment). Call by:"
+  echo "  go FILE [FILE..]"
+  echo "The execution is delayed by 1 s for one argument"
+  echo "Asks for confirmation for more arguments"
+  echo "DOS-compatible (\r\n -> \n)"
+  echo "Examples:"
+  echo "  go simul?.get"
+  echo "See also:"
+  echo "  start starts s ss"
+  exit
+fi
+
+if [ $# == 1 ] ; then
+  head -n1 "$1" | sed 's/\r$//' | cut -c3-
+  echo "...will be executed in 1 s"
+  sleep 1
+  head -n1 "$1" | sed 's/\r$//' | cut -c3- | sh
+else
+  for f in "$@" ; do
+    head -n1 "$f" | sed 's/\r$//' | cut -c3-
+  done
+  echo "Enter to execute, Ctrl-C to stop"
+  read
+  for f in "$@" ; do
+    head -n1 "$f" | sed 's/\r$//' | cut -c3- | sh
+  done
+fi

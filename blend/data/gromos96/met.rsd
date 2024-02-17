@@ -1,0 +1,17 @@
+aminoacid M MET methionine  
+
+parameter_set = gromos96
+number_of_atoms = 9
+! charge=0
+
+atoms
+! i  atomid  atomtype charge chiral nbonds bound-index
+  0  C       CO       0.38     0    2      1 7
+  1  CA      CH1      0.00     1    3      6 0 2
+  2  CB      CH2      0.00     0    2      1 4
+  3  CE      CH3      0.00     0    1      8
+  4  CG      CH2      0.00     0    2      2 8
+  5  H       H        0.28     0    1      6
+  6  N       N        -0.28    0    2      1 5
+  7  O       O        -0.38    0    1      0
+  8  SD      S        0.00     0    2      4 3

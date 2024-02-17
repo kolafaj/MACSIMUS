@@ -1,0 +1,10 @@
+cation NA
+! total charge = 1
+
+parameter_set = undefined
+number_of_atoms = 1
+
+atoms
+! i Crad/atom-id  a-type  charge chir nbonds bound_atoms
+  0 M080/0-NA       NA    1.0000  0    0
+

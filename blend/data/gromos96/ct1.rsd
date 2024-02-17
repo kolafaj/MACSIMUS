@@ -1,0 +1,14 @@
+cter CT1 - methylated C-terminus
+
+parameter_set = gromos96
+! total charge = 0.000
+number_of_atoms = 4
+
+atoms
+! i  atom-id  a-type charge chir nbonds bound_atoms
+  0 OT1:O      O    -0.3800  0    1  1
+  1 C:C        CO    0.3800  0    2  0 2
+  2 OT2        OE   -0.2000  0    2  1 3
+  3 CT         CH3   0.2000  0    1  2
+
+

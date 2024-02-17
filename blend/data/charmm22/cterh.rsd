@@ -1,0 +1,12 @@
+cter COOH (C-terminal patch for aminoacids, protonated)
+
+parameter_set = charmm22
+number_of_atoms = 4
+! charge=0
+
+atoms
+!i  id   type charge chir nb bonded_atoms
+ 0  C:C   CD    0.72   0  2  2 1
+ 1  OC1:O OB   -0.55   0  1  0
+ 2  OC2   OH1  -0.61   0  2  0 3
+ 3  HC    H     0.44   0  1  2

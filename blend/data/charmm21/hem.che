@@ -1,0 +1,27 @@
+molecule   HEME 
+parameter_set = charmm21
+! charge=-2.00
+! WARNING: FE-NP bond changed in param file
+    OCn.5    OCn.5              OCn.5  OCn.5
+         \   /                     \   /
+          C.3                       C.3
+            |                        |
+      CH2En.1                      CH2En.1
+            |                        |
+      CH2E.04       C5R.04       CH2E.04
+            |      /      \         |
+        C5Rn.02-C5R.03   C5R.02-C5Rn.02
+            |     |          |      |       
+CH3En.04-C5R.02 N5Rn.18  N5Rn.18  C5R.02-CH3En.04
+             \   /  \      /  \    /
+           C5R.02    \    /    C5R.03
+              /       \  /         \
+         C5R.04      MFE.24      C5R.04
+              \       /  \         /
+            C5R.03   /    \    C5R.02
+             /   \  /      \  /    \
+CH3En.04-C5R.02 N5Rn.18  N5Rn.18 C5Rn.05-CUA2.03-CUA2n.1
+            |     |          |      |
+         C5Rn.05-C5R.02    C5R.03-C5R.02
+            |       \      /         |
+CUA2n.1-CUA2.03      C5R.04         CH3En.04

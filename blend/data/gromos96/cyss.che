@@ -1,0 +1,12 @@
+aminoacid C CYS cysteine (to bind to another CYS)
+parameter_set = gromos96
+! charge=0.00
+        |              
+       N^n.28-Hp.28         
+          |        
+          |            
+          CH1--CH2^--S--->  ! to another CYSS
+          |                
+          |          
+  On.38=CO^p.38                      
+        |                      

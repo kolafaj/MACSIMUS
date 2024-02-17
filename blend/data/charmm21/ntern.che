@@ -1,0 +1,11 @@
+patch NH2 (neutral N-terminal patch for all aminoacids but PRO and GLY)
+parameter_set = charmm21
+! charge=0
+
+    H.25  H.25
+       \  /
+       NP.6          !
+          |      !
+          |      !
+       CH2E.1----!>>> CH1E.1 side-chain of the following aminoacid
+          |

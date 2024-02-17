@@ -1,0 +1,12 @@
+aminoacid K LYS lysine
+parameter_set = charmm22
+! charge=1.00
+        |                                      
+        NH1^n.47-Hp.31                                
+        |        HAvp.09  HA^p.09  HAvp.09  HA^p.05     HCvp.33
+        |        |         |        |        |          /      
+HBvp.09-CT1p.07--CT2n.18--CT2n.18--CT2n.18--CT2p.21--NH3n.30--HC^p.33
+        |        |         |        |        |          \
+        |        HAvp.09  HA^p.09  HAvp.09  HA^p.05     HCvp.33
+  On.51=C^p.51                                    
+        |                                    

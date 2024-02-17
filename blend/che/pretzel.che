@@ -1,0 +1,34 @@
+molecule pretzel
+
+       HA            HA HA  HA             HA
+       |              | |   |              |
+   HA-CT^^------------CT^^ CTvv-----------CTvv-HA
+      |                \   / |             |
+  HA-CT^-HA             \ /  HA         HA-CTv-HA
+     |                   +                  |
+     |              HA  / \   HA            |
+     |               | /   \  |             |
+     |            HA-CTvv   CT^^-HA         |
+ HA-CT-HA            |        |          HA-CT-HA
+    |             HA-CT-HA HA-CT-HA          |
+ HA-CT-HA            |        |           HA-CT-HA
+    |             HA-CT^^   CTvv-HA           |
+ HA-CT-HA            | \   /  |            HA-CT-HA
+    |               HA  \ /   HA              |
+ HA-CT-HA                +                HA-CT-HA
+     |              HA  / \   HA             |
+     |               | /   \  |              |
+     |            HA-CTvv   CT^^-HA          |
+ HA-CT-HA             |       |           HA-CT-HA
+    |             HA-CT-HA HA-CT-HA           |
+ HA-CT-HA             |       |               |
+    |             HA-CT^^   CTvv-HA           |
+ HA-CT^-HA           | \   /  |            HA-CTv-HA
+     \              HA  \ /   HA              /
+      \                  +                   /
+       \                / \                 /
+     HA-CT^^----------CTvv CT^^-----------CTvv-HA
+        |             | |   | \             |
+        HA           HA HA  HA HA           HA
+
+

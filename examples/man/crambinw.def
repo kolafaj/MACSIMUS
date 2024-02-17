@@ -1,0 +1,15 @@
+! use this if the numbers of molecules are not given to blens:
+! N[0]=1   ! protein
+! N[1]=999 ! water
+T=310                 ! temperature in K
+thermostat="friction" ! Berendsen thermostat
+tau.T=0.1             ! time constant (start only)
+rho=1050              ! final density in kg/m^3 (this is the default)
+initrho=900           ! initial density
+tau.rho=1             ! typical time for initrho->rho condensing
+cutoff=15             ! electrostatic cutoff
+LJcutoff=12           ! Lennard-Jones cutoff
+equalize.cfg=0.8      ! equalize masses
+h=0.002               ! [ps] timestep (use 0.001 without equalization)
+noint=5               ! steps/cycle
+;                     ! end of data set

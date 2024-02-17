@@ -1,0 +1,24 @@
+aminoacid R ARG neutral arginine 
+
+parameter_set = charmm21
+number_of_atoms = 16
+! charge=0
+
+atoms
+! i  atomid  atomtype charge chiral nbonds bound-index
+  0  C       C        0.55     0    2      1 15 
+  1  CA      CH1E     0.10     1    3      11 0 2 
+  2  CB      CH2E     0.00     0    2      1 4 
+  3  CD      CH2E     0.10     0    2      4 12 
+  4  CG      CH2E     0.00     0    2      2 3 
+  5  CZ      C        -0.20    0    3      12 13 14 
+  6  H       H        0.25     0    1      11 
+  7  HE      H        0.30     0    1      12 
+  8  1HH1    HC       0.35     0    1      13 
+  9  2HH1    HC       0.35     0    1      13 
+  10 1HH2    HC       0.25     0    1      14 
+  11 N       NP       -0.35    0    2      1 6 
+  12 NE      NP       -0.40    0    3      3 7 5 
+  13 NH1     NC       -0.45    0    3      5 8 9 
+  14 NH2     NC       -0.30    0    2      5 10 
+  15 O       O        -0.55    0    1      0 

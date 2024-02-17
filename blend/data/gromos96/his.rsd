@@ -1,0 +1,21 @@
+aminoacid H HIS protonated histidine (GROMOS name: HISH)
+
+parameter_set = gromos96
+number_of_atoms = 13
+! charge=1
+
+atoms
+! i  atomid  atomtype charge chiral nbonds bound-index
+  0  C       CO       0.38     0    2      1 12
+  1  CA      CH1      0.00     1    3      9 0 2
+  2  CB      CH2      0.00     0    2      1 5
+  3  CD2     CR1      0.00     0    2      5 11
+  4  CE1     CR1      -0.24    0    2      10 11
+  5  CG      CR5      -0.05    0    3      2 10 3
+  6  H       H        0.28     0    1      9
+  7  HD1     H        0.30     0    1      10
+  8  HE2     H        0.30     0    1      11
+  9  N       N        -0.28    0    2      1 6
+  10 ND1     NR5      0.38     0    3      5 7 4
+  11 NE2     NR5      0.31     0    3      3 4 8
+  12 O       O        -0.38    0    1      0

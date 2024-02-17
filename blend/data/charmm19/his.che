@@ -1,0 +1,12 @@
+aminoacid H HIS protonated histidine (charmm19 name: HSC)
+parameter_set = charmm19
+! charge=1.00
+        |                   H.35
+        NH1^n.35-Hp.25       |
+          |                 NH1n.3--CR1E.45
+          |                /        |
+          CH1E.1--CH2E^.1-C.15      |
+          |                \        |
+          |                 CR1E.2--NH1n.3-H.35
+ On.55=C^p.55
+        |

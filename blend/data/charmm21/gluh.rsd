@@ -1,0 +1,19 @@
+aminoacid E GLU glutamic acid (protonated)
+
+parameter_set = charmm21
+number_of_atoms = 11
+! charge=0
+
+atoms
+! i  atomid  atomtype charge chiral nbonds bound-index
+  0  C       C        0.55     0    2      1 8 
+  1  CA      CH1E     0.10     1    3      7 0 2 
+  2  CB      CH2E     0.00     0    2      1 4 
+  3  CD      C        0.70     0    3      4 9 10 
+  4  CG      CH2E     0.00     0    2      2 3 
+  5  H       H        0.25     0    1      7 
+  6  HE      H        0.25     0    1      10 
+  7  N       NP       -0.35    0    2      1 5 
+  8  O       O        -0.55    0    1      0 
+  9  OE1     OAC      -0.55    0    1      3 
+  10 OE2     OT       -0.40    0    2      3 6 

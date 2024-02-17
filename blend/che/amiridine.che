@@ -1,0 +1,14 @@
+amiridine
+parameter_set=gromos
+
+             H.4     H.4
+               \     /
+                NTn.86
+                  |
+      CH2.14     CB.2        CH2.1
+     /      \    /   \      /     \
+  CH2n.04   CBn.34    CBn.18       \
+    |         |           |        CH2n.11
+  CH2.06     CB.51    CB.44        /
+     \      /    \     /   \      /
+      CH2.01     NR6n.8     CH2.07

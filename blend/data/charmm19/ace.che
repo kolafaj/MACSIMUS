@@ -1,0 +1,8 @@
+nter ACE acetoamide group
+parameter_set = charmm19
+! charge=0.00
+
+       CH3E
+        |    
+ On.55=C^p.55
+        |

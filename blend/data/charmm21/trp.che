@@ -1,0 +1,15 @@
+aminoacid W TRP tryptophan
+parameter_set = charmm21
+! charge=0.00
+! NOTE: different terms used to keep the rings planar - wrong vibrations
+        |         
+        NP^n.35-Hp.25
+          |                       C6REn.03
+          |                      /      \
+          CH1E.1--CH2E^-C5Rn.03-CR56.1   C6RE
+          |              |      |        |
+          |           C5RE.06 CR56n.04  C6RE
+          |               \    /  \    /
+          |           H.3-N5Rn.36  C6RE
+ On.55=C^p.55
+        |

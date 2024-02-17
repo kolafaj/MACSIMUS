@@ -1,0 +1,12 @@
+aminoacid X SAR sarcosine
+parameter_set = charmm21
+! charge=0.00
+        |
+        NP^n.25-CH3Ep.15
+          |
+          |
+          CH2E.1
+          |
+          |
+ On.55=C^p.55
+        |

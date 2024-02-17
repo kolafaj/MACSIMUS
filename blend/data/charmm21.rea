@@ -1,0 +1,53 @@
+! reaction patterns for proton bound to protein
+! do not change the order of lines in this file!
+
+! proton + neutral acid group:  H[+] + -COOH  ->  -COOH2[+]
+!
+!         OT--H          OT--H
+!        /              /
+! HP + -C        ->   -C
+!        \              \
+!         OAC            OT--H
+!
+! (1st H is not used in the reaction pattern - unique anyway)
+HP + OAC *C OT += H-.75 OT+.45 C+0 OT+.3 > -150
+
+! proton + carbonyl:  H[+] + >CO  ->  -COH[+]
+!
+!      \         \
+! HP +  C-O  ->   C-OT-H
+!      /         /
+!
+HP + O *C += H-.6 OT+.4 C+.2 > -200
+
+! proton + aminogroup:  H[+] + -NH2  -> -NH3[+]
+! to make the selection unique, it is written in 2 versions:
+! (1) H[+] + -CH2-NH2  -> -CH2-NH3[+]
+!
+!               H              HC
+!              /              /
+! HP + -CH2E-NP    -> -CH2E-NT--HC
+!              \              \
+!               H              HC
+!
+HP + NP H H CH2E = HC.35 NT-.3 HC.35 HC.35 CH2E.25 > -200
+
+! (2) H[+] + >CH1-NH2  -> >CH1-NH3[+]
+!
+!               H              HC
+!       \      /       \      /
+! HP +  CH1E-NP    ->  CH1E-NT--HC
+!       /      \       /      \
+!               H              HC
+!
+HP + NP H H CH1E = HC.35 NT-.3 HC.35 HC.35 CH1E.25 > -200
+
+! proton + acid (ionized): H[+] + -COO[-]  ->  -COOH
+!
+!         OC             OT--H
+!        /              /
+! HP + -C        ->   -C
+!        \              \
+!         OC             OAC
+!
+HP + OC *C OC = H.25 OT-.4 C.7 OAC-.55 > -250

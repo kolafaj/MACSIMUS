@@ -1,0 +1,13 @@
+cter CT1 - methylated C-terminus
+parameter_set = charmm21
+! charge=0.00
+        |
+      C^p.7     !<<< On.55=C^p.55 of previous aminoacid to be replaced
+      /    \
+ On.55    OSn.3
+            |
+         CH3E.15 ! charges guessed/JK
+
+
+
+

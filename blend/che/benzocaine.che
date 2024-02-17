@@ -1,0 +1,21 @@
+benzocaine (ethylaminobenzoate)
+parameter_set = charmm21
+
+   HA
+    |
+HA-CT-HA
+    |
+ HA-CT-HA
+    |
+    OSn.2
+    |
+    Cp.7=On.5
+    |
+    C6R--C6R-HA
+    |    |
+HA-C6R   C6R-HA
+    |    |
+HA-C6R--C6R-NP^n.5-Hp.25
+            |
+            Hp.25
+           

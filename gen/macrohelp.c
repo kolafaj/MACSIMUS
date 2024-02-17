@@ -1,0 +1,12 @@
+  H("=== MACROS ===","");
+  H("`",      "macro and repeat prefix");
+  H("--- syntax ---","");
+  H("`A@@@@`","define macro A, @@@@ = max 32 keys (not mouse)");
+  H("",       "26 macros A..Z are available");
+  H("`A`",    "erase macro A (=replace by empty string)");
+  H("`Ctrl-A","print macro to stderr (simple)");
+  H("`a",     "execute macro A");
+  H("`####@", "repeat character @ ####-times (max 9999)");
+  H("`####`a","repeat macro A ####-times");
+  H("`/",     "swap mid <-> right mouse button (useful without mouse)");
+  H("ESC",    "interrupt running macro");

@@ -1,0 +1,1818 @@
+               ==============================================
+                         MACSIMUS version file
+                   (with history, bugs, and to-do list)
+               ==============================================
+
+BUG AND TO-DO LIST
+^^^^^^^^^^^^^^^^^^
+KEY is priority or severity (0=unimportant, 9=important, X=critical)
+
+cook:
+  9 Langevin thermostat not sufficiently implemented, Gear only:
+    with -m4 gives *** Too low virial pressure vs. tensor accuracy
+    consider DOI: 10.1080/00268976.2012.760055
+  9 Andersen thermostat issues:
+    AndersenCM thermostat wrong for TIP4P (not SPC) -- why?
+    Andersen wrong for RTIL -u9999 (all bonds vibrating)
+    Andersen with elst. field suspicious
+    Andersen thermostat not as accurate as expected (No.f problem?)
+    low-T crashes if restarted with Andersen
+  9 Elst+mag field virial of force and pressure tensor unclear (never use NPT)
+  9 pressure/pressure tensor accuracy problems for PERSUM, -m4: see projects/tests/constrdyn/cangles/
+  9 Ewald issues:
+    parm(): "just calculate charges" should be cleaned!!!
+    Ewald autoset via error estimate out of order for polarizable molecules with no or small charges (ponder such molecules in elst. field)
+    Ewald error estimates use the assumption that charges are distributed randomly which overestimates (several times) the errors for dipolar models
+    Off-diag pressure tensor has not been tested for GAUSSIANCHARGES
+    +? consider Ewald cutoff=const*L for NPT
+  8 if LINKCELL is used on a few molecules, it crashes (see BUG in lc.C)
+  8 rehack the .cp creation logic in the .cpi spirit to avoid maincps.c and simmeas.c synchronization and empty column |M| or |J| if lag.M/lag.J not set
+  8 rescale="XY" does not work correctly with Lx,y,z set and tau.rho
+  8 reconsider slab autocenter by sites, not molecules
+  8 the kinetic pressure correction is not without caveats - do not trust the defaults and consult the manual
+  8 add pressure tensor components corresponding to the external elst field
+  7 NPT + diffusivity/SF should be checked again (perhaps OK for cube only)
+  6 POLAR: improve numerical errors: see locEnel-README.txt
+  6 tau.sat<0 cannot be started with init=2 because it is changed to init=1 in a wrong place, or the order of setup is wrong
+  6 Gear+Nose does not survive direct start, must (a few cycles) run Berendsen first
+  5 parallelized structure factor probably out of order
+  5 k-vector initialized in Ewald even w/o charges - crash for dilute systems
+  5 cutelst Ewald unnecesarily initialized, with alloc problems
+  5 SLAB: (?) vdrift in x,y not autoset - doublecheck!
+  5 POLAR elst energy/forces rounding problems (<.1K/charge) for shell=1000
+  4 cutelst requires PRESSURETENSOR for only shape change (tau.rho)
+  3 writing plb may be shifted by h or so for long runs (1us) - rounding problems
+  3 keyword LJ in SIMNAME.cpi out of order (in most versions)
+  3 extend Rgyr to the whole config. (cf. mXsection,cXsection), doublecheck Rgys vs. moment of inertia
+  3 cutelst: should choose which pressure to use for barostat
+  3 add ~M^2 term to energy also in non-Ewald
+  2 make 14 inclusion in rdf switchable (now: 14=on in plain version, 14=off in link-cell list)
+  2 omit 1-4 at all if not needed (e.g., distance14=0)
+  2 key="sort+z" problems, use sort="z"
+  2 clean the free version (misleading info about boxes...)
+  2 clean simcg (allocate M in bigger chunks)
+  2 omit M/J from .cp as default?
+  1 siminit: loop (n,0,option('m')+3) sdsralloczero(a[n],i): 3 too many?
+  1 should warn if positive Emin in ble-file
+  1 improve Emax for debug pot -v31
+  1 double vector[4] support? (better cache usage, but speed gain ~1% only)
+  1 is it necessary to call rhs at init if Verlet?
+  1 LJcutoff=0 should turn off LJ (workaround: use option -j#)
+  ? technical problem: calc.c uses rndgen.c
+  ? virtual volume change for rescale!="xyz" and constrained model? Use kinetic pressure tensor components?
+  ? it happended that one zero-length cycle was executed after stop was reached, but I cannot reproduce it anymore...
+  ? QQTAB and qtype&4 optimization (for BK3+ions)
+  ? problem of large noise in Jx,Jy,Jz caused by water - split measurements?
+  ? unroll intermol() for m1==m2 and m1!=m2 ?
+  ? LJ cutoff/constrained models/small boxes and the virtual volume change method
+  ? LJ cutoff and virtual volume change small boxes
+  = WARNINGs *** box has changed by >5% (log-scale) and k-vectors remain unchanged and  *** cutoff=11.000000 exceeding minL/2=10.000000 by 10.00% unnecessarily printed even if no charge
+  = doublecheck the Yeh-Berkowitz correction (now in all 3 directions, equivalent to eps'=0)
+  = thermostat="NPT" rescale clash when started from init=3
+  = sometimes enthalpy = internal energy
+  = Selected #defines: printed to stderr is not the same as printed to prt
+  - when rescaling (load.n[]), automatic cutoff determination is incorrect (will not be fixed but noted in the manual)
+  - automatic corr setup fails if thermostat/barostat changed within one run (e.g., Berendsen -> NPT) - noted in the manual, will not be fixed
+
+blend:
+  8 tetrahedral dependants => 5 bonds (one missing)
+  8 implement Gaussian charges
+  7 "shake" with "dependants" not supported
+  7 Gaussian charges not supported
+  6 hot keys ,; with -b0/-a0 change the number of steps; remedy: <Esc> sd=999; <Enter>
+  5 warn about positive Emin in nbfixes
+  4 extend plb2plb also to mol and gol files
+  3 blend: more fool-proof logic if .che changes (check time stamp?)
+
+other:
+  9 change home-made int4.h into standard stdint.h
+  7 `makepept charmm22 ace G ct1' incorrectly replaces CT2 by CT1 and charge in G
+  5 showcp -c -l - blocking not needed, -c strange printout, also Cov
+  5 showcp change int to unsigned to allow for 2^32-1 records (not 2^31-1)
+  5 showcp ignores column number with -a
+  4 showcp does not read .cpz with -f -t (full range is OK)
+  3 water (hoh) translated into internal name (TIP3P) and TIP3P.mol interferes with molcfg. Workaround: use the model names like TIP3P, not hoh etc.
+  3 show: -@ out of order, the follow mode fails
+  ? random numbers: Mersenne Twister instead of Ziff?
+  ? pgcc does not compile random numbers
+  ? show shows last frame as empty for old plb format
+  = cppak crash
+
+HISTORY
+^^^^^^^
+  !! dangerous bug fixed
+  ! bug fixed
+  + feature added
+  * feature changed
+  - feature removed
+
+
+********** Posted to GitHub **********
+
+examples/{edu,NPT,brine} added.
+
+cook 3.6s:
+  * default slab.geom changed to 0, to suppress warnings if a SLAB version is used for a cubic box
+
+makemake:
+  * metamake renamed to metamake.mmk, command !private added
+
+plot 2.0t:
+  ! kill all button wrong info fixed
+
+---------------------------------------------------------------------------
+
+cook 3.6r:
+  ! wrong enthalpy for NVT,NVE fixed
+  ! control of charged system and el. background for FREEBC and STARS fixed
+
+showcp V2.0f:
+  ! bug of V2.0e (selection of columns) fixed
+  ! cppak memory bug fixed
+
+cook 3.6q:
+  ! Saving of plb moved BEFORE removing a molecule (see SLAB, slab.out)
+    Thus, the molecule being removed is present in the last frame
+    Good for dt.plb=0
+
+plot 2.0s:
+  ! missing column 2 filled by the prev value in plot file (w/o :)
+
+ev,evu:
+  * modulo is now @, not ` (in tabproc, modulo is %)
+
+showcp V2.0e:
+  *- option -z extended, -e removed, lin.regr. of Etot removed
+
+cook 3.6p:
+  + option -b changed, the default is now to test SIMNAME.stp every 15 s
+
+cook 3.6o:
+  + Hoover NPT (the total energy looks OK, but has not been tested)
+
+cook 3.6n:
+  + external forces by calling Gaussian
+
+blend 2.4e:
+  ! option -b (could not minimize)
+  ! metamake with exp-6,busing now OK (not fool-proof)
+  - legacy DOS, FAT, Imworking() removed
+
+cook 3.6m:
+  + with SLAB, slab.out: kinetic properties of the evaporated molecule calculated
+  ! missing drifts.c added
+  + (GUI) font # 4 added (not used in MACSIMUS)
+
+cook 3.6l:
+  + magnetic dipole implemented
+  + Pcfg (see variable virial) reported in convergence profile
+  ! structure slab_s shifted frame (=> slab-thermostat turned wrogly on)
+  ! CP record bugs fixed (FREEBC shifted frame, bad size determined)
+  ! measurement of integrals of motion rehacked,
+    drift correction and measurements separated
+  ! P unit in protocol (by dt.prt), other instances were OK
+
+cook 3.6k:
+  + magnetic field implemented for moving charges
+  + lag.lM and lag.aM added
+  + option -k0 added
+
+show 2.2j
+  * hotkey '0' changed into the prefix of 2 decimal digits
+
+cook 3.6j:
+  ! bug in Berendsen barostat and MTK anisotropic (introduced in V3.6g)
+  ! bug missing columns in SIMNAME.cp
+
+rdfg 10/2022:
+  ! bug (write to closed file) fixed
+
+show 2.2i:
+  - endian change for match (-m) removed, the same for plbmatch.c
+
+cook 3.6i:
+  ! z-profile of Gaussian charges fixed
+  * off-diagonal pressure tensor for dependants re-checked (cf. norm.c, macros above depend_f)
+
+cook 3.6h:
+  * Gear's integration upgraded:
+  - development code partially removed
+  + Janek's version added
+  ! POLAR support fixed (although ASPC+Verlet is generaly recomended)
+  + Tests added to the linked-cell list method to catch a particle out of box
+  ! bugs (bad pressure units) fixed
+
+cook 3.6g and utilities:
+  - legacy cubrt() eventually hard-replaced by cbrt()
+  - obsolete REDUNITS switch removed
+  * P vs Ptens logic changed:
+  + variable `virial' added, pressures reconsidered and cleaned
+  ! atomdist and plbcheck fixed
+
+cook 3.6f:
+  ! Ballenegger-Arnold-Cerda correction (Yeh-Berkowitz for charged system
+    compensated by background) added
+
+cook 3.6e:
+  ! versions c,d (pair sums, not linked-cell-list) elst energy not included in total energy
+
+cook 3.6d:
+  + unsplit added
+  ! POLAR + cprof.c fixed
+
+cook 3.6c:
+  ! bug (POLAR density profiles, introduced recently) fixed
+
+makemake:
+  * This legacy code was simplified:
+    - DOS support removed
+    - home is allowed to constain spaces (and some similar characters),
+      this is useful under WSL
+
+cook 3.6b:
+  ! SHARPCUTOFF fixed (wall for metal not checked, likely wrong)
+  + ANCHOR improved
+
+showcp 2.0c:
+  + option -z added
+
+cook 3.6a:
+  - unused and obsolete switch #define COOK removed
+  * some polishing
+  * measuring dipole moments cleaned, manual updated
+  + ANCHOR extended to CM in selected direction and CM of all
+    molecules not already anchored
+  * default equalize.sp changed to negative big number = whole configuration
+    equalized, the former default (0) equalized only species 0
+
+cook 3.5i:
+  !! missing initialization of shift,vshift (results undefined):
+     (just by chance they contained numbers << 0)
+  + Ewald background added, el.bg and el.epsq added
+  * negative option -q now denotes negative charge scaling,
+    to redistribute charges use el.bg=2
+  + removing molecules in the slab,trickle,droplet geometry:
+    slab.out, removemol.n
+  * default -r1 changed into -r2
+  ! call to molcfg is now performed after reading N[] so that the
+    mol-file matches the plb-file (cf. load.N=4)
+  ? placement of initNo likely fixed, to be doublechecked (see V3.6a)
+
+cfg2asc:
+  + Now various info on cfg-files is extracted and printed
+
+cook 3.5h:
+  + radial and cylindric density profiles, see variable slab.geom
+
+showcp 2.0b:
+  ! linear regression uses t=DT*n, not n
+
+cook 3.5g:
+  * the kinetic pressure correction info improved
+  ! kurtosis bug with kinetic pressure correction (fixed)
+
+cook 3.5f:
+  ! (not harmful) too long lag for some quantities
+
+show 2.2h:
+  ! option make animated GIF added
+
+cook 3.5e:
+  ! slab energy corection from z-profile fixed (likely never useful)
+  * code for surface tension cleaned a bit
+
+cook 3.5d:
+  + option -d-# added (FREEBC only)
+
+utilities:
+  + most filters as tabproc, sumetc, ev now accept environment variable FMT
+    for the numerical format.  The default is %.8g.  To be extended...
+
+cook 3.5c:
+  ! the last cluster was omitted in x-section calculations and periodic
+    cluster detection - fixed
+
+cook 3.5b:
+  ! linking duplicate of cl fixed
+  ! periodic cluster count fixed
+  * some compiler warnings suppressed by unnecessary added code
+
+plot,blend,show,jkv:
+  + new version of fullscreen (e.g., show -gf) and
+    X-geometry extensions (see help (G)eometry)
+
+cook 3.5a:
+  ! units polished
+  + groups added, partial support for TCF of M and J in groups
+  + export of M and J by coordinates and groups to .cp (noint=1 recommended)
+  + group[] added to data
+  * lag.cond renamed to lag.J, lag.visc renamed to lag.Pt
+  * lag.M added
+
+cook 3.4r:
+  + cl.mincluster added
+
+blend V2.4d:
+  ! ar_dih_limit=-1 caused repeating aromatics=dihedrals in some cases
+    (but the same with gromos96), see blendgen find V2.4d
+
+blend V2.4c:
+  + on hotkey E = "info", energy printed also on screen
+
+UTILITIES
+  + oneline, line, molren added
+
+cook 3.4q:
+  ! export Nose-Hoover xi shifted time fixed
+
+cook 3.4p:
+  + export Nose-Hoover lambda added
+
+cook 3.4o:
+  ! small fixes
+
+cook 3.4n:
+  + export of positions of Drude charges (SIMNAME.dlb)
+  + true charge density profile for Gaussian charges
+
+cook 3.4l:
+  ! In NPT, enthalpy was calculated using the configurational pressure instead of
+    parameter P. (NPT is recognized by nonzero tau.P.)
+    Var(H) is meaningful with thermostat="NPT" only.
+    Caveat: not well documented in the manual.
+cook 3.4k:
+  ! organizational bug PERSUM in info (mainhlp) and cook/configure.sh fixed
+  ! bad print of vshift fixed
+
+cook 3.4j:
+  + NPT documentation improved
+
+cook 3.4i:
+  ! Epot reported by cook -l had not contained En.el - fixed
+
+show 2.2g, utilities
+  + imperfect ad hoc support for cook -n4, to be extended
+
+cook 3.4h:
+  ! bug in file name with option -n fixed (.plb was renamed to .plb~)
+  + -n upgraded
+
+cook 3.4g:
+  + Eelst[] renamed to el.E[]
+  + oscillating electric field supported, control quantities added:
+    el.f, el.t0, el.phase[]
+
+cook 3.4f:
+  ! bug in print with el.kappa=0 fixed
+
+blend 2.4b
+  - bug fixed (int div 0 for -g1 -m1)
+
+cook 3.4e:
+  - dih.res removed (DIHEDRAL only)
+  ! bug in ANCHOR print fixed
+
+cook 3.4d:
+  + option -_ added, see help (s)caling
+  - option -^ simplified (cannot change the Drude charge anymore)
+  + option -u-# added (select vibrating bonds according to wavenumber)
+  + scf.domega, scf.margin (for automatic setup of scf.omega)
+
+plot 2.0q:
+  ! bit cleaned, hotkeys [ ] 0..9 fixed
+  + hotkey U added
+
+cook 3.4c:
+  * #define MONITOR changed to #define LOG, +m in cook* name changed to +l
+  + Morse potential (expanded to dist^4), #define MORSE, +m in cook name
+
+cook 3.4b:
+  ! organization bug in printing EPS0 fixed
+  * "ECC Epot" instead of Epot in previous versions
+  + "ECC Uscaled" = conventional energy (not available directly in ECC before)
+
+cook 3.4a:
+  * ECC pressure and energy transparently printed
+
+cook 3.3s:
+  ! bug conversion K->J/mol fixed
+
+cook 3.3r:
+  * monitoring individual terms as LJ, Eintra, first molecules etc.
+    now available under #define MONITOR and direct pair sum (not LINKCELL)
+    some variables (LJ, PLJ) need a record in .cpi
+    LJ is in K (not J/mol as before)
+  * LJ pressure added (with MONITOR, see above)
+  - option -j replaced by No.first and No.rotatefrom (MONITOR, ?)
+  + option -j now means scaling of Lennard-Jones parameters
+  * some changes in reading in the cfgs recorded by -m0
+  * minor code changes
+  ! bug in 3.3r only: quantities from .cpi by mistake multiplied by R
+
+cook 3.3q:
+  ! re-read mode and -f: energy fixed (P still wrong for GAUSSIANCHARGES)
+
+show 2.2f:
+  ! background color bug fixed
+
+show 2.2e:
+  * code cleaned (vector eye[] is now the true eye position)
+    mid mouse and arrows change the viewpoint wrt screen
+    raytracing now better corresponds to the screen
+    bar shown a bit better (still cheap and approximate)
+  - reverse endian support removed
+
+cook 3.3p:
+  + dielectric constant calculation (partly) returned to CUTELST version
+  * default el.epsinf changed to 3e33 also for cut-off electrostatics, but
+    it is used in postprocessing only (no term ~|M^2| as in Ewald - to be
+    added?)
+
+cook 3.3o:
+  !! malloc(0) bug fixed: result of malloc(0) used => overflow for >3 species
+
+cook 3.3n:
+  ! CPmark error fixed
+
+cook 3.3m:
+  + cp-file now supports simulation time info
+    cppak and (partially) cp2cp updated
+
+showcp 2.0a:
+  + plots show time in ps, help changed, options changed (-m -| -a -p)
+
+show 2.2d:
+  ! bug (color searched also in the part of id before /) fixed
+
+show 2.2c:
+  ! bug (probably from 2.2a) in wire modes and marking fixed
+
+cook 3.3l:
+  + CSVR thermostat (Bussi et al.) simply and inefficiently implemented
+
+show 2.2b:
+  + option -P = presenter mode (F4,F5 = hotkey 'i')
+
+cook 3.3k:
+  + equalization improved, variable equalize replaced by equalize.{cfg,mol,sp}
+  ! conductivity of polarizable models (imprecise inclusion of Drude charges)
+  + slab.sym added: slab asymmetry detection
+  * new SI definition 5/2019 implemented
+  ! small implementation problems with gaussian charges fixed
+
+cook 3.3j:
+  * ECC improvement; e.g., Pcorr now split and reported in 2 parts, P2 and P3
+  + Limited pressure calculation added to the playback mode (-m0,-m1).
+  + Playback mode small changes
+
+cook 3.3i:
+  * el.fast renamed to el.ecc, control changed
+    pressure checked via virtual volume change for ionic liquids
+  ! current density J for polarizable models bug fixed
+  + cook diffusivity (e.g., called by plb2diff) now detects and fixes one
+    move >L/2 between frames
+
+blend 2.4a:
+  * .gol files removed, color and radius info moved before atom-id
+  * option -p changed (-p-# now forces gol)
+
+show 2.2a:
+  * changed accordingly (backwards compatible)
+  ! bug z-viewpoint for raytracing fixed
+
+tomoil removed
+
+blend 2.3f:
+  + MC minimization, reasonably good for simple cases with constraints
+    WARNING: constraints with dependants not still supported (e.g, TIP4P)!
+  + features added to GUI (hot keys []j)
+  + option -W added
+  ! steepest-descent with constraints fixed - not buggy but slow
+  - console-based input of minimization parameteres removed (hotkey F9)
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>> Release 2019-08-01 <<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+show 2.1d:
+  ! option -\\ fixed (actually, it is not needed, -I| can be used instead)
+
+cook 3.3h:
+  + CLUSTERS: cl.format&32 (print all clusters)
+  ! distancecheck removed from the initializer (too slow for large systems)
+
+cook 3.3h:
+  * small changes with CLUSTERS
+
+cook 3.3f:
+  ! ertest Gauss ga.g12 printed incorrectly - fixed
+  + ertest Gauss improved
+  + BJERRUM improved
+
+cook 3.3e:
+  ! small formal changes in BJERRUM
+
+plot 2.0p:
+  ! button [recalc] = Ctrl-U = F9
+
+cook 3.3d:
+  ! memory leak fixed
+
+cook 3.3c:
+  * small changes; improved: neutrality test, cfg2asc, asc2cfg, control od
+    plots spawned by rdfg, showcp
+
+show 2.1c:
+  ! bug of previous version for SHELL fixed
+
+cook 3.3b:
+  * bjerrum.mode changed
+
+cook 3.3b:
+  * Ewald initialization improved
+
+cook 3.3a:
+  * WALL version reconsidered:
+    - "#define SLIT" now denotes 2D periodic b.c. (z-images do not interact)
+    - walls require "#define SLAB 1" and are dynamically set by structure wall.*
+    - pressure on walls calculated
+  * virial-of-force terms added to wall calculations (the virial pressure
+    is NOT the system pressure anyway - use Pwall[0],Pwall[1] instead) as
+    well as elst field (only pressure tensor components)
+  ! bug in virtual volume change scaling in some coordinates fixed
+
+cook 3.2e:
+  + optional thread-parallelism using barriers (may be faster on some systems)
+
+show 2.0m:
+  + now Donor=Acceptor accepted, range of accepted bond lengths increased
+  + marking now works in all modes (not only "wire")
+  ! bug in showing H-bonds in the wire modes
+
+cook 3.2d:
+  ! the speed of rescaling using tau.rho is now the same both for swelling
+    and shrinking (swelling had been 2x faster)
+
+cook 3.2c:
+  + xs.mode="x", "y", "z" added
+
+cook 3.2b:
+  ! wrong DT in StaAdd for Mx,My,Mz,M2 fixed, lag.err multiplied ny noint, too
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>> Release 2018-09-13 <<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+ev, tabproc: Fortran-style numbers (as 2d3) bug fixed
+
+plot 2.0n:
+  ! PS output of file names/formulas containing ()\
+plot 2.0m:
+  + toggle showing error bars, hotkey=[^]
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>> Release 2018-08-21 <<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+plot 2.0l:
+  + batch mode added (option -b)
+  + option -t added (do not recompile)
+
+cook 3.2a:
+  * default value of the number of degrees of freedom for NVE,Berendsen changed
+  + flag corr&64 added to control the above behavior
+  * Gear line with errors printed with -v4 only (-c unchanged)
+
+show 2.0k:
+  ! export of background (-bg#HEXCOLOR) to nff fixed
+
+cook 3.1m:
+  + vibrations for general constraints
+  * nm.method flag meanings changed
+
+cook 3.1l:
+  * small optimization of constraint dynamics and nmc.c
+
+cook 3.1k:
+  ! ewald port to SF: bug in control fixed
+  * small technical improvements
+
+cook 3.1j:
+  PERSUM default option -x changed to -x0, default corr+=32
+
+plot 2.0k:
+  + Ctrl-U and F9 recalculate zoom
+  + longer history for undo
+  ! smaller bugs fixed
+
+plot 2.0j:
+  + option -a added (imperfect way for aspect ratio x:y=1)
+
+show 2.0j:
+  * option -v changed to -_
+  + option -v added (verbosity level)
+
+cook 3.1j:
+  ! the 1-4 control bug mentioned in 3.1g was not fixed in the P1 version
+    now fixed
+evu.c:
+  ! bug fixed: cbrt did not consider units
+
+cook 3.1i:
+  + barostat in specified direction includes the respective box in
+    statistics (formerly, +Lx,+Ly,+Lz had to be given in .cpi file, which
+    can be easily forgotten)
+
+cook 3.1h:
+  ! tau.T of Langevin thermostat was wrong (correlation time of velocity of
+    ideal gas) so that the correlation time of temperature was tau.T/2.
+    Fixed - tau.T is now the correlation time of temperature
+
+cook 3.1g:
+  ! linked-cell list was wrong for fully flexible models because of a
+    new bug in 1-4 control
+  ! metal force field contained incorrectly measurements every step; thus,
+    some quantities (as RDF) were multiplied by noint - fixed
+
+plot 2.0i:
+  ! parameters to erase (F8) and exported to PLOTCMD have been accepted
+    only if shown, allocation error while PLOTCMD (max 3) -- fixed
+
+show 2.0i:
+  + cluster analysis added (hot key F5 or Ctrl-T)
+  * old F5 (font) renamed to F6
+  + plbcenter upgraded to center a periodically split cluster
+
+plot 2.0h:
+  + . in ps.def = EOF
+
+install.sh:
+  ! bug fixed: compiler was not written to compiler.sh
+    (thus default cc was used without optimization)
+
+cook 3.1f:
+  * line beginning by * in data input is now copied as a comment
+    (avoids problems with WARNINGS in a ble-file)
+  ! autocentered slab was by mistake shifted by 0.5 AA - fixed
+
+cook 3.1e:
+  + option -k-1 added: with ANCHOR suppresses writing SIMNAME.anc
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>> Release 2017-10-24 <<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+blend 2.3e:
+  ! bug fixed - determination of EvdW (U=0 problem as before)
+
+cook 3.1d:
+  + key P in -l added (dump of Drude amplitudes)
+
+plot 2.0f:
+  + FIT="e NUMBER" added
+
+cook 3.1c:
+  ! U=0 not properly initialized in some places (see 3.1a) - fixed
+
+cook 3.1b:
+  ! interaction energy with Eelst[] was inappropriately added to En.pot
+    directly, not En.el - fixed
+  * scf.eps<0 options and algorithms reconsidered
+
+cook 3.1a:
+  + PERSUM version (suffix ps) added: periodic sum, cutoff > box/2
+  ? WARNING: large changes in the code were needed, some sub-versions not
+             tested, problems cannot be excluded
+    Needed changes: U+=0 instead of U=0 in SS_MEASURE and similar
+                    U=0 in declarations of U in site-site functions
+    Any call to functions LJ, LJM, LJQQ, ... may be affected!
+
+cook 3.0k:
+  ! Codata 2010 constants used for h/k in nm.c,nmc.c changed into 2014
+  ! init="crystal" fixed for not cube, with pins=4 format changed
+
+cook 3.0j:
+  ! small fixes: scf.c: rpol^2 -> |rpol| fixed in divergence output
+                 nmc.c: error reporting improved
+
+blend 2.3d:
+  ! with option -H the final inertia tensor in kg m2 was wrong - fixed
+
+blend 2.3c:
+  ! 1-4 table wrong with blend -v8
+
+
+plot 2.0e:
+  ! stderr was incorrect for the integral of the fit (env INTEG)
+  + env FIT added
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>> Release 2017-07-10 <<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+cook 3.0i:
+  ! Bug in Ewald Drude pair self-energy term (introduced in V3.0a) fixed.
+    Typically, the energy error was ~ several J/mol.
+    The trajectory was not affected.
+
+plot 2.0d:
+  + option -v added (= `v' in GUI, cf. hotkey v)
+
+cook 3.0g:
+  ! slab autocenter (see slab.sp) was not working at all, now OK
+  ! ST2 was out of order - fixed
+  ! "optimized water models" were turned off
+    NB: be aware that cutoff<L/2-1 is needed here
+
+cook 3.0f:
+  + q added to ble-file data (1st set) = charge scaling
+    auxiliary variables x,y,z,a,b,c,aux,i,j,k,n added, too
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>> Release 2017-05-17 <<<<<<<<<<<<<<<<<<<<<<<<<<<
+cook 3.0e:
+  ! bug introduced in V3.0d fixed
+
+cook 3.0d:
+  ! module Ewaldtest unnecessarily called for short cutoff - removed
+  * default drmax increased to 0.15
+
+cook 3.0c:
+  ! int overflow for large systems fixed if cfg loaded from .plb
+
+show 2.0g:
+  ! show H-bonds (color not initialized w/o -H option or color change)
+
+cook 3.0b:
+  ! bug fixed (wrong CP allocation in the re-read mode)
+
+show 2.0f:
+  + H-bonds added to menu, hotkeys h H Ctrl-H Ctrl-C added
+
+cook 3.0a:
+  * #ifdef BJERRUM: see bjerrum.c, under development
+  * Measurements during simulations / stored configurations unified:
+    CHANGED OPTIONS:
+    * -m0 = read configurations SIMNAME.0, SIMNAME.1 instead of simulating
+       NOT TESTED, CUMBERSOME SIMNAME CONTROL
+    * -m1 = read playback instead of simulating
+    *  -f = calculate forces (after reading or in addition)
+       OLD MEANING OF -f REMOVED, use reread.by
+    REMOVED OPTION:
+    - -g (remedy: rename files and use symlinks instead of the lost functionality)
+  + variables reread.from, reread.to, reread.by added, to control of reading
+    frames with options -m1,-m0
+  * CLUSTER: input data are now in SIMNAME.cli instead of end of files
+    .def,.get
+  + cl.mode added (1=on, 2=cluster, 4=configurations)
+  + cl.format cl.maxn cl.maxcluster duplicate the respective keywords
+    in SIMNAME.cli
+  + Cross-section of clusters added
+  + diffusion and conductivity changed, variable diff.mode added
+  ? Bug in self energy created, fixed in V3.0i
+
+plb2diff 3.0
+  * changed to be compatible with cook V3.0a
+
+show 2.0d:
+  * -X,-Y changed to -P#,# (because -Y blocked yellow)
+
+cook 2.9f:
+  + Gear integrator development code (gear.init, gear.P[], gear.C[])
+  ! Urey-Bradley fixed
+  ! option -l fixed and extended
+  + center.K unified with FREEBC
+
+
+show 2.0b:
+plot 2.0b:
+  ! small bugs fixed in the new GUI
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>> Release 2017-01-31 <<<<<<<<<<<<<<<<<<<<<<<<<<<
+December 2016:
+GUI based on gtk removed, in-house GUI added
+environment variable GUIPATH removed
+environment variable GUI added, containing letters:
+  g = start blend with menu
+  s = start show with menu
+  p = start plot with menu
+  K = enable "kill all" in plot
+
+plot 2.0a:
+  + in-house GUI added, small changes, units in ps.def
+show 2.0a:
+  + in-house GUI added, small changes in hot keys and buttons
+blend 2.3a:
+  + in-house GUI added, small changes
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>> Release 2016-08-05 <<<<<<<<<<<<<<<<<<<<<<<<<<<
+cook 2.9e:
+  ! fully flexible models did not work under linked-cell list because
+    the 1-4 predictor was turned off and the bonded forces were not
+    calculated - fixed
+
+cook 2.9d:
+  + D/r^8 added to exp-6, #define POW used instead of REP12
+
+cook 2.9c:
+  * Angstrom is now denoted AA not to confuse with A=Ampere.
+    It applies to info and file names; eg., SIMNAME.cm.A-3.z -> SIMNAME.cm.AA-3.z
+
+cook 2.9b:
+  + stacking correction, see slab.ext.zero, slab.ext.center,slab.ext.span
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>> Release 2016-08-05 <<<<<<<<<<<<<<<<<<<<<<<<<<<
+cook 2.9a:
+  * normal modes improved
+  ! small fixes
+
+plot:
+  + PLOTCMD added
+
+blend 2.2i:
+  * some defaults and file names changed for for normal mode vibrations
+    (and essential dynamics - untested)
+
+cook 2.8i:
+  ! bug fixed: t was ignored if init<=2 - now checked and noted
+  ! bug "7 init<-1 wrong - loads incorrect box size" cannot be reproduced, seems to be OK
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>> Release 2016-03-14 <<<<<<<<<<<<<<<<<<<<<<<<<<<
+cook 2.8h:
+  + Fourier-expansion slab cutoff corrections (slab.K, slab.range) added
+  ! cookfree, configure.sh incompatibility fixed
+
+cook 2.8f:
+  ! bug cutoff electrostatic (in V2.8e only) fixed
+
+blend 2.2h:
+  ! gyration tensor was incorrectly named inertia tensor - fixed
+  + inertia tensor added, options renamed (see -I -G -S)
+
+cook 2.9b:
+  + Surface tension: Slab stacking corrected, see variables slab.ext.zero,
+    slab.ext.center, slab.ext.span
+
+cook 2.9a:
+  + Fourier transform slab cutoff correction, see variables slab.K, slab.range
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>> Release 2015-12-17 <<<<<<<<<<<<<<<<<<<<<<<<<<<
+cook 2.8e,f:
+  ! BUG FIXED: bad Hamiltonian for thermostat="NPT", isotropic case
+    (no bug in the trajectory)
+  + control of volume, V(t), using external file SIMNAME.box, t added
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>> Release 2015-11-15 <<<<<<<<<<<<<<<<<<<<<<<<<<<
+cook 2.8d:
+  * some prints cleaned (no dielectric constant if ions)
+  + partial currents by ion types added
+
+cook 2.8c:
+  * default PRESSURETENSOR changed to 3
+  * unit of Wcl in .cp changed to Pa (as statistics), was K/A^2
+  * Ein as the 4th column of .cp for NVT removed, rho applies unless
+    fitting of sigma, virtual volume change...
+
+cook 2.8b:
+  * WARNING "cannot determine smooth cutoff" relaxed, both energy and
+    forces beyond C1 are now smoothed, although inconsistent.
+    The energy/forces checker reports problems, which are WARNINGs only.
+  - No.lcth removed (always the same # of threads for r- and k-space
+    with PARALLEL=1)
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>> Release 2015-09-17 <<<<<<<<<<<<<<<<<<<<<<<<<<<
+cook 2.8a:
+  + Support of different energy units in the ble-files (not in the
+    ble-files generated by blend). This solves the following caveat:
+    ! Some force fields (e.g., Buckingham, see MACSIMUS/sim/buck)
+    ! had additional parameters (C and D) in kcal/mol, however,
+    ! the same parameter in the table nbfixes must have been given in
+    ! internal units (Kelvin, or R/kcal=0.0019872041), i.e., as printed
+    ! when cook -v7, or multiplied by kcal/R = 503.219565.
+    The new scheme defines the units in structure Epow_s in
+    macsimus/sim/<nonbond>/sitesite.c.  Variable  eunit  defines the
+    unit in which energies are given in the ble-file.  eunit is given in
+    p.u. (loosely, Kelvin), the default is Eunit/kcal = R/kcal (R=gas
+    constant).
+    The nbfixes table uses the same unit as the site-site table (no
+    exception for parameters C,D for the Buckingham potential).
+    FOR FORCE FIELD WITH EXTRA ENERGY PARAMETERS, THE NEW nbfixes
+    TABLE IS NOT COMPATIBLE WITH THE OLD ONE!
+  ? function finite() to detect numeric problems was replaced by isfinite(),
+    because finite() did not detect nan in some cases when optimizing on.
+    It is assumed and verified that isfinite(0) returns 1,  although the
+    man page says it should return 0, which does not make sense.
+
+cook 2.7v:
+  ! bug fixed - automatic -a0 (invalid for Gaussian charges) removed from
+    the back calculation of diffusivity; note to plb2diff added
+  + synopsis slightly changed (cook* SYSNAME.ble SIMNAME.get allowed)
+  * Busing-style of the exp-6 potential extended to Gaussian charges
+    (good for Baranyai-Kiss water and ions)
+
+cook 2.7u:
+  + switch SS_DEBUG changed to variable poteps
+  + adjusting size potential parameter extended to cross-terms (fia nbfixes)
+  * constants updated for CODATA 2010
+
+cook 2.7t:
+  ! reported energy cutoff corrections in the slab version
+  * aesthetical changes of the cleaving algorithm, units changed
+
+cook 2.7s:
+  + Zone melting ensemble (NLxLyPzzE), see tau.L, box.Lx[], box.Ly[]
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>> Release 2015-01-08 <<<<<<<<<<<<<<<<<<<<<<<<<<<
+cook 2.7q,r:
+  ! Gaussian charges for ions - bugs fixed
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>> Release 2012-06-28 <<<<<<<<<<<<<<<<<<<<<<<<<<<
+cook 2.7o,p:
+  ! small change/fix of X-section
+
+cook 2.7m:
+  + Gaussian charges added (switch GAUSSIANCHARGES, tested for COS)
+  + qq-based r-space Ewakd tables added (switch QQTAB)
+  + eps14 added (should be improved in future)
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>> Release 2013-08-28 <<<<<<<<<<<<<<<<<<<<<<<<<<<
+cook 2.7l:
+  + Tstop added (stop if temperature reached)
+  + keywords Ekin added to .cpi
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>> Release 2013-04-03 <<<<<<<<<<<<<<<<<<<<<<<<<<<
+cook 2.7k:
+  * Default el.rshift changed to 3, warnings improved
+  ! Bug fixed: normal mode vibrations of constraint models were wrong for
+    certain combinations of masses because of numeric underflow in the matrix
+    inversion procedure
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>> Release 2012-12-11 <<<<<<<<<<<<<<<<<<<<<<<<<<<
+cook 2.7j:
+  + Cross-section extended to the whole configuration
+  + Normal modes with constraints now may call octave to calculate
+    eigenvalues - faster, but more memory consuming.
+    New input variable: nm.method (see the manual)
+
+cook 2.7h:
+  ! The diagonal components of the pressure tensor for the dipolar Ewald term
+    were wrong (its trace and thus the isotropic pressure were correct).
+    The error was zero for tinfoil.
+    Surface tension with Berkowitz correction was affected, but the
+    correction is negligible in any practical setup. The same holds for
+    optimizing crystal shapes
+  ! POLAR saturation autoset: ref. dipole moment includes the induced part
+    (bug: was permanent)
+
+cook 2.7g:
+  + Support for automatic determination of el.epsinf and Eelst to
+    reach given saturation: new variables sat and tau.sat
+    If Eelst=0, el.epsinf is adjusted:
+       use keyword "xinf" in SIMNAME.cpi to monitor 1/(2*epsinf+1)
+    If Eelst[2]!=0, Eelst[2] is adjusted (must be positive):
+       use keyword "Ez" in SIMNAME.cpi to monitor
+  + tau.sat<0 will copy the average to the controlling variable
+    and start init="append" run
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>> Release 2012-06-28 <<<<<<<<<<<<<<<<<<<<<<<<<<<
+cook 2.7f:
+  * el.sf default changed to 0 even if option -f
+  * el.epsinf<0 no longer means the Berkowitz slab correction - see el.slab
+  + el.slab: the Berkowitz slab correction
+  - option -\\ removed, use environment NSLOTS and variable No.lcth
+  ! no distance check as the default (-d0, was incorrectly -d1)
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>> Release 2012-06-20 <<<<<<<<<<<<<<<<<<<<<<<<<<<
+cook 2.7e:
+  * An attempt was made to improve performance of the linked-cell method,
+    esp. if parallel, using different organization of data.
+    See compile-time switch LINKCELL.
+    The results are very architecture and data dependent.
+
+cook 2.7d:
+  * precision loss due to q^2 constant term and Ewald correction of Drude
+    charges further improved (see exacterud_sqrt_1())
+    Still there is error ~<100 kPa in the pressure tensor (different
+    versions may differ because summing contributions in different orders)
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>> Release 2012-06-01 <<<<<<<<<<<<<<<<<<<<<<<<<<<
+cook 2.7c:
+  + el.rshift added (shift erfc splines to avoid jumps, test print)
+    el.rshift=3 recommended for normal modes
+  + el.rplus added (instead of compile-time switch ERFCPLUS)
+  * (in some POLAR versions) precision improved by NOT summing large
+     q+q- erfc terms to the alpha/sqrt(pi) sum q^2 constant term
+     The error <1K/molecule or 50 kPa in pressure was thus reduced several times
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>> Release 2012-05-25 <<<<<<<<<<<<<<<<<<<<<<<<<<<
+cook 2.7b:
+  * option -x (optimized code, LJ terms for some water models) changed,
+    warnings added - less automatic, but more fool-proof
+  * equalize allowed in .def only (ignored if in .get)
+  + normal mode vibrations (BUG: not for general constraint models with
+    variable angles between fixed bonds, good enough for rigid models)
+    New variables: nm.ampl, nm.dr, nm.eps, nm.frames, nm.modes, nm.zero
+    See the manual!
+
+Utilities cfg2asc, asc2cfg added (for editing the configurations by hand)
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>> Release 2012-03-31 <<<<<<<<<<<<<<<<<<<<<<<<<<<
+cook 2.7a:
+  + MTK thermostat+barostat
+  * format of .cfg files changed, utility cfgconv provided for conversion
+  + fundamental frequencies (for vibrating bonds only, to be extended)
+    variables nm.dr, nm.eps, nm.frames
+  + cutoff correction control (variable corr) extended
+  + statistics and convergence profiles of enthalpy, pot+kin energy
+  - load.reversed (support of reversed endian) removed
+
+blend 2.2f:
+  + dump screen a bit changed
+  + -w80 now writes a configuration in the (V2.7a) format of cook
+
+ice.c etc.:
+  + ices II,III,V,VI,VII
+
+show 1.1f:
+  ! serious bug fixed in showing H-bonds
+  * small changes
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>> Release 2011-11-11 <<<<<<<<<<<<<<<<<<<<<<<<<<<
+cook 2.6k:
+  ! bug fixed (reset of Nose variable log(s) if the thermostat changes)
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>> Release 2011-10-26 <<<<<<<<<<<<<<<<<<<<<<<<<<<
+cook 2.6j:
+  + variable key added, to be used to execute commands and (later) also
+    replace quit and sort
+    e.g., key="cp" (without ending ;) will pop up convergence profiles
+  + three versions of cook added to the basic installation
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>> Release 2011-10-18 <<<<<<<<<<<<<<<<<<<<<<<<<<<
+cook 2.6i:
+  + variable el.Perr added (to control WARNING in the case of pressure tensor trace/virial discrepancy)
+  * variables densprof.* changed to slab.*
+  * however, densprof.slab -> slab.mode
+  + slab-based thermostat: slab.T slab.Tz0 slab.Tz1
+  * slab-based forces in the z-direction moved from center.* to slab.*
+  + non-Nose thermostat forces Nose variables:=0
+    (NOT to remember these variables if other thermostat was run meanwhile)
+  + 3D structure factor added, el.sf=1 = radial SF, el.sf=3 = 3D SF
+  * format and name of the radial SF changed
+  + corr extended:  1=cutoff corrections included in final results, not in P for the barostat
+                    2=cutoff corrections included (also in barostat)
+    the default is now corr=2, which the same as before
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>> Release 2011-07-13 <<<<<<<<<<<<<<<<<<<<<<<<<<<
+plb2diff:
+  + fit of MSD(t) to a+b+c/t^1/2 (w. hydrodynamic tail) now optional
+    with PLB2DIFF=3 (old linear fit = PLB2DIFF=2 = default)
+
+cutprt:
+  ! bug fixed (new table not recognized - some output omitted)
+
+staprt:
+  + -kr added (relative standard error)
+
+cook 2.6h:
+  + rho printed with standard error estimate
+  * option -[ removed, use data:
+    load.n[] = replicate factors
+    load.L[] = change L option
+    load.N   = change N option
+    load.tr  = load transformation
+  * option -] removed - use variable equalize instead (default = no equalization = 0)
+    CAVEAT: only some variables allowed to calculate equalize, e.g.:
+            allowed:  noint=5 h=.01/noint equalize=0.8*(h>0.0015)
+            error (NOT REPORTED): equalize=cleave.K>10
+    (see the manual or code for details)
+  * option -@ changed to -@WHO@WHERE (send e-mail if job finished)
+    old -@ available as  No.occup
+
+plot:
+  * mouse changed: left=digitize (no doubleclick needed)
+                   right=place file info
+  + ctrl-a,b.. = assign 0 to parms
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>> Release 2011-05-11 <<<<<<<<<<<<<<<<<<<<<<<<<<<
+cook 2.6g:
+  * harmonics and full correlation function of water (old feature) revisited
+  + el.centroid added (default=0, old default=1):
+    1 = old default = dipole moments of ions are w.r.t. molecule charge centroid
+        problem: total dipole moment is not a sum of ion moment
+    0 = dipole moments of ions are w.r.t. coord. center
+        total dipole moment = sum
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>> Release 2011-04-22 <<<<<<<<<<<<<<<<<<<<<<<<<<<
+show 2.0f:
+  + dump EPS added (hot key E)
+  * old duplicate hot key E removed (use tabulator to rotate by 90 deg)
+    Hint: this is the tabulator in bash: $'\t'
+    Example (show slab horizontally):
+      show -I%$'\t' molfile slab.plb
+  + environment variable SHOWPAL added - number of palette entries
+    (default = 249, practical minimum is about 100)
+    Example (slow connection):
+      SHOWPAL=66 show molecule
+  + oraNge (browN) color added, used for marking, -N<PATTERN> in recoloring
+
+cook 2.6f:
+  + fluctuating charge FQ4 model
+    o direct and LINKCELL supported
+    o BUG: FQ4--DRUDE interaction not yet
+    o CAVEAT: not tested with POLAR&4
+  * some variables renamed:
+    epsp -> scf.eps
+    omegap -> scf.omega
+    epspx -> scf.epsx
+    epspq -> scf.epsq
+    maxitp -> scf.maxit
+    new variable: scf.omegax (relaxation parameter for virtual volume
+                  change method)
+    negative scf.eps, scf.epsx: abs. value determines the number of
+                                iterations (scf.maxit irrelevant)
+  * output names of box and dipole moments changed
+  * formula for the dielectric constant improved (see the manual)
+  * legacy code allows loading old names and dielectric constant
+    recalculation
+  * change of defaults: el.epsinf=1 for cutoff electrostatics
+
+  several bugs fixed by T. Trnka:
+  ! -v logic in blend
+  ! slab geometry problems: auto set the number of degrees of freedom with z-forces
+  ! init cfg with z-forces and with shell-core model (crash - term missing)
+  ! z-profile if not autocenter (crash - undef. variable)
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>> Release 2011-02-22 <<<<<<<<<<<<<<<<<<<<<<<<<<<
+statics.c (cook, autocorr, showcp):
+  * In the statistics module, the "automatic" determination of error
+    estimates was improved.  It is now uniformly good even for cases
+    like long negative corelations (e.g., Ptzz for liquid slab+water).
+    There is a certain tendency to underestimate the error, though.
+    The new formula takes a weighted average over several blocked
+    estimates, both without c_1 and with it. (The old version took a
+    maximum, which in case of negative correlations overestimated the
+    error, however, is more prone against underestimation.)
+    The default blocking was increased to 2^15.
+Several bugs fixed thanks to Tomas Trnka:
+blend 2.2d:
+  ! determination of the vdw radius for exp-6 was wrong - fixed
+  + verbose output of pair potential parameters
+  * -v (verbosity) option changed
+cook 2.6e:
+  ! load cfg with POLAR<->NONPOLAR conversion and old version was fixed
+  ! En.Hz requires PRESSURETENSOR
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>> Release 2011-02-17 <<<<<<<<<<<<<<<<<<<<<<<<<<<
+show 2.0e
+  * -a changed: now -aAN determines max rotation angle as 2*PI/AN,
+    the initial rotation angle is initial (PI/8)/AN
+    default AN=4
+    E alternate for TAB (standard orientations)
+cook 2.6d: (wrong version number)
+  ! automatic centering bug fixed
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>> Release 2011-02-01 <<<<<<<<<<<<<<<<<<<<<<<<<<<
+cook 2.6d:
+  ! number of degrees of freedom for AndersenCM and MaxwellCM was wrong - fixed
+  + simplified Langevin thermostat (canonical in the long tau.T limit)
+  + Gibbs interfacial energy by the cleaving method - see the manual
+  * density profile measurements improved (as regards z-periodicity)
+  + automatic centering of the z-profile (see densprof.sp)
+  ! the slab for surface tension calculations (slab corrections) need not
+    be centered
+  * densprof.zmax=0 means scaled density profile in [0,Lz] divided
+    into density.grid
+  * dt.plb<0: frame not written for t=0 (init>=2)
+
+show 1.0d:
+  + key K (markallmode) added
+  + save plb (^S) saves the marked subset (if SELECTION)
+  * I = invert marking, TAB = reset (orientation)
+  ! bug fixed (buffer overflow, discovered by Radek Vostal)
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>> Release 2010-11-22 <<<<<<<<<<<<<<<<<<<<<<<<<<<
+cook 2.6b:
+  ! caveat fixed: now can read playback and then write it again
+  + name of input playback accepted (argument PLBNAME.plb; if missing,
+    SIMNAME.plb is used), can be further used even if further
+    processed (option -[)
+blend 2.2b:
+  + GUI support, hot key Ctrl-S (save) added
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>> Release 2010-10-18 <<<<<<<<<<<<<<<<<<<<<<<<<<<
+cook 2.6a, blend 2.2a:
+  * new simplified interface to implement potentials and combining rules:
+    see MACSIMUS/sim/ssdecl.h and example MACSIMUS/sim/lj/
+  + Buckingham potential extended
+  + The van der Waals radii (exported via GOL-file to show) are now
+    calculated because the Buckingham parameters are not directly
+    related to the atom size.  If the atom-atom potential does not
+    have a minimum, R=r1*1.12, where U(r1)=1 kcal/mol, is used instead.
+    (This radius is then rescaled by option -p).
+  * parameter sqrt_rule changed to comb_rule
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>> Release 2010-10-07 <<<<<<<<<<<<<<<<<<<<<<<<<<<
+cook 2.5h:
+  + Buckingham support added to cook and blend (see sim/buck+12s), various
+    combining rules; the D/r^12 term can be turned off by switch -DNO12REP
+  + as above - the shell-core polarizable version
+  ! wrong masses in some parts of the algorithm with mass equalization -]
+    (probably only some normalization was imprecise)
+show 1.1b:
+  ! numbering improved, plb can shring during viewing, better looking box..
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>> Release 2010-09-29 <<<<<<<<<<<<<<<<<<<<<<<<<<<
+cook 2.5g:
+  ! bug fixed (POLAR: -p control was wrong)
+  ! POLAR=1 off-diagonal pressure tensor added
+    off-diagonal pressure tensor symmetry tested for off-plane dependants and POLAR=1
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>> Release 2010-09-08 <<<<<<<<<<<<<<<<<<<<<<<<<<<
+cook 2.5f:
+  ! bug fixed (could not read files > 2GiB)
+  ! bug fixed (surface tension output)
+  + Nose-Hover for Verlet+SHAKE implemented via velocity predictor
+    switch SHAKEVELOCITY renamed to VERLET
+  * options -_ and -p changed:
+    -pKPC (dec. digits):
+      K = k (predictor length, parameter of ASPC or similar)
+      P = polar method (order of the method):
+          0=Car-Parrinello-like (0th order, no extra thermostating)
+          1=no prediction
+          2=ASPC
+          3,4=higher-order (with Gear only)
+      C = velocity predictor length, Verlet+SHAKE (-m2) + Nose-Hover only
+          (default C=2 => energy drift O(h^5))
+          constraint predictor order, Gear only (-m#, #>2)
+          (default = -m value)
+     -_ = inactive now - changed into P above
+  + support for out-of-plane dependants (as Lone pair in some water models)
+    incl. the pressure tensor
+    Not available via blend!
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>> Release 2010-06-01 <<<<<<<<<<<<<<<<<<<<<<<<<<<
+cook 2.5e:
+  + diffusivity now also for NPT (cubic box), uses L from plb
+  * epslc replaced by box.rmin, code changed to shift normalization
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>> Release 2010-05-21 <<<<<<<<<<<<<<<<<<<<<<<<<<<
+show 1.1a:
+  gtk-based GUI by Karel Matas added:
+  - should be compiled with -DGUIMENU
+  - runtime environment variable GUIPATH should point to macsimus/guimenu
+
+cook 2.5d:
+  ! several bugs fixed by Tomas Trnka
+  ! cutoff electrostatics bug of 2.5c fixed
+  ! bug in setting atomatom2() fixed
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>> Release 2010-04-14 <<<<<<<<<<<<<<<<<<<<<<<<<<<
+blend 2.1l:
+  + 1-4 interactions with POLAR implemented: all charge-charge terms
+    are multiplied by factor14 (as if diel.const.=1/factor14)
+  ! shell-core (repulsive antipolarization) changed:
+    polar=2 removed from .par file (while polar=4 still means ADIM)
+  + table "shellrep" added in par-files.
+    The shell-core term is the interaction between (A) a polarizable
+    atom and (B) repelling atom.
+    (A) is usually anion with a large polarizability, it has nonzero
+    kappa (arep) in the table "polaratoms"
+    (B) is usually cation with none or small polarizability. These
+    cations are now listed in table "shellrep".
+    WARNING: not compatible with older versions - you must add table
+    shellrep to such force fields!
+  + 1-4 polarizable interactions (scaled by factor14) are added to the polar
+    versions. The shell-core term is ignored for 1-4
+  ! infinite loop w. -b0/-a0 fixed
+  + -q also suppresses warning "fractional charge"
+    hint: use -q100 to suppress the warning and keep charges unchanged
+
+cook 2.5c(?):
+  + bit optimized for monoatomic molecules and no LINKCELL
+  * verbose output set in case of POLAR bad iterations if this happens
+    for the second time
+  * POLAR: option ^ changed (-^+EEEEOO: +EEEE=shell, OO=omegap in %)
+  + POLAR: 1-4 polarizable terms added
+    supported: FREE, cutoff elst, Ewald; LINKCELL, shell-core (POLAR&1)
+    suppoted but not tested: ADIM (POLAR&64)
+  - POLAR&32 removed (cf. table "shellrep" in the par-file)
+
+show 1.0d:
+  + dihedral angle info printed if 4 atoms clicked
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>> Release 2010-03-11 <<<<<<<<<<<<<<<<<<<<<<<<<<<
+cook 2.5b:
+  + another warning for a small non-rigid molecule (forgotten -h in blend)
+    pressure tensor double checked for POLAR&1
+  ! the suggested timestep was calculated from the initial masses even if
+    option -] which might have lead to a misleading info - fixed
+  ! memory leak for PARALLEL=1+Ewald fixed
+
+blend 2.1k:
+  * options -a0, -b0 improved: minimization with constraints is now smooth
+  + constrained dihedrals added. They should be written in file SPECIES.jet as:
+    IDi IDj IDk IDl ANGLE
+    the angle is in degrees in interval (0,180)
+    BUGs : cos(angle) is used internally, 0 and 180 are not allowed and
+           the sign of ANGLE is not distinguished
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>> Release 2010-03-02 <<<<<<<<<<<<<<<<<<<<<<<<<<<
+cook 2.5a:
+  + code (re)parallelized using threads
+    PARALLEL=1: linked-cell list parallelized
+    PARALLEL=2: ewald k-space runs in parallel with pair forces (r-space)
+    example (SGE):
+      qsub -cwd -b y -pe shm 2 ./cookewslcp0P2 polwater slab -t
+  - switch CLOCK removed
+  * time measurement (-t) upgraded
+all:
+  * option -DSCR removed from modules in show, blend and util
+    (#include in che-files still works)
+    it is left for cook because it enables $iFILE in input data
+molcfg:
+  ! problems with molcfg called from cook again...fixed
+plot:
+  * wrong input data treated as NaN and not plotted
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>> Release 2010-02-16 <<<<<<<<<<<<<<<<<<<<<<<<<<<
+blend 2.1j:
+  * -h no longer automatic with registered waters (warning printed)
+cook 2.4p:
+  + info/warning added for inappropriate timestep h (based on min. mass)
+plbreplicate:
+  ! fixed
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>> Release 2010-02-08 <<<<<<<<<<<<<<<<<<<<<<<<<<<
+cook 2.4o:
+  * init=4="slab" make a slab (cheap random with z-center bias)
+  + check of a registered water model
+blend 2.1i:
+  + variable "water" exported in the ble-file (=registered water model)
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>> Release 2010-02-06 <<<<<<<<<<<<<<<<<<<<<<<<<<<
+cook 2.4n:
+  ! bug (wrong pressure tensor components in cook 2.4m) fixed
+
+>>>>>>>>>>>>>>>>>>>> Releases 2010-01-05, 2010-01-22 <<<<<<<<<<<<<<<<<<<<<
+WARNING: bug in pressure tensor components
+
+show 1.0c:
+  + editing of a configuration added, toggle mode by m (the same as blend)
+  + save one frame by ctrl-s
+  + unmark by M or ctrl-u (compatibility with blend)
+  * hot keys m M (match configuration) renamed to ' "
+  + if the mol-file does not match the plb-file, the mol (and gol) file info
+    is either repeated or truncated
+  + if mol/gol file is missing, just spheres are used
+  * DOS support finally removed
+    (show 1.0b/DOS frozen as show4dos.c and showidos.c)
+blend 2.1h:
+  * `x' no longer allowed as the character for crossing bonds in a che-file,
+    use `+' instead (`x' interferes with the `:ID' constrct)
+  + blend now prints a "soft warning" if the par-file contains "void" data
+    lines which do not start with a table name (like if an accidental Enter
+    appears within the data)
+  * hot key M (used to be floodfill) now means unmark all (cf. show)
+    (floodfill is midclick - the middle button is now common, so that
+    it is not necessary to use a key)
+cook 2.4m:
+  + option -] added: equalize masses of atoms in molecules
+  + option -q-# changed: now a charged system is neutralized by adding
+    a constant charge to all charges (old meaning "do not rotate" is now -j-#)
+  * option -j-# changed: now it means "do not rotate while initializing"
+    (formerly -q-#)
+  + variable  initvel  added: reinitialize velocities of initvel molecules
+    (the same as former -j-#)
+    initvel is reset to 0 after velocities assignment
+  * the definition of the pressure tensor was standardized - now without
+    factor 1/3
+    Note that the reported values were 1/3 of the pressure, which was
+    written in the manual, but misleading
+  + time autocorrelations functions:
+    time scale is always in ps, conversion to SI should include factor 1e-12
+    off-diagonal pressure tensor (-> viscosity), if lag.visc
+    current (-> conductivity), if lag.cond
+    velocity-velocity (-> diffusivity), #ifdef RGYR, if lag.v
+      (for molecules to lag.nv, lag.dim coordinates)
+  * lag ranamed to lag.err, lag2 to lag.n
+  + molcfg not called if -f specified
+cp2cp:
+  ! bug found (option -d did not work properly)
+    options replaced by (more general) -r and -h
+showcp:
+  * cleaned, some options changed:
+    -e (all columns) removed
+    -[ -] changed to -e
+    -c extended
+    -xDT becomes -hDT -x
+    -hDT set time step (=noint*h)
+  + can print also time autocovariances (-c2)
+  + -n added: number of blocking 2^
+cook, showcp, autocorr, staprt:
+  + now dt recorded and time axis printed
+    (may be confused if old/new sta-files are mixed)
+plb2diff:
+  ! bug fixed (int overflow if too long plb-file and too many blocks)
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>> Release 2009-11-30 <<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+blend 2.1g:
+  + option -g-# : no graphics, minimization protocol printed
+    by # steps (default = guess)
+show 1.0b:
+  + show hydrogen bonds. Example:
+      show iceVMq3288 -DH4I -AO4I -HB2.4
+    (donor site type=H4I  acceptor=O4I  distance limit=2.4 A  color=Blue)
+  - option -_ removed (not clear what it was good for)
+  * bond allocation was made dynamic
+    (option -i is now the initial number of bonds - may be removed in future)
+  + box around (-\\ = -|) can be now any color (e.g., -\\B)
+cook 2.4l:
+  unchanged (no bug in Ptens)
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>> Release 2009-11-18 <<<<<<<<<<<<<<<<<<<<<<<<<<<
+  * getline() renamed to mygetline() because of clash with a new GNU library
+cook 2.4l:
+  + el.diff added
+  * tau.rho now forces rho in column 4 of SIMNAME.cp (the same as tau.P)
+  * info plb: ... moved to -v4 verbosity level
+  * (somewhere around this version)
+    statistics not automatically calculated for variables in .cpi
+    (can be returned back by + prepended, e.g., "+Lz")
+blend 2.1f:
+  + option -w80 added (make .cfg for cook)
+plbcut:
+  ! serious bug fixed in array allocation
+show 1.0a:
+  + option -J added (more flexible "show shell"). Example:
+      show -j6 -Jb xxx
+    will show waters (= molecules with 'b' in their id's) around the 1st
+    molecule
+    Note: 'b' appears if molcfg is automatically called from cook and
+    water is the second molecule (N[1])
+hbonds:
+  + extended to allow a solute
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>> Release 2009-09-18 <<<<<<<<<<<<<<<<<<<<<<<<<<<
+cook 2.4k:
+  + variable corr added (whether LJ cutoff corrections are to be included)
+  ! severe bug fixed: LJ without charges in nonpolar versions had bad
+    cutoff and the molecules "exploded". This bug was introduced while
+    "cleaning" the code, several versions affected.
+  * the 1-4 predictor in the LINKCELL version is now safer and prints
+    more helpful warning messages
+  + Andersen and Maxwell thermostats working on centers of mass
+    they are safe with constrained dynamics
+  * some renaming: "intermolecular" degrees of freedom/kin. energy/temperature
+    are now called translational (calculated from the center of mass)
+    "Tmol" in .cp is renamed to "Ttr"
+    "Tkin inter" (in .sta) renamed consistently to "Ttr"
+    "Tkin intra" (in .sta) renamed consistently to "Tin"
+    "T" (in .sta and .cp) renamed to "Tkin", to be distinguished from
+      the thermostat value Tkin
+    "Tinter_intra" renamed to "T_tr_in"
+  * the default rescale was changed to 15
+  + examples/sample.def: file with the most common variables and options
+show:
+  options added:
+    -[# frames moved in keys []; -[-# the same in %
+    -]0 MOLNAME.gol will be ignored
+  filename argument logic cleaned:
+    - 1st arg can be MOLNAME or MOLNAME.mol or MOLNAME.gol or MOLNAME.plb
+    - optional 2nd arg must be with extension, preferably PLBNAME.plb
+      (.plb is then stripped off in derived names)
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>> Release 2009-09-09 <<<<<<<<<<<<<<<<<<<<<<<<<<<
+cook 2.4j:
+  ! In the linked-cell+polar versions, the RDF contributions were calculated
+    every step instead of every cycle. The resulting RDFs were thus noint
+    times larger and the code somehow slower.
+  ! Wrong number of inter/intramolecular degrees of freedom (with Berendsen
+    thermostat and NVE) - fixed.
+    (This bug in versions 2.4k and older introduced an inaccuracy of the
+    order of 1/N to Tkin inter and Tkin intra. The correct values can be
+    easily obtained by multiplying by wrong_degrees/good_degrees)
+  * -k option was changed and manual updated
+blend 2.1e:
+  + hot key @m writes file MOLNAME.mark with marked sites
+  + hot key @k writes file MOLNAME.keep with kept (frozen) sites
+  + -k extended (-k4 reads FILE.keep, -k8 reads FILE.mark)
+mol2mol:
+  this utility can provide various operations with mol, gol, and plb files
+  It can also read MOLNAME.mark etc mentioned above
+show:
+  ! bad 'L' (write plb) if new format - fixed
+  + match extended to a selection of sites (cf. blend above)
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>> Release 2009-07-30 <<<<<<<<<<<<<<<<<<<<<<<<<<<
+showcp:
+  + Braille subset of UTF-8 used to print a better pseudograph
+    can be turned on/off by option -u (former -u renamed to -n)
+  * the y-range of plot is now within min:max of the original data, not
+    of the blocked data (=the same behavior as the pseudographs)
+plot:
+  * number of variables available for fitting increased to 10
+  * some hot keys had to be changed:
+    i: initial scaling is now U (or k)
+    I: fit is now:
+       ctrl-t in double,
+       t in long double (recommended),
+       T in highprec
+    gG: show/hide grid is now zZ or oO
+
+    Example of fitting:
+    ^^^^^^^^^^^^^^^^^^^
+    tab 0 1 0.01 | \
+      tabproc "A" "exp(A)+rnd(1)*0.1" 0.1 | \
+      plot -:A:B:-:C :A:"a+b*A+c*A^2"
+    Then, in the plot window, type `t'.
+    It should compile a fitting program and plot a fit.
+    The result is around a=1.0, b=0.8, c=0.8.
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>> Release 2009-07-22 <<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+cook 2.4i:
+  ! malformed error message (rescaled too much) fixed
+  + bulkmodulus added (for NPT and similar; if not set, ideal gas value used)
+
+most software; e.g., showcp and ev:
+  * terminal sizes are now determined from environment variables LINES and
+    COLUMNS, not SCROLL
+    Hint: in bash, add to your .bashrc:
+      shopt -s checkwinsize
+      export LINES
+      export COLUMNS
+
+blend 2.1d:
+  ! temporary file now created using mkstemp(), which is save if run
+    concurrently (on several nodes). (The price paid is that you must
+    by hand remove temporary files if blend crashes.)
+  ! format for constrained angles fixed (was slightly less accurate)
+  ! blank lines allowed between header and parameter_set in a che-file
+  ! undefined chirality is a warning only
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>> Release 2009-06-11 <<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+cook 2.4h:
+  ! -[-XXX (allow box change without rescaling while load) does not work
+    FIXED (thanks to T. Trnka)
+  ! rhoinit does not work - FIXED
+  ! small bug fixed: report of energy/particle
+  * padding spaces (to 4 chars) removed from names listed in SIMNAME.cpi
+    (e.g., Lx)
+
+blend 2.1c:
+  * second virial coefficient improved
+
+pdb V1.4b:
+  ! incompatibility fixed - alternate locations can be now also in order
+    AAABBB, not only ABABAB as before. Other orders (BA, etc.) are warning.
+
+show:
+  * init size according to box if available FIXED
+  ! bug (something like box around for old .plb) FIXED
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>> Release 2009-05-18 <<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+tabproc, plot:
+  * 1000 columns now allowed (used to be up to Z=26)
+    columns over Z=26 are accessible as #27 or c27, etc.
+
+blend 2.1b:
+  + second virial coefficient (options -V, -T, -R) added
+
+cook 2.4g:
+  * writing of playback files rehacked
+    IMPORTANT CHANGE:
+      Option -y-1 now means "write one molecule", NOT write the whole
+      configuration. Do not use any option to write the full playback.
+    Changes of -y:
+      -yBIG (now the default!): write playback and call molcfg to prepare
+            data for show
+      -y##: write ## molecules only (into single SIMNAME.plb, not .p##),
+            incl. a call to molcfg
+      -y0:  do not write playback
+      -y-##: as above, but do not call molcfg
+    Input data changes:
+      dt.plb=0: write at start and when a sweep (; in the data) is finished
+
+  * normalizing drift and degrees of freedom cleaned:
+    - variable `norm' removed
+    + variable `drift' added
+    + variable `conserved' added
+
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>> Release 2009-04-07 <<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+cook 2.4f:
+  + option -w extended to -w#, #>1:
+    The same as -w1 and the available disk space is checked before selected
+    files are written.  If not enough space is available, it waits several
+    minutes (more for the second time) and then checks again.  The available
+    space is compared to a rather pessimistic estimate of space needed plus
+    # kB added (to be even more pessimistic). -w2 should be enough unless
+    your co-workers often fill the disk in a very greedy way.  The algorithm
+    is not 100% reliable, though.  It relies on a system call to df; if this
+    fails for any reason, it is considered as no space and the program keeps
+    waiting.  A warning is printed after space has appeared again; for
+    apparent reasons, nothing is printed when the no-space condition is
+    encountered.
+
+  FIXED BUGS:
+  ! tau.E+thermostat should be error - FIXED (warning+ thermostat off)
+  ! something's wrong with reporting rho if tau.rho: after switching to
+    tau.rho, the target rho is reported, but not actually reached
+    (V there - not calculated) - FOUND, V was not correctly calculated
+    (might have affected pressure...)
+  ! xxx="xxx" in get data not error if key not defined - FIXED
+
+  NEW:
+  + plb2rdf, utility to calculate RDF from plb
+
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>> Release 2009-04-07 <<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+cook 2.4e:
+  + The Ewald error estimates updated for non-cube; see also the BUGS section
+  * some electrostatic (Ewald) parameters renamed:
+      alpha    -> el.alpha
+      epsk     -> el.epsk
+      epsr     -> el.epsr
+      epsinf   -> el.epsinf
+      minqq    -> el.minqq
+      erfcgrid -> el.grid
+      etest    -> el.test
+  - parameter K removed (see el.kappa below)
+  + parameters added:
+      el.kappa: k-space cutoffs are K[] = el.kappa*L[]
+                (old K was in the z-direction: old K = el.kappa*L[2])
+      el.diag: include diagonal correction (good for salts),
+               formerly available via #define INCLUDEDIAG
+
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>> Release 2009-02-20 <<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+cook 2.4d:
+  + The linked-cell list implemented now also for POLAR, tested with POLAR=0
+  + Exclusions + EXACTERU (COULOMB=-2) implemented now with the link-cell:
+    r-space errors caused by splines for Ewald summation of models with
+    partial charges are now smaller
+
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>> Release 2009-02-10 <<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+cook 2.4c:
+  The logic controlling box size and rescaling was cleaned.
+  * The "Reference box" is given by density rho and box L[0], L[1], L[2] in
+      the input data:
+    - if nonzero rho is given and some of L[i] are not given (or are zero),
+      the remaining L[i] are calculated to reach given rho
+    - particularly, if only rho is given and no L, a cubic box with
+      calculated size (L[0]=L[1]=L[2]) is used
+    - if either rho==0 or rescale&7==0 (i.e., no rescaling is allowed),
+      L[i] are not changed; if any of them iz zero, this is error
+    This "Reference Box" is used for:
+    - setting cutoff (if not given explicitly)
+    - setting Ewald parameters alpha,K from errors epsk,epsr (unless they
+      are given explicitly)
+  * The "Actual Box" is the box size during simulation. It may differ from
+      the "Defined box" because:
+    - such a box is read from previous run (init=0,1,2), initialized using
+      initrho (init=3,4,5), read from ascii (init=10,11,12), read from
+      plb-file (init<0), etc.
+    - an NPT ensemble is used (or its variant with a component of the
+      pressure tensor) which leads to variable L during simulation.
+      This is set by nonzero tau.P
+    - If nonzero tau.rho (but not tau.P) is specified, the system rescales
+      the box gradually to reach "Defined Box"
+    - If none of tau.P,tau.rho is specified, the "Defined Box" may differ
+      from the actual box forever; this is not recommended (and warnings are
+      printed)
+  * Option -[-NNN forces (some) components of the Actual Box to be replaced
+    by the "Define Box" values
+
+  Options change:
+    -[-NNN changed - see the manual
+    -@ now reserved for LINKCELL only, removed from POLAR
+    -_ now reserved for ASPC (parameter k) with Verlet+SHAKE only
+    -w2 (write if cfg has changed) no longer supported,
+        default = -w = always write
+        (The reason is that it is difficult to trace all changes that a
+        user may do with the configuration and determine whether the
+        configuration has changed; a cfg may be restored from a backup
+        SIMNAME.cfg~ if necessary.)
+
+NEW and updated playback-related utilities:
+  + plbstack - stack configurations at the level of plb-files
+  + plb2cfg - convert plb to cfg (loadable by cook)
+  + cfg2plb - convert cfg to plb (if you have forgotten -y-1)
+  + plbreplicate - replicate cell at the level of plb-file
+  * plbbox - change box
+  * plbinfo - also reports prints all plb-related utilities
+
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>> Release 2009-01-15 <<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+blend 2.1a, pdb 1.4a:
+  + new format (variable L) of .plb implemented
+  * .plb made the default format, .3db (and .3dt) deprecated
+    (.3db and .3dt can be still read/written on demand)
+  * blend writes also .gol file as the default
+    IMPORTANT NOTE: use distinct names for cook!
+  + suboptions -y4, -y8, -y16 implemented (see manual)
+
+
+See blend/new and sim/new for the detailed history until 2008
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>> Brief older history <<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+>>>>> 2008
+Box scaling, pressure tensor (2.4a)
+
+>>>>> 2006
+Widom insertion particle method
+
+>>>>> 2005
+Slab geometry, surface tension
+
+>>>>> 2005
+Rectangular box (not cube)
+
+>>>>> 2004
+ANCHOR, WALL
+* ICT Prague
+
+>>>>> 2001
+CHARMM22, GROMOS96 and better manual -- version number set to 2.0a.
+* Evanston, Prague
+
+>>>>> 2000
+Cluster analysis, conductivity
+* Evanston, Prague
+
+>>>>> 6-12/1999
+New and extended polar version, Busing force field, axial polarizability
+* Evanston, Prague
+
+>>>>> 6/1997
+MPI parallelization
+
+>>>>> 7/1996
+Better control over end-to-end distance, cross section, radius of gyration
+* Evanston
+
+>>>>> 11/1995
+Playback and batch control improved (option -#)
+tcfg tprt changed into dt.prt dt.plb
+dt.plb instead of option -y
+Packed convergence profile (and playback soon...)
+* Evanston
+
+>>>>> 2-10/1995
+Support for shared memory parallel computers (Convex, SGI)
+* Odense
+
+>>>>> 7/1995
+Decoupled inter/intra-molecular friction thermostat
+* Odense
+
+>>>>> 6/1995
+Isobaric ensemble (Berendsen style) supported.
+Cosinus shear stress to measure viscosity
+* Odense
+
+>>>>> 4/1995
+Polarizable dipoles
+* Odense
+
+>>>>> 1/1995
+PEO and COOK merged into 1 package
+* Odense
+
+>>>>> 11/1994
+Linked-cell list method version, free-boundary conditions version (C1.0)
+* Odense
+
+>>>>> 10/1993
+PROSIS/COOK Version C0.5
+* Odense
+
+>>>>> 3/1993
+Easy implementation of different systems (V2.0)
+* Institute of Chemical Processes * Prague * Czech Republic
+
+>>>>> 8/1992
+Serial version V2.0, parallel version V0.1 (see ppeo.man)
+* Odense
+
+>>>>> 7/1992
+Compatibility changes to the transputer parallel version (V1.2)
+* Odense
+
+>>>>> 5/1992
+Bug fixes (V1.1)
+* Odense
+
+>>>>> 4/1992
+PEO V1.0,
+* UTZCHT CSAV * Praha 6 - Suchdol * Czechoslovakia
+
+>>>>> 1/1992
+Poly(ethylen oxide)
+* Dept.Math. & Computer Sci. * Odense University * Denmark
+
+>>>>> 10/1991
+Constraint dynamics (Lagrangian and Hamiltonian formalism)
+* Dept.Chem. * Northwestern University * Evanston * Illinois * USA
+

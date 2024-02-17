@@ -1,0 +1,381 @@
+! Models of water, by Jorgensen etal.: J. Chem. Phys. 79, 926 (1983)
+! F3C model: Levitt M., Hirshberg M., Sharon R., Daggett V.:
+!   Comput. Phys. Commun., 91, 215(1995), also 10.1021/jp964020s
+!   WARNING: problems with combining rule
+! flexible Fergusson DM J. Comput. Chem. 16 501-511 (1995)
+!
+! NOTE: the TIP3P potential used in CHARMM21 contains extra LJ terms for
+! H..H and H..O interactions
+! TIP3P dimer energy             = -6.542 kcal/mol
+! CHARMM21 version dimer energy  = -6.595 kcal/mol
+
+! TIP4P dimer =-6.237 kcal/mol
+
+all_dihedrals=1  ! all dihedrals
+ar_dih_limit=1   ! inclusion limit for dihedrals in aromatic rings
+all_impropers=2  ! one improper per central atom, can swap central:out (NEW)
+column_X=0       ! column X disabled (all atoms match = all X=1)
+!sqrt_rule=1      ! sqrt combining rule for LJ energies, diameters additive
+comb_rule=3      ! sqrt combining rules for LJ energies and diameters
+factor14=0.5     ! multiplicative factor for 1-4 interactions
+distance14=4     ! these interactions are really 1-4
+;
+
+atoms
+!
+! X : if the atom can match wildcard atom X in the tables of dihedrals
+!     and impropers
+! A : if the atom is a member of an aromatic ring
+! mass : atomic mass in g/mol
+! shell : el shell (for MD aux charge) (WARNING: a sort of random numbers)
+! col : color type (differing from chem. are M=metal, X=halogen, Z=rare gas)
+!
+!i name   X A    mass    Z col description
+  1 H     0 0   1.00800  1 H  Hydrogen, ST2 or SPC
+  2 H4    0 0   1.00800  1 H  TIP4P water model hydrogen
+  3 M4    0 0   0        0 M  TIP4P auxiliary site
+  4 O4    0 0  15.99940  8 O  TIP4P oxygen
+  5 HT    0 0   1.00800  1 H  TIP3P water model hydrogen
+  6 LP    0 0   7.9997   0 Z  ST2 lone pair !!! mass=OH2/2
+  7 OW    0 0  15.99940  8 O  TIP3P water model oxygen
+  8 OH2   0 0  0         8 O  ST2  water model oxygen - mass moved to LP
+  9 MNAP  0 0 22.9898   11 M  Cation Na+ / TIPS
+ 10 XCLM  0 0 35.45300  17 X  Anion Cl- / TIPS
+ 11 HP    0 0 1.00800    1 H  Proton (H+)
+ 12 HF    0 0 1.00800    1 H  Hydrogen, F3C NOT FINISHED
+ 13 OF    0 0  15.99940  8 O  Oxygen, F3C
+ 14 H5    0 0   4.50385  1 H  TIP5P water model hydrogen !! not real mass
+ 15 O5    0 0    0       8 O  TIP5P water model oxygen   !! not real mass
+ 16 E5    0 0   4.50385  0 Z  TIP5P water model e-site   !! not real mass
+ 17 OX    0 0 15.99940   8 O  flexible
+ 18 HX    0 0 1.00800    1 H  flexible
+ 19 S     0 0   32      16 S  yellow large atom
+ 20 H4EW  0 0   1.00800  1 H  TIP4P-Ew water model hydrogen
+ 21 M4EW  0 0   0        0 M  TIP4P-Ew auxiliary site
+ 22 O4EW  0 0  15.99940  8 O  TIP4P-Ew oxygen
+ 23 H405  0 0   1.00800  1 H  TIP4P/2005 water model hydrogen
+ 24 M405  0 0   0        0 M  TIP4P/2005 auxiliary site
+ 25 O405  0 0  15.99940  8 O  TIP4P/2005 oxygen
+ 26 H4I   0 0   1.00800  1 H  TIP4P/ice  water model hydrogen
+ 27 M4I   0 0   0        0 M  TIP4P/ice  auxiliary site
+ 28 O4I   0 0  15.99940  8 O  TIP4P/ice  oxygen
+ 30 H6NE  0 0   4.00000  1 H  Nada-Eerden JCP 118, 7401 (2003)
+ 31 O6NE  0 0   0.00000  1 O  !!! NOT REAL MASSES !!!
+ 32 M6NE  0 0   0.00000  1 M  tip4p-like charge
+ 33 L6NE  0 0   5.00770  1 Z  lone pair SEE ALSO VERSION WITH REAL MASSES
+ 34 HE    0 0   4.00260  2 Z  Helium
+ 35 O     0 0  15.99940  8 O  SPC, SPCE
+ 36 OFW   0 0  15.99940  8 O  SPC/Fw, DOI: 10.1063/1.2136877
+ 37 OQFW  0 0  15.99940  8 O  q-SPC/FW, DOI: 10.1063/1.2386157
+! 37 HFW   0 0  1.008     1 H   use H instead
+ 38 OQ4   0 0  15.99940  8 O  q-TIP4P/F, DOI: 10.1063/1.3167790
+ 39 NO3   0 0  14.00670  7 N  Nitrogen in nitro, or related, group (CHARMM21 NO2)
+ 40 ON    0 0  15.99940  8 O  Carbonyl oxygen for amides, or related structures (CHARMM21 O)
+ 41 OFD   0 0  15.99940  8 O  SPC/Fd
+! 42 HFD   0 0  1.008     1 H  use H instead
+ 43 CL    0 0 35.45300  17 X  Anion Cl- M. Fyta and R. R. Netz, J. Chem. Phys. 136, 124103 (2012).
+ 44 HOPC  0 0   1.00800  1 H  OPC water hydrogen                   
+ 45 MOPC  0 0   0        0 M  OPC auxiliary site                         
+ 46 OOPC  0 0  15.99940  8 O  OPC oxygen                                 
+ 50 OOX   0 0  15.99940  8 O oxonium, SPCE-compatible, geom.rule doi: 10.1063/1.4942771
+ 52 ORAD  0 0  15.99940  8 O for radical OH`
+ 
+Lennard-Jones
+!       alpha     EMIN         Rmin     These columns used for
+!       [A^3]  (kcal/mol)      (A)      1-4 interactions
+! ST2:
+H        0.044   0             1.000    ! no LJ
+LP       0.044   0             0.800    ! no LJ
+OH2      0.00    -0.075715     1.7398162
+!
+! TIP4P:
+! Jorgensen, Madura: 6e5/r^12-610/r^6 (kcal/mol, A)
+H4       0.044   0             0.800    ! no LJ
+O4       0.44    -0.15504167     1.76988578
+M4       1       0             1
+!
+! TIP4P-Ew:
+H4EW       0.044   0             0.800    ! no LJ
+O4EW       0.44    -0.16275     1.7759314
+M4EW       1       0             1
+!
+! TIP4P/2005:
+H405       0.044   0             0.800    ! no LJ
+O405       0.44    -0.18520765   1.7728727 ! eps=93.2K sig=3.1589A
+M405       1       0             1
+! TIP4P/ice: eps=106.1 sig=3.1668 qH=0.5897 OM=0.1577
+H4I       0.044   0             0.800    ! no LJ
+O4I       0.44    -0.21084261   1.7773064
+M4I       1       0             1
+!
+! OPC
+H4I       0.044   0             0.800    ! no LJ
+O4I       0.44    -0.21280115   1.777166 ! to double-check
+M4I       1       0             1
+!
+! TIP3P:
+!HT       0.044   -0.0498       0.920 (CHARMM for non-water interactions)
+HT       0.044   0             0.920    ! no LJ
+OW       0.84    -0.1520726    1.768246
+!
+XCLM   3.599923  -0.1177885    2.4790916
+CL     3.6       -0.1000478    2.5367642 ! M. Fyta and R. R. Netz, J. Chem. Phys. 136, 124103 (2012).
+MNAP   0.699834  -1.607143     1.0649016
+HP       0.001   -0.002        0.8      ! added JK
+! F3C:
+HF       0.044   -0.01         0.45
+OF       0.84    -0.1848       1.7766
+! TIP5P
+O5      0.84     -0.16         1.7510408
+H5      0.044      0          0.8 ! no LJ
+E5      0.044      0          0.4 ! no LJ
+! flexible
+OX      0.84     -0.15046643  1.7861838
+HX      0.044     0           0.4 ! no LJ
+S   1    -0.05 7.5 ! auxiliary large atom
+! Nada-Eerden
+O6NE 0.84  -0.17085326  1.7482346
+H6NE 0.044 -0.027585804 0.37770848
+M6NE  0.1       0          0.3 ! no LJ
+L6NE  0.1       0          0.3 ! no LJ
+HE       1.50    -0.02030925         1.4345
+!O     0.840 -0.15539426 1.7766093 ! SPC[E]
+! SPC[/E] by orig. Berendsen:
+! (.3428/r)^12-(.37122/r)^6 , kJ/mol and nm
+! sigma_vdw=3.5532185935 eps=0.6501695808 kJ/mol = 0.155394259 kcal_th/mol
+O     0.840 -0.1553942593 1.7766092967 ! SPC/E
+ON       0.84    -0.1591       1.530    0.84  -0.20  1.36
+N*       1.10    -0.0900       1.830    1.10  -0.1   1.63
+! SPC/Fw
+OFW      0.840  -0.1554253   1.776572317
+!HFW      0.044   0           0.8   ! no LJ - use H
+! q-SPC/FW
+OQFW      0.840  -0.1554252   1.776572317
+OQ4       0.840  -0.1852      1.772872682  
+!HQFW      0.044   0           0.8   ! no LJ - use H
+! SPCE/Fd
+OFD      0.840  -0.1554253   1.7765723
+!HFD      0.044   0           0.8   ! no LJ - use H
+! oxonium 
+OOX      0.840  -0.19120459  1.73981617
+! radical DOI: 10.1063/1.2013253
+ORAD     0.840   -0.1553942593 1.7766092967 
+!ORAD     0.840  -0.155326317 1.77675996 ! = SPC/E except rounding errors
+!ORAD     0.840  -0.0690339187 2.03388244 
+
+ 
+bonds
+! K is force constant in kcal/mol/A^2: U=K(r-length)^2
+! ! atom  atom      K[kcal/mol/A^2]  r0[AA]
+HT   OW     450.0       0.9572
+LP   OH2    450.0       0.80
+H    OH2    450.0       1.00
+HX OX 547.5 1 ! cubic term omitted
+!
+H4   O4     450         0.9572
+M4   O4     800         0.15
+!
+H4EW   O4EW     450         0.9572
+M4EW   O4EW     800         0.125
+!
+H405   O405     450         0.9572
+M405   O405     800         0.1546
+!
+H4I    O4I      450         0.9572
+M4I    O4I      800         0.1577
+!
+HF   OF     250         1
+!
+O5   H5     450         0.9572
+O5   E5     450         0.7
+S S         50   3
+!
+O6NE H6NE 450 0.98
+O6NE L6NE 450 0.8892
+O6NE M6NE 450 0.23
+H	O		555  1.00	! K only for blend
+NO3   ON      362.0       1.21
+OFW  H     529.581    1.012
+OQFW  H     529.581    1
+OFD  H     527.1      1
+OOX  H       530        0.98 
+ORAD H       530        1
+!
+HOPC OOPC    530        0.8724  ! double-check!
+MOPC OOPC    800        0.1594  ! double-check!
+
+angles
+H	O	H	55   109.47122  ! K only for blend
+H    OH2  H       55.0     109.47122
+H    OH2  LP      55.0     109.47122
+LP   OH2  LP      55.0     109.47122
+!
+HT   OW   HT      55.0     104.52
+!
+H4   O4   H4      55.0     104.52
+H4   O4   M4      55.0      52.26
+!
+H4EW   O4EW   H4EW      55.0     104.52
+H4EW   O4EW   M4EW      55.0      52.26
+!
+H405   O405   H405      55.0     104.52
+H405   O405   M405      55.0      52.26
+!
+H4I    O4I    H4I       55.0     104.52
+H4I    O4I    M4I       55.0      52.26
+!
+HF   OF   HF      60       109.47122
+!
+H5   O5   H5     55        104.52
+E5   O5   E5     55        109.47
+E5   O5   H5     55        110.694771
+!
+HX OX HX 49.9 109.5
+S S S 30 108 ! pentagonal
+!
+H6NE O6NE H6NE 55 108
+L6NE O6NE L6NE 55 111
+H6NE O6NE M6NE 55 54    ! calculated from geometry
+L6NE O6NE M6NE 55 124.5 ! calculated from geometry
+L6NE O6NE H6NE 55 109.44642171 ! calculated from geometry
+ON    NO3  ON      160.0     120.0  ! guess
+H   OFW  H        37.95  113.24
+H   OQFW  H       37.95  112
+H   OFD  H        37.95  109.5
+H   OOX  H        40     111.4
+HOPC OOPC HOPC    37.95  103.6  ! double-check!
+
+dihedrals
+
+impropers
+M4  H4  H4  O4   100 0 0
+M405  H405  H405  O405   100 0 0
+ON NO3 ON ON     90.0  0    0.0
+
+nbfixes
+! site site  Emin[kcal/mol] sigmavdW[A]
+! TIP3P
+!OW   OW     -0.1520726 3.536492 as OW above
+!HT   HT     -0.04598   0.4490 ! CHARMM21 version
+!HT   OW     -0.08363   1.9927 ! CHARMM21 version
+S S 0 8 ! no LJ
+O6NE  H6NE   -0.0686522 2.12594312 ! Lorentz-Berthelot
+! F3C
+OF HF -0.0423 1.7883 ! see doi: 10.1063/1.2335971, undef. in 10.1021/jp964020s
+
+waters
+! must be in standard order recognized by cook
+SPCE  3 H .4238 H .4238 O -.8476
+SPC   3 H .41   H .41   O -.82
+
+
+! recommended SPCE.che:
+! water SPC/E water model
+! parameter_set = water
+! Hp0.4238 Hp0.4238
+!     \    /
+!      On.8476
+
+! water SPC water model
+! parameter_set = water
+! Hp0.41   Hp0.41
+!     \    /
+!      On.82
+! see also sea.par!
+! SPC: q(O)=-0.82 e, q(H)=0.41 e, alpha=109.47o,
+! r(OH)=1 A, epsilon(O)=78.21 K, sigma(O)=3.167 A
+
+! SPC/E: q(O)=-0.8476 e, q(H)=0.4238 e, alpha=109.47o
+! r(OH)=1 A, epsilon(O)=78.21 K, sigma(O)=3.166 A
+
+! both as calc. from JPC 91, 6269 (1987): (.3428/r)^12-(.37122/r)^6 , kJ/mol and nm
+! Emin=0.15539426 kcal/mol sigma=3.1655579 Rmin=1.7766093 Dmin= 3.5532186
+! CODATA 2014: eps=78.19745316692 K = 650.16958082 J/mol = 155.39425928 cal/mol
+!              sig=3.165557890200 AA
+
+! Gromos:
+! OW    -0.155393                                               3.553321
+
+!TIP4P water model
+!parameter_set = water
+!
+!      H4p.52
+!     /
+!   O4-M4n1.04
+!     \
+!      H4p.52
+
+!TIP4P-Ew water model
+!parameter_set = water
+!
+!      H4EWp.52422
+!     /
+!   O4EW-M4EWn1.04844
+!     \
+!      H4EWp.52422
+
+! tip4p05.che
+! tip4p/2005 water model
+! parameter_set = water
+!
+!       H405p.55640
+!      /
+!    O405-M405n1.1128
+!      \
+!       H405p.55640
+
+! tip4pice.che
+! tip4p/ice water model
+! parameter_set = water
+!
+!       H4Ip.5897
+!      /
+!    O4I-M4In1.1794
+!      \
+!       H4Ip.5897
+
+! OPC water model
+! parameter_set = water
+! 
+!       HOPCp0.6791
+!      /
+!    OOPC-MOPCn1.3582
+!      \
+!       HOPCp0.6791
+
+! Nada-van der Eerden model of water
+! parameter_set = water
+!
+! L6NE^n.044  H6NEp.477
+!         \   /
+!          O6NE-M6NEn.866
+!          /  \
+! L6NEvn.044  H6NEp.477
+!
+! angle calculation
+! deg
+! Mx=1;           My=0;          Mz=0
+! Hx= cos(108/2); Hy=0;          Hz=sin(108/2)
+! Lx=-cos(111/2); Ly=sin(111/2); Lz=0
+!
+! HOM=acos(Hx*Mx+Hy*My+Hz*Mz)
+! MOL=acos(Lx*Mx+Ly*My+Lz*Mz)
+! HOL=acos(Lx*Hx+Ly*Hy+Lz*Hz)
+
+! water SPC/Fw water model
+! parameter_set = water
+! Hp0.41     Hp0.41
+!       \    /
+!       OFWn.82
+
+! water q-SPC/FW water model
+! parameter_set = water
+! Hp0.42     Hp0.42
+!       \    /
+!       OQFWn.84
+
+! water F3C
+! HFp0.41     HFp0.41
+!       \    /
+!       OFn.82
+! vibrations are on purpose slower than for real water

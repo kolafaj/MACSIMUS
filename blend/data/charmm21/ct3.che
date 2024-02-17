@@ -1,0 +1,7 @@
+cter CT3 - methylamidated C-terminus (also CMAM)
+parameter_set = charmm21
+! charge=0.00
+        |
+      NPn.35
+      /   \
+   Hp.25   CH3Ep.1

@@ -1,0 +1,10 @@
+cter COOH (C-terminal patch for aminoacids protonated)
+parameter_set = charmm21
+! charge=0
+        |
+      C^p.7     !<<< On.55=C^p.55 of previous aminoacid be replaced
+      /    \
+ OACn.55   OTn.4
+            |
+            H.25
+

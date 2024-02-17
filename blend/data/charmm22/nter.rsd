@@ -1,0 +1,14 @@
+nter NTER -NH3+ (N-terminal patch for all aminoacids but PRO and GLY)
+
+parameter_set = charmm22
+number_of_atoms = 6
+! charge=1.00
+
+atoms
+!i  id   type charge chir nb bonded_atoms
+ 0  N:N   NH3  -0.30   0  3  1 2 3
+ 1  HT1,HN1:H HC    0.33   0  1  0
+ 2  HT2,HN2   HC    0.33   0  1  0
+ 3  HT3,HN3   HC    0.33   0  1  0
+ 4  CA:CA CT1   0.21   0  0 
+ 5  HA:HA HB    0.10   0  0 

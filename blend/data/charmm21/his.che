@@ -1,0 +1,12 @@
+aminoacid H HIS protonated histidine (charmm21 name: HSC)
+parameter_set = charmm21
+! charge=1.00
+        |                  H.35
+        NP^n.35-Hp.25        |
+          |                 N5Rn.3--C5RE.45
+          |                /         |
+          CH1E.1--CH2E^.1-C5R.15     |
+          |                \         |
+          |                 C5RE.2--N5Rn.3-H.35
+ On.55=C^p.55
+        |

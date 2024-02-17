@@ -1,0 +1,27 @@
+aminoacid L LEU leucine
+
+parameter_set = charmm22
+number_of_atoms = 19
+! charge=0.00
+
+atoms
+!i  id   type charge chir nb bonded_atoms
+ 0  N     NH1  -0.47   0  2  1 2
+ 1  H,HN    H     0.31   0  1  0
+ 2  CA    CT1   0.07   0  4  4 0 17 3
+ 3  HA    HB    0.09   0  1  2
+ 4  CB    CT2  -0.18   0  4  2 7 5 6
+ 5  HB1   HA    0.09   0  1  4
+ 6  HB2   HA    0.09   0  1  4
+ 7  CG    CT1  -0.09   0  4  4 9 13 8
+ 8  HG    HA    0.09   0  1  7
+ 9  CD1   CT3  -0.27   0  4  7 10 11 12
+10  HD11  HA    0.09   0  1  9
+11  HD12  HA    0.09   0  1  9
+12  HD13  HA    0.09   0  1  9
+13  CD2   CT3  -0.27   0  4  7 14 15 16
+14  HD21  HA    0.09   0  1  13
+15  HD22  HA    0.09   0  1  13
+16  HD23  HA    0.09   0  1  13
+17  C     C     0.51   0  2  2 18
+18  O     O    -0.51   0  1  17

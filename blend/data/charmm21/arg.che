@@ -1,0 +1,12 @@
+aminoacid R ARG arginine
+parameter_set = charmm21
+! charge=1.00
+        |
+        NP^n.35-Hp.25                   
+          |                        H^.3 HC.35-NCn.45-HC.35
+          |                          |       /
+          CH1E.1--CH2E^-CH2E-CH2E.1-NPn.4-C.5
+          |                                  \
+          |                             HC.35-NCn.45-HC.35
+ On.55=C^p.55
+        |

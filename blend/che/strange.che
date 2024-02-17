@@ -1,0 +1,17 @@
+strange molecule
+            HA   HA    HA
+            |     |     |
+            C6R--C6R--C6R
+            | HA^^^^^^  |
+            |     |     |
+     HA^^^^-+-CT^^^^^^--+-HA^^^^^
+            |     |     |
+            |     |     |
+     HAvvvv-+-CTvvvvvv--+-HAvvvvv
+            |     |     |
+            | HAvvvvvv  |
+            |           |
+            C6R--C6R--C6R
+            |     |     |
+            HA    HA   HA
+

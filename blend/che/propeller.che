@@ -1,0 +1,28 @@
+propeler
+    HAv   HAv
+    |     |
+   C6Rv--C6Rv
+    |     |
+HA-C6R   C6RP------C6R--C6R-HA
+    |     |         |     |
+   C6R^--C6R^       |     |
+    |     |         |     |
+    HA^   HA^       |     |
+                    |     |   HA^
+                    |     |   |
+                    |     |  C6R^--C6R^-HA^
+                    |     |   |     |
+               HA--C6R  C6R--C6RP  C6R-HA
+                    |     |   |     |
+                    |     |  C6Rv--C6Rv-HAv
+                    |     |   |
+                    |     |   HAv
+    HAv   HAv       |     |
+    |     |         |     |
+   C6Rv--C6Rv       |     |
+    |     |         |     |
+HA-C6R   C6RP------C6R--C6R-HA
+    |     |
+   C6R^--C6R^
+    |     |
+    HA^   HA^

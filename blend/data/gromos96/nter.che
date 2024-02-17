@@ -1,0 +1,10 @@
+nter NTER -NH3+ (N-terminal patch for all aminoacids but PRO and GLY)
+parameter_set = gromos96
+! charge=1
+      H.248
+         |
+H.248-NL.129-H.248 !
+         |       !
+         |       ! 
+     CH1p.127--!>>> CH1
+        |

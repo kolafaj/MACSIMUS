@@ -1,0 +1,22 @@
+aminoacid Y TYR tyrosine  
+
+parameter_set = charmm21
+number_of_atoms = 14
+! charge=0
+
+atoms
+! i  atomid  atomtype charge chiral nbonds bound-index
+  0  C       C        0.55     0    2      1 12 
+  1  CA      CH1E     0.10     1    3      11 0 2 
+  2  CB      CH2E     0.00     0    2      1 7 
+  3  CD1     C6RE     0.00     0    2      7 5 
+  4  CD2     C6RE     0.00     0    2      7 6 
+  5  CE1     C6RE     0.00     0    2      3 8 
+  6  CE2     C6RE     0.00     0    2      4 8 
+  7  CG      C6R      0.00     0    3      2 3 4 
+  8  CZ      C6R      0.25     0    3      5 6 13 
+  9  H       H        0.25     0    1      11 
+  10 HH      HO       0.40     0    1      13 
+  11 N       NP       -0.35    0    2      1 9 
+  12 O       O        -0.55    0    1      0 
+  13 OH      OT       -0.65    0    2      8 10 

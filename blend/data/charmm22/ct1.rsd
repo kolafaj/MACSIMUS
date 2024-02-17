@@ -1,0 +1,19 @@
+cter CT1 - methylated C-terminus
+
+parameter_set = charmm22
+number_of_atoms = 11
+! charge=0.00
+
+atoms
+!i  id   type charge chir nb bonded_atoms
+ 0  N:N   NH1  -0.47   0  2  1 2
+ 1  H,HN:H H     0.31   0  1  0
+ 2  CA:CA CT1   0.17   0  3  3 0 4
+ 3  HA:HA HB    0.09   0  1  2
+ 4  C:C   CD    0.63   0  3  6 5 2
+ 5  OC1,OT1:O OB   -0.52   0  1  4
+ 6  OC2,OT2   OS   -0.34   0  2  4 7
+ 7  CT    CT3  -0.14   0  4  6 8 9 10
+ 8  HT1   HA    0.09   0  1  7
+ 9  HT2   HA    0.09   0  1  7
+10  HT3   HA    0.09   0  1  7

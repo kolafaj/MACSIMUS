@@ -1,0 +1,184 @@
+! ------ MACSIMUS / V2.8 - POLAR + Gaussian charges, busing form
+
+! for the buckingham form, see Qbuck.ble
+
+!   NaCl+BK3 water version Y - FINAL
+!   MACSIMUS V2.8a and later (i.e., nbfixes in natural units)
+!
+! exp-6 with Busing combining rules and Gaussian charges
+!   u_rep(r) = f (rho_i+rho_j) exp[ (R_i+R_j-r)/(rho_i+rho_j) ]
+!   u(r) = u_rep(r) - C_i*C_j/r^6
+
+! BK3 model, JCP  138, 204507 (2013)
+! ions, JCP 141, 114501 (2014) + refitted crystal - version Y - FINAL
+! Oxygen-ions interaction kept
+
+nspec=3
+  nsites=5  nnbfixes=0  factor14=1.000000  distance14=0  comb_rule=0
+  polar=1  nparms=2;
+
+Busing
+! i atom  mass    alpha  Eref[kcal/mol]    R[A]             C[(A^6kcal/mol)^.5] sigma[A] alphapol shell  Esat arep rep
+  1 H    1.00800  0.000 -1                 0.5                0                 0.4      0.36     0.584  0 0 0
+  2 O   15.99940  0.000  2.33190807964185  1.36393329578423  28.1691150020728   0        0        0      0 0 0
+  3 M    0        0.000 -1                 0.5                0                 0.71     0.72    -1.168  0 0 0
+! Y = MAH
+!  4 NA  22.98980  0.000  0.800665576739 1.14897554592 11.4653022201772   0.65     0.157   -10     0 0 0
+!  5 CL  35.45300  0.000  3.45723479796 1.50394674805 43.7269469549384   0.96     3.5      10     0 0 0
+! version Q
+!  4 NA  22.98980  0.000  1.14748258397239  1.08686443853333  11.4653022201772   0.65     0.157   -10     0 0 0
+!  5 CL  35.45300  0.000  3.29077125022065  1.55091502334032  43.7269469549384   0.96     3.5      10     0 0 0
+! original Kiss, Baranyiai:
+  4 NA  22.98980  0.000  0.553439517568333 0.941275839253075 11.4653022201772 0.65      0.157   -10     0 0 0
+  5 CL  35.45300  0.000  2.67793314952419  1.71680241337722  43.7269469549384 0.96      3.5      10     0 0 0
+
+nbfixes
+!atom  atom    Eref[kcal/mol]   R[A]    C[A^6kcal/mol]  dummy
+!O NA 2.88534759721018  2.3052091350373  322.967416773692    0
+!O CL 5.00984122916604  3.08073570916145 1231.7493974632     0
+
+
+!!!!!!!!!!
+species NA
+!!!!!!!!!!
+! ion Na+
+! 0 atoms kept  1 free
+! mass=22.9898 g/mol
+! potential energy summary (in kcal/mol)
+!                                                     dihedrals:     0.00000
+! Lennard-Jones:    0.00000       bonds:    0.00000   impropers:     0.00000
+!       Coulomb:    0.00000      angles:    0.00000   aromatics:     0.00000
+! sum nonbonded:    0.00000  sum bonded:    0.00000     total U:     0.00000
+! duration=0s/1=0s
+! 0 dependants: 0 bonds, 0 angles, 0 impropers removed
+
+! 0 dihedrals, 0 impropers, and 0 aromatics zero or not found
+! 0 pairs excluded (1-2 etc.)   0 interactions 1-4
+
+i=0  N=0  config=0  water=0
+ns=1  nc=0  nangles=0  ndihedrals=0  nimpropers=0  naromatics=0
+ndependants=0 ;
+! charge = 1.000
+
+sites
+! i atom   charge      x        y        z    #  excluded *1-4  chir:nam
+  0 NA     1.000000   0.000000   0.000000   0.000000  0
+
+bonds
+! i atom   i atom  K[kcal/mol/A^2]  r[A]   calc.     Upot
+
+angles
+! i atom   i atom   i atom  K[kcal/mol] angle[deg]  calc.      Upot
+
+dihedrals
+! i atom   i atom   i atom   i atom nX  n    K|K[0] calc.angle Upot  angle|K[1]
+
+impropers
+! i atom   i atom   i atom   i atom nX  n    K|K[0] calc.angle Upot  angle|K[1]
+
+aromatics
+! i atom   i atom   i atom   i atom nX  n    K|K[0] calc.angle Upot  angle|K[1]
+
+dependants
+!i atom   #   i atom  weight...
+
+! max angle energy = 0 kcal/mol
+! NA.gol written
+! NA.plb renamed to NA.plb~, NA.plb written
+
+
+!!!!!!!!!!
+species CL
+!!!!!!!!!!
+! ion Cl-
+! 0 atoms kept  1 free
+! mass=35.4530 g/mol
+! potential energy summary (in kcal/mol)
+!                                                     dihedrals:     0.00000
+! Lennard-Jones:    0.00000       bonds:    0.00000   impropers:     0.00000
+!       Coulomb:    0.00000      angles:    0.00000   aromatics:     0.00000
+! sum nonbonded:    0.00000  sum bonded:    0.00000     total U:     0.00000
+! duration=0s/1=0s
+! 0 dependants: 0 bonds, 0 angles, 0 impropers removed
+
+! 0 dihedrals, 0 impropers, and 0 aromatics zero or not found
+! 0 pairs excluded (1-2 etc.)   0 interactions 1-4
+
+i=1  N=0  config=0  water=0
+ns=1  nc=0  nangles=0  ndihedrals=0  nimpropers=0  naromatics=0
+ndependants=0 ;
+! charge = -1.000
+
+sites
+! i atom   charge      x        y        z    #  excluded *1-4  chir:nam
+  0 CL    -1.000000   0.000000   0.000000   0.000000  0
+
+bonds
+! i atom   i atom  K[kcal/mol/A^2]  r[A]   calc.     Upot
+
+angles
+! i atom   i atom   i atom  K[kcal/mol] angle[deg]  calc.      Upot
+
+dihedrals
+! i atom   i atom   i atom   i atom nX  n    K|K[0] calc.angle Upot  angle|K[1]
+
+impropers
+! i atom   i atom   i atom   i atom nX  n    K|K[0] calc.angle Upot  angle|K[1]
+
+aromatics
+! i atom   i atom   i atom   i atom nX  n    K|K[0] calc.angle Upot  angle|K[1]
+
+dependants
+!i atom   #   i atom  weight...
+
+! max angle energy = 0 kcal/mol
+! CL.gol written
+! CL.plb renamed to CL.plb~, CL.plb written
+
+
+!!!!!!!!!!!
+species BK3
+!!!!!!!!!!!
+
+i=2  N=0  config=0
+ns=4  nc=3  nangles=0  ndihedrals=0  nimpropers=0  naromatics=0
+naxials=0 ndependants=1 ;
+! charge = 0.000
+
+sites
+! i atom   charge      x        y        z    #  excluded *1-4  chir:nam
+  0 H      0.584000   0.612011   0.667929  -0.151719  0
+  1 O      0.000000  -0.063918   0.009924   0.010698  1  0
+  2 M     -1.168000   0.145730  -0.022604  -0.024155  2  0 1
+  3 H      0.584000   0.402526  -0.825440  -0.018087  3  0 1 2
+
+! waterdep H,O,M,H 0.975 104.52 M 0.2661
+! H,O,M,H
+! OH=0.975 HOH=104.52 MO=0.2661
+
+bonds
+!i atom   i atom  K[kcal/mol]  r[A]   calc.     Upot
+ 0 H     1 O     450 0.975  0.975 0.0
+ 3 H     1 O     450 0.975  0.975 0.0
+! bonds equivalent to constrained angles:
+ 0 H     3 H     200 1.542053  1.54205 0.0
+
+angles
+! i atom   i atom   i atom  K[kcal/mol] angle[deg]  calc.      Upot
+! 104.52 deg
+
+dihedrals
+! i atom   i atom   i atom   i atom nX  n    K|K[0] calc.angle  Upot   angle|K[1]
+
+impropers
+! i atom   i atom   i atom   i atom nX  n    K|K[0] calc.angle  Upot   angle|K[1]
+
+aromatics
+! i atom   i atom   i atom   i atom nX  n    K|K[0] calc.angle  Upot   angle|K[1]
+
+dependants
+!i atom   #   i atom  weight...
+M  2 M     3  1 O     0.55410501  0 H     0.22294749  3 H     0.22294749 e
+
+axials
+! i atom-->i atom   arep    alpha  alphazz   Esat

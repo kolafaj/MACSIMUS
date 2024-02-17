@@ -1,0 +1,14 @@
+aminoacid Y TYR tyrosine
+parameter_set = charmm22
+! charge=0.00
+        |
+        NH1^n.47-Hp.31
+        |                   HPp.115    HPp.115        
+        |                       |        |      
+        |       HAvp.09    CAn.115-CAn.115
+        |        |         /            \
+HBvp.09-CT1p.07-CT2n.18-CAp.00         CAp.11-OH1n.54
+        |        |         \            /        \
+        |       HAvp.09    CAn.115-CAn.115       Hp.43
+ On.51=C^p.51                  |        |    
+        |                HPp.115    HPp.115      

@@ -1,0 +1,9 @@
+molecule cyclobutane
+      HAv    HAv
+       |      |
+  HA^--CT-----CT--HA^
+       |      |
+       |      |
+  HA^--CT-----CT--HA^
+       |      |
+      HAv    HAv

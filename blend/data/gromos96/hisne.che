@@ -1,0 +1,12 @@
+aminoacid H HIS histidine (uncharged with proton on NE2)
+parameter_set = gromos96
+! charge=0.00
+        |         
+       N^n.28-Hp.28
+          |           NR5n.58-CR51p.26
+          |          /             |
+          CH1-CH2^-CR5p.13         |
+          |          \             |
+          |           CR51p.0--NR5p.0
+  On.38=CO^p.38                     \
+        |                            H.19

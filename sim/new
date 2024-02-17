@@ -1,0 +1,2233 @@
+This file contains history of cook etc. until 2008.
+See `macsimus/history.txt' for the history since 2009.
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Common history file for sim and cook.  Watch the end!
+
+before 1995:
+
+loadreversed added
+init=4: supresses Scorrect when init
+
+FIXED(?) auto ewald crashes if charges=0
+option -w
+option -q
+
+config support
+
+etest changed!!!
+
+rdfgrid: rdf crashes cookfree - must be zero
+
+1/95 constraint H-angles: overdetermination problems ... solved
+
+1/95 option -u : bond limit (..not tested..)
+
+1/95 !!! inefficiency bug fixed: record of constraint errors if(measure) only !
+
+-t changed: use -t to enable time measurements
+
+1/95 (to be debugged) vibrating bonds added
+
+1/95 SYSNAME.def read if SIMNAME.def does not exist
+
+1/95: init=10
+
+1/95: -@ cell analysis (homogeneous?)
+
+-v added
+
+??? new ERROR: not in scroll!!!
+??? error if LJcutoff too short
+CACHE + FROM - not finished
+
+-j extended to negative args
+
+error fixed: init velocities (old version: T/2 used)
+
+init=5 pins>3 : repeating cells from external cfg
+
+FREEBC: mess with cutoff/measuring rdf
+
+5/95 : POLAR
+
+7/95 : decoupled intra/inter molecular thermostat
+
+7/95 : option -i improved
+
+11/95: dt.prt, dt.plb, dt.cfg
+       option -y removed (now dt.plb)
+       negative dt.plb: omit header
+
+removedrift/removerotation fixed 
+  (problem was with long runs on small molecules - removerotation caused
+  V drift which was not corrected sufficiently often)
+
+COMPROMISE: removedrift/removerotation corrected only each cycle
+
+BUG: No.free_mass was int!!! - fixed (but was not too harmful, the double->int
+  conversion error did not cumulate)
+
+more changes: statics format changed to be transferable between
+    16/32/64 bit systems (still backward compatible :
+      use environment variable STAOLDFMT)
+    dihedral histograms format changed (still backward compatible :
+      use environment variable DIHOLDFMT - see simmeas.c)
+
+packed convergence profile format implemented (files *.cpz, variable
+  CPnbit, utility cppak, to peores soon)
+
+packed playback (not in cook [yet], now utility plbpak only)
+
+bug (bad formula for dielectric constant for polarizable systems) fixed
+
+12/95:
+  SHEAR extended to SHAKE (incl. POLAR)
+  SHEAR - meaning of parameter `shear' changed (now, a product of
+    expected heating rate [in K/s] and an estimate of viscosity [in SI])
+  option -q made global
+  intermolecular degrees of freedom if not Nose ++
+
+7/96: 
+  xs.cp added
+  rg.cp,rg.end[2] added
+
+  dihgrid renamed to dih.grid
+  dih.cp added (negative: summary gauche(cis) ratio in CP, otherwise dih #)
+
+  variable SI added: if set, E, Emax, and output energies are given in J/mol,
+    otherwise in kcal/mol
+
+8/96:
+  xs.ns,xs.sizelimit added
+  particle out of grid array is ignored with a warning only
+  rdf.cutoff added
+
+  rdf and dih run now in serial for PARALLEL==1 or 3
+9/96
+  quit=-4 calls shell while in get data
+  xs.RvdW added
+  xs.scaleR renamed to xs.Rscale
+  bug bad cutoff corr if LJ term zero: fixed
+
+  bug (or feature...) found: if Gear is used and no thermostat,
+  Tkinintra and Tkinter are not measured.  If you need them, use
+  tau.T=3e33 (this is `infinity')
+
+9/96: LJ+exp6 support
+  interface files sitesite.c and sitesite.h:
+  in sim/lj for the standard LJ version of cook and blend
+  in sim/ljexp6 for exp6+LJ version
+  exp6+LJ version requires the following changes in the blend file:
+    (1) add `nparms=1' to the 1st get data set
+    (2) add columns 7 and 11 (after RvdW and RvdW[1-4]) with the
+        stiffness parameter (usu. denoted xi, alpha, gamma) to table
+        `site-types'.  xi=0 denotes Lennard-Jones, xi>0 is exp-6; then,
+        RvdW is 1/2 of the minimum location
+    (3) similarly (a) xi column(s) can be added to the NBFIX table
+        after sigvdW
+
+10/96:
+  pins changed:
+    pins<0: increase density if prob(insert)>sqrt(|pins|)
+            decrease density if prob(insert)<|pins|
+    pins>0: decrease density if prob(insert)<|pins|
+            accepted if inserted
+    default=0.1
+  caveat found: should check LJcutoff vs. cutoff for Ewald test
+
+
+  cook: special functions for water models implemented.
+  These are recognized by species names in the *.ble file.
+  The order of sites must be as specified below:
+
+  species tip3p : HHO
+--------------- tip3p.che -------------
+TIP3p water model
+parameter_set=water
+!parameter_set=charmm21 is with LJ on H
+
+  HT.417 HT.417
+     \    /
+     OWn.834
+------------------------------------
+
+  species tip4p : HOMH
+--------------- tip4p.che -------------
+tip4p water model
+parameter_set = water
+
+      H4p.52000
+     /
+   O4-M4n1.04
+     \
+      H4p.52000
+----------------------------------------
+
+  species st2 : OLHLH
+---------------- st2.che ---------
+ST2 water
+parameter_set=water
+
+! order of sites OH2 LP H LP H
+! use blend with -r option until energy=0
+
+       OH2--LPn.2357
+      / | \
+H.2357  |  LPn.2357
+      H.2357
+----------------------------------
+
+To get rigid models, option -h must be given to blend.
+(non-rigid ST2 not supported)
+
+option -x turns off using these special functions
+caveat: H..H LJ terms are in (some cases?) included when -x is given
+
+ERFCPLUS (see ewald.c) must be at least 1.8 for ST2 !!!
+
+if init>=2 then the playback is also written for the starting config (if
+         t  is a multiple of  dt.plb )
+
+warning: mess if real=float (interpot.c vs. lcforces.c)
+
+10/96: compatibility update for linkcell
+
+10/96: bugs found and fixed
+         1. crash for a mixture of species with dependent sites
+         2. bad force for charged exp-6 particles
+
+10/96: option -c added to showcp (files of time correlation functions)
+
+1/97: bug fixed (dependants)
+
+2/97: zero_energy (as exported in ble-files) incl. in pot. energy
+      lag2 added
+      note: both lag and lag2 are global (peostruc) though lag needed
+        in main only
+      bug fixed: read dependants in simdef.c (just by chance, worked OK for water)
+
+3/97: #define NIBC (nearest-image boundary conditions) added
+      not finished: cutoff correction
+
+3/97: #define SCALEDMOL under development
+      (bugs when dependants, does not work for Ewald)
+
+4/97: En.first added = energy of first No.first molecules (intramolecular,
+      but without Ewald k-space contribution)
+      No.first added to get data
+      if No.first>0 then E# instead of Ein in CP records En.first
+      if No.first=0, Ein is En.intra as it used to be
+      NEW: Both are now in J/mol or kcal/mol (according to SI)
+      default No.first=0
+
+8/97: if -j# then # molecules not rotated while init (-q-% not needed -- 
+      reserved for the rest)
+      MC added to init cfg: MC=-1 runs MC until ^C or max pair E <Emax
+                            MC>0  runs MC sweeps
+                            MC=0  no MC
+
+      bug: the potential energy is not correct if option -j is used 
+           (differs by a constant dependent on the Ewald parameters, 
+           i.e., the Ewald test fails). 
+           Forces and thus the trajectory are OK
+
+      bug: playback writing was at improper times (1st frame was twice,
+           then if time integer*dt.plb was exactly reached, the frame
+           was written in the beginning of the next step/run)
+           now fixed: one frame written at the beginning (if 
+           dt.plb*INTEGER is in <t-h/2,t+h/2>) and then AFTER MD step.
+
+      t written to header[1] of the playback file (when new playback
+      started, i.e. init>=2)
+           
+      Support for recording (in CP and statistics) of chosen atom-atom
+      distances added.  The atom indices (site numbers) are given in file
+      SIMNAME.cpi in the following two or three column format (fields
+      separated by white characters).
+      ! this is comment
+      ! atom1 atom2 [name]
+        1     123   CC1 (this is comment, too)
+        1     124   CC1_nbr
+       KEYWORD
+      In CP only first 4 letters of the name are used (CC1_nbr is
+      truncated to to CC1_).  If the third column is missing,
+      names ss1, ss2, ... are used.
+
+      The second form now accepts KEYWORD = elst LJ bond
+     
+to do: MC preferentially sample high-energy atoms and/or force-bias
+       MD with fixed max displacement (?)
+       1-4 distance predictor + -j option makes warning
+       to make CP more flexible in the spirit of *.cpi (units? SI/kcal)
+
+initcfg changes:
+for FREEBC and init=3, the first molecule is centered (not placed randomly)
+central force (option -o) added to MC now
+playback recorded every (dt.plb/h)-th sweep
+
+10/97: test `max pair energy < Emax' ends MC only for MC=-1,
+       if MC>0 then always MC steps are done
+       (always possible to interrupt by ^C)
+
+       more measuring different energy terms added, keywords in *.cpi are:
+         bond   total bonded energy
+         LJ     total LJ energy
+         elst   total electrostatic energy
+         bond0  bonded energy of first  No.first  molecules
+         LJ0    LJ     energy of first  No.first  molecules
+         elst0  elst   energy of first  No.first  molecules
+         pot0   potential (bonded+LJ+elst+zero) energy
+                of first  No.first  molecules
+         elstX  cross elst energy (first No.first molecules X rest)
+         LJX    cross LJ   energy (first No.first molecules X rest)
+         potX   cross pot  energy (first No.first molecules X rest)
+
+       No.first=number_of_molecules_in_the_first_group should be in
+       input data, if missing and one of the terms containing No.first
+       is present in *.cpi file, No.first=1 is the default
+
+       option -o-NUMBER added to MC initcfg
+       -j# should be specified, too.  Then special `sticky' potential of
+       the form
+         NUMBER*(mindist/NUMBER)^2
+       is added to all molecule-molecule pairs between molecules of
+       indices<#, and those with indices>=#, where mindist is the
+       minimum atom-atom distance. Typical usage is for protein (-j1)
+       and water: water molecules will find places in a shell (layer) of
+       average thickness NUMBER around the protein.  There is no
+       water-water sticky force.  The algoritm of inserting waters works
+       as follows:
+         gaussian random shooting of molecules to give total density of
+         the cloud roughly initrho
+         if inserting fails (prob<pins), initrho is slightly decreased
+         and NUMBER is increased
+         MC uses the same potential but MD does not
+         pins<0 should not be used
+
+11/97 option -r# now saves cfgs SIMNAME.1, ... in float instead of
+      cook's native real (usually double): use -r-# to get native real.
+
+      BUG: for ljexp6 and reading force-field with LJ only, makes mess with parm[0]
+
+9/98: L instead of t written to header[1] of playback file(s)
+      #define STARS to simulate gravity instead of charges
+
+???: init<0, Reads playback, frame |init|, then as if init=2.
+
+10/98: init=999: SIMNAME.1, SIMNAME.2 ... SIMNAME.no and writes frames to
+     the playback file(s); nothing is calculated.
+     The last cfg has number no
+
+fall/97: version MARK to analyze pair energies, FREEBC recommended
+     (note 3/2000: works fine with CUTELST, too)
+     What it does:
+       calculates pair energies between groups of atoms
+       one group is the zeroth-group, there are NG (NG<254) other groups
+       energy (in vacuum) of n-th group vs. zeroth-group is calculated 
+         and recorded in CP-file (note:1st 2 columns have bad heading)
+     Source of data:
+       if option -r: files SIMNAME.1, SIMNAME.2 ... SIMNAME.no
+       if not option -r: playback file SIMNAME.plb, frames 1..no
+     Compiling:
+       #define MARK needed in simopt.h
+       link with module mark (mark.h, mark.c)
+     Bug:
+       inefficient, calculates also pairs that are not needed
+     Usage:
+       prepare file SIMNAME.mkr (option -r>0) or SIMNAME.mkp (option -r<=0)
+       in the following format (ID is group ID derived from 1st atom ID):
+NG
+0 ID GROUP
+1 ID GROUP
+2 ID GROUP
+...
+       example (abridged):
+10
+  0 ASN64aC     0
+  1 ASN64aCA    0
+  2 ASN64aCB    0
+...
+633 PRO10cCG   10
+634 PRO10cN    10
+635 PRO10cOC1  10
+636 PRO10cOC2  10
+       NOTE: in the playback version (no option -r), only those atoms
+       actually stored in the playback may be listed
+       Option -r summary:
+         -r0 : reads playback SIMNAME.plb, uses SIMNAME.mkp
+         -r1 : reads configs SIMNAME.1 ..., uses SIMNAME.mkr
+         -r-1 : reads configs SIMNAME.1 ..., uses SIMNAME.mkp
+       NOTES (added 3/2000): 
+         IDs in the mkp,mkr files are used as info only, they do not
+           select anything nor are checked
+         The N[] in the def-file used must conform the original def-file.
+         Atom not to be included in any group simply have the group
+           field blank (e.g., "636 PRO10cOC2  ")
+         SIMNAME.mkp and SIMNAME.mkr files may be shorter (i.e., not
+           listing all atoms).  Not listed atoms are simply ignored.
+           Only if the actual plb file is shorter, a warning is printed.
+         Typical usage is for protein in water.  For energies without
+           water (not solvated), mkr and mkp files can be created from
+           the protein mol-files (water is ignored).  To include
+           water, use a mol-file generated by molcfg.
+
+2/99: PARALLEL/SGI: environment variable MPC_NUM_THREADS changed to
+      MP_SET_NUMTHREADS in accordance with the new MIPS version of the
+      C compiler
+
+      show/rdfg bug fixed (grid incorrectly printed)
+
+6/99  technical: new exp6,lj,... interface to blend
+      option -[ = # of periodic copies while loadcfg
+      options -d and -k changed (d=distancecheck)
+      new default for -m is -m2
+      -y# extended to #<-1: will make playback of |#| molecules of the last 
+        species, chosing those |#| molecules which are nearest to
+        all molecules of previous species (i.e. but the last).
+        Typical usage for showing a shell of water molecules around a protein,
+        the protein is centered and waters are shown in proper periodic image
+        In addition, files SIMNAME.TIME (where TIME is in %.3f incl. the
+        decimal point) are created, e.g.:
+# i wat# site# nbr  protein atoms in shells by 1A from any water atom
+  0  228  762   77     0    1    4   13   19   38   56   81  128  181
+  1  252  834    1     0    1    4   13   23   35   40   46   62   86
+  2  401 1281   76     0    1   13   22   39   56   93  130  164  194
+        lines are sorted according to the nearest protein-water distance
+        wat#=water # in cook (1st water=0)
+        site#=# of 1st site of the water
+        nbr=site # of the closest protein atom
+        more 10 columns: # of protein atoms around any water atom (SUM over O
+        and both H), in 1A shells (1st shell=1A, of course no atom so
+        close...).  
+        
+9/99: option('f') changed: negative: reads SIMNAME.### from -option('f')
+                           positive: reads SIMNAME.plb from option('f')
+
+NOTES on TIP3 water.
+There are THREE versions of TIP3 water:
+1/ flexible TIP3 water, as used in blend, with small intermolecular
+   H-O and H-H terms to prevent H-O charge singularity.  Because of
+   flexibility, the H-bond energies are lower.
+2/ rigid TIP3 water, with those intermolecular terms.  This is used in
+   cook* when *.ble file has been created by blend -h AND using
+   `optimized' water is disabled by cook -x (and no -u option selecting
+   flexible terms is used).
+3/ rigid `original' TIPS3 water: blend -h needed.  This is optimized
+   code which does not contain additional H-O and H-H terms and is
+   always rigid.
+* cook* prints a warning when it recognizes water and blend -h has not
+   been used.
+* blend without -h and cook* -x -u99999 will use the flexible water also
+   in MD.  This is less efficient.
+* cook* need not recognize water (to use optimized code) that has been
+   added to the system in other way than via `blend hoh' and
+   consequently uses the general code (with H-O and H-H terms).  The
+   molecule is still rigid (if blend -h)
+
+9/99 upgrade of autodiffusion, also with FREEBC
+   use -j to turn off some molecules 
+   -f# refers to reading *.plb from frame # to frame no or option -#
+   by noint frames 
+   NOTE: if this is to be used for water around protein, all waters
+   should be individual molecules, i.e., blend should be run with -n-1
+   option.  Then, use -j1 or more according to the number of molecules
+   (protein chains).
+
+9/99
+   file simname.loc is used to prevent cook from starting two 
+     simulations at once
+   normally, it is removed after completition or interrupt
+   It is NOT removed after kill -9 or crash, indeed
+
+9/99
+   bug found: if `config' is passes from blend -n-1, still energy is
+   checked and, if Emax is reached, the system tries to insert again,
+   ending in an infite loop (using large Emax helps)
+   fixed -- test was removed
+
+10/99
+   Support for fixing positions of selected atoms via harmonic springs:
+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+     Ufix = sum_i K/2 (r[i]-rfix[i])^2
+
+   needed:
+
+     * file SIMNAME.fix defining sites to be kept fixed:
+------------------------ example of SIMNAME.fix ---------------------
+# this is comment
+! this as well
+! the following line specifies that site # 2 will be fixed:
+2
+! the following line specifies that sites 5 6 7 8 will be fixed:
+5-8
+! site numbers for the first molecule can be found in mol-file or
+! ble-file (table sites), otherwise have to be calculated
+! this is incorrect line:
+2 3
+------------------------ end of SIMNAME.fix ---------------------
+
+     * K=option -k.  K is in units K/A^2.
+       Reasonable values are probably in range 100-10000.  Too low
+       values do not keep atoms in positions firmly enough, too large
+       values cause bad energy conservation and other artifacts.
+       -k0 [default] turns off any fixing and file SIMNAME.fix is ignored
+
+     * if the following line
+--------------------------- SIMNAME.cpi -------------
+fix
+----------------------- end of SIMNAME.cpi -------------
+       is present in file SIMNAME.cpi, energy Ufix is recorded in the
+       convergence profile
+        
+   program flow:
+     when init>=3, file SIMNAME.fxc is written containing the initial
+     positions of atoms rfix[]
+     when init<2, file SIMNAME.fxc is read
+
+   conserved quantities:
+     presence of non-symmetric potencial causes the momentum and
+     angular momentum (for free b.c.) not to be conserved.  For
+     general 3 or more fixed atoms, this is correctly taken into
+     account in calculating the number of degrees of freedom (needed
+     to evaluate Tkin).  In addition, correcting the momentum and
+     angular momentum for numerical errors is turned off (unless norm
+     is specified)
+ 
+   bugs:
+     for 1 or 2 atoms to be fixed (or linear set of atoms), the number
+     of degrees of freedom calculated and correcting the angular
+     momentum is incorrect
+
+   tested with FREEBC only, but in principle should work with other b.c. too
+
+
+   norm
+   ~~~~
+   This new variable affects the way how the momentum and angular
+   momentum are corrected for numerical errors
+   norm=0 - default, corrections apply when the coresponding quantity
+            is conserved
+   norm=-1 - momentum (velocity) drift never corrected
+   norm=1  - momentum (velocity) drift always corrected
+   norm=-2 - angular momentum (rotation) drift never corrected
+   norm=2  - angular momentum (rotation) drift always corrected
+   norm=-3 - the same as norm=-1 and norm=-2
+   norm=3 -  the same as norm=1 and norm=2
+
+   When a big macromolecule is kept by several atoms, it may be
+   useful to set norm>0 during equilibration 
+
+10/99
+   structure factor update
+   cook* -f: center.plb did not include the first frame -- fixed
+   cook* -f: -a0, -q0 forced
+   cook* -f: atom table may contain weights as the last number
+             otherwise, atom mass used
+
+Structure factor theory:
+~~~~~~~~~~~~~~~~~~~~~~~~
+The following `combining rule' is used for the structure factor of mixture:
+
+               <Q*(k) Q(k)> - sum_i b_i^2 
+  S(k) = 1 + N --------------------------               (+)
+                     (sum_i b_i)^2 
+
+where
+
+  Q(k) = sum_j b_j exp(-ik.r_j)
+
+and k is vector here.  Sums here are over atoms.
+
+The scattering amplitudes (lengths, weights) b_I should be written to the
+ble-file to the table of pair potential parameters (Lennard-Jones,
+Busing-12, ...) after the last column.
+(If this column is missing, atomic masses m_I are used instead,
+however, do NOT write b_J instead of masses to the 2nd column!)
+
+S(k) should be spherically symmetric for a homogeneous fluid, but it
+is not exactly spherically symmetric in periodic b.c. and the last
+step is thus
+
+  S(kscal) = sum_{kscal=|k|} S(k) / sum_{kscal=|k|} 1
+
+Formula (+) comes from the following `combining rule' for the `partial
+structure factors' S_IJ (I,J index species)
+
+  S = sum_I sum_J w_IJ S_IJ
+
+where
+          N_I b_I N_J b_J
+  w_IJ = -----------------
+         (sum_I N_I b_I)^2 
+             
+(Note that sum_I N_I b_I=sum_i b_i)
+
+The `partial structure factors' S_IJ are defined by
+
+  S_IJ(k) = 1 + (N/V) INT (g_IJ-1) exp (-ik.r) dr      (++)
+
+(k,r are vectors)
+
+More details about Fourier transforms.  The basic formula in 1D is
+that for
+  
+   F(k) = INT f(x) exp (-ikx) dx 
+
+(INTegral is from -infinity to +infinity)
+there is
+
+   f(x) = (1/2PI) INT F(k) exp (ikx) dk
+
+In 3D it is (now r and k are 3D vectors):
+ 
+   F(k) = INT f(r) exp (-ik.r) dr                            (*)
+   f(r) = (1/2PI)^3 INT F(k) exp (ik.r) dk
+
+If f(r) is spherically symmetric, then (*) becomes
+
+   F(k) = INT f(|r|) exp (-i cos(theta) |k| |r|) 
+          r^2 d |r| d phi d cos(theta)
+
+after performing the integration over d phi [-PI,PI] and d cos theta
+[-1,1] 
+
+   |k| F(|k|) = 4 PI INT sin(|k| |r|) |r| f(|r|) d |r|
+
+and back in the same way
+
+   |r| f(|r|) = 1/(2 PI^2) INT sin(|k| |r|) |k| F(|k|) d |k|
+
+To derive the formula for S_IJ, let us start from the definitions of
+g_IJ:
+
+  g_IJ(r) = V < delta(r_ij - r) >                                (**)
+
+where i(j) is any atom of type I(J), delta is the Dirac
+delta-function, and for I=J there is additional (1-1/N_I) in front of
+it.  By taking the Fourier transform of (**) (for I<>J)
+
+  INT (g_IJ(r) exp(-ik.r) dr = V < exp(ik.r_i) exp(-ik.r_j) >
+                             = V < Q_I*(k) Q_J(k) > / (N_I N_J)
+
+and using (++), one gets the partial structure factors
+
+  S_IJ(k) = 1 + N [ < Q_I*(k) Q_J(k) > / (N_I N_J) -1 ]
+
+and finally (+)
+
+
+11/99: option -y# (#<-1) upgraded, new option -]#:
+
+   # = site number in water (in range 0-2, default=0) which is used to
+   calculate distances to.  (The old version with all 3 water atoms
+   included is still available using -]-1.)  First check the site # of
+   oxygen in water (e.g., in the ble-file), I guess it is 2 in most
+   cases; if yes, use:
+
+     linkelst -y-10 "-]2" XXX
+
+   This will find first 10 water molecules with the minimum
+   wateroxygen-protein distance.  In the *.TIME (*.0.000) file, there
+   are numbers of neighboring atoms.  (In the old version, there were
+   sums over H+H+O).  But essentially almost the same result could
+   be obtained by dividing the old version (H+H+O) numbers by 3...
+
+------------- MACSIMUS pre-official release ----------------
+
+11/99: inter and intramolecular kinetic energies now always measured
+       bug fix: linear momentum was scaled by h in statistics
+       now linear and angular momenta always measured (angular FREEBC only)
+       reported if removed on save/load (these measurements are not
+         included into statistics)
+       CP available as angm and linm in SIMNAME.cpi
+       BUG: angm  and linm are incorrectly included into statistics
+            (in wrong energy units)
+
+01/00: pressure is now Pvir=((En.kin*2+En.vir)/DIM+corr/V)/V;
+       (used to be Pvir=(((DIM*No.s-No.c)*En.T+En.vir)/DIM+corr/V)/V;)
+       The difference is of the order of 1/N, but now it gives `true zero' 
+       in free b.c.
+
+       epspq added:
+       1/ value 0<epspq<1 means that epsp*(1-epspq) will be used as
+         the actual error limit EPSP in the 1st step, instead of epsp.
+         In subsequent steps,
+           EPSP := EPSP*epspq + epsp*(1-epspq)
+         performed after every step so that after some time epsp is
+         reached.  After every batch (data set ended by ;), epspq is
+         made negative and this function is turned off. This is
+         because the history for the predictor IS saved across batches
+       2/ value epspq<=0 turns off this function and epsp is always
+         used
+       3/ epspq>=1 is invalid
+
+       nomax added:
+         the simulation stops if the total number of measured cycles
+         reaches or exceeds nomax.
+         nomax<=0 turns off the check
+
+
+WARNING: rdfg, harmg etc. use for site-site correlation functions a
+       formula giving 
+         lim{r->infty} g_sS(r) = 1                                 (1)
+       and not the corrrect
+         lim     g_sS(r) = 1 - 1/N for s=S                         (2)
+                         = 1       for s<>S 
+       Formula (1) is better approximation of the thermodynamic limit,
+       however, in certain cases whwre e.g. integrals of gs are
+       calculated (2) should be preferred.  In most cases the
+       difference between (1) and (2) is irrelevant.
+
+BUGS and FEATURES: 
+  measurements of harmonics, dihedrals etc. are appended if init=1
+  (they should be initialized) - FIXED 3/2000
+
+  -j-# causes Maxwellian velocities reassigning every data set, which
+       may be sometimes desirable (thermostat), sometimes wrong
+       (simulation should smoothly continue as if init=0)
+
+  -y# and dt.plb forces playback writing every time t which is a
+      multiple of  dt.plb .   However, if init>=2 is used at t which
+      is not multiple of  dt.plb, and  no  is small, it may happen
+      that no frame is actually written.  Consequent restart with
+      init=0 fails because at least one previous frame is needed to
+      continue correctly in periodic b.c.  Can be fixed by newt=0.
+  
+  .cpz (packed convergence profile) does not work for no=1.
+      There is extra 4B in the file for unknown reason
+      This has been fixed by a symptomatic way: reading these 4B
+      It is not guaranteed that this is always correct!
+
+3/2000: 
+------------------------- GOLD version --------------------------
+
+  Simulation at vicinity of metal (ideal conductor) surface.
+  The surface is located at z=0, bulk metal at z<0, studied
+  configuration at z>0.
+
+METHOD
+~~~~~~
+  The electrostatic forces are obtained by the method of "inversion":
+
+          (+)
+                (+)
+                /     configuration
+              (-)
+    (-)             
+  ------------------------
+    (+)             
+              (+)
+                \     mirror image with opposite charges
+                (-)
+          (-)
+
+  In addition, Lennard-Jones-type interaction with the surface is added.
+
+
+FORCE FIELD
+~~~~~~~~~~~
+Electrostatics:
+
+                        1         1         1       2    1    
+     U = SUM qi qj [ ------- - -------- ] - - SUM qi  --------
+         i<j         |ri-rj|   |ri*-rj|     2  i      |ri*-ri|
+
+  where ri=(xi,yi,zi) and the mirror image is ri*=(xi,yi,-zi) 
+  (To derive this formula, calculate elst energy of the `double'
+  system with reflected charged.  You will get 2U.  Use
+  |ri*-rj|=|ri-rj*|, |ri-rj|=|ri*-rj*| to simplify.)  Note also that
+  |ri*-ri|=2z.
+
+  Implementation: Inside all site-site functions, the Coulomb term is
+  replaced by Coulomb+inverted Coulomb.  Module "interpot.c" is
+  replaced by "gold.c", with the same header file "interpot.h".
+  B.c. macros in "intermac.h" are updated to treat periodic b.c. in
+  x,y only and adding extra support for inversion.  The SUM_i part
+  (along with LJ, see below) is in "peoforce.c", function
+  goldforces().
+====> CAVEAT: optimized water potentials not (yet) implemented, gold*
+  must be run with option -x
+
+Atom-surface: 
+
+  It is assumed as averaged Lennard-Jones in z<0 metal.  Let eps,sig
+  be LJ parameters { ULJ(r) = 4 eps [(sig/r)^12-(sig/r)^6] } of
+  interaction between a gold atom and a given atom; these parameters
+  are obtained by the usual combining rules from LJ parameters of both
+  atoms, and let rho be the number density of (smoothly distributed)
+  gold atoms.  Then the effective potential is
+
+                         36 PI  sig 9         sig 3
+     U = eps rho sig^3 [ ----- (---)  - 6 PI (---)  ]
+                           5     z             z    
+
+  USAGE:  
+  Programs `gold*' derive rho from real mass density of metal
+  (gold) gold.rho in kg/m^3 which is available in data (default
+  gold.rho=19320).  Also eps,LJ need LJ parameters for gold.  This
+  gold atom must be listed as the LAST atom in table Lennard-Jones in
+  the system ble-file and at the same time MUST NOT appear as normal
+  atom in molecules.  This can be accomplished by putting it the last
+  position when using blend and specifying N[LASTINDEX]=0 or
+  blendoption -n0, e.g.
+     blend MOLECULE(s) -n0 au
+  where au.che is just
+----------- au.che -------
+gold atom
+MAU
+------------ eof ----------
+  WARNING this requires that the correct data for gold are present in
+  charmm21.par!  At the moment, I am using
+!       alpha     EMIN         Rmin 
+!       [A^3]  (kcal/mol)      (A)  
+MAU      1       -0.039        3.293    ! UFF -- JK
+  based on UFF (JACS 114,10024 (1992)).  The value for alpha (used in
+  the combining rule) is just guess.  We need  better data from
+  literature, and/or adjust this for given task.  This value affects
+  the energy of adsorption.
+
+====>  NOT TESTED: interaction with -n-1
+
+  Minor versions:
+    FREEBC: free b.c. in x,y, and z>0
+    NIBC: nearest image periodic b.c. in x,y, free in z>0 
+    cutoff electrostatics: periodic b.c. in x,y, free in z>0
+====> Ewald not supported
+====> NIBC NOT TESTED
+
+  Integrals of motion:
+    x,y periodic and FREEBC:
+          momentum in x and y is conserved and is periodically
+          reset to zero, z-momentum is unchanged
+          center-of-mass is adjusted to (x,y)=(0,0)
+    FREEBC: angular momentum in z-direction is conserved and is
+          periodically reset to zero, x,y are unchabged
+
+  Degrees of freedom to subtract for conserving quantities (siminit.c):
+    GOLD + FREEBC, no central force (-o0): 3
+    GOLD + FREEBC, central force (-o#): 1
+    GOLD + periodic: 2
+    Fixed atoms (option -k) shrinks this to 0 (NOT GENERALLY CORRECT).
+
+  Initializer:
+    only init=3 available, both with and without `config' option
+    config (= option -n-1 in blend): the configuration is shifted
+         in the z-direction so that the atom with minimum z coordinate
+         is gold.minz from the surface (gold.minz is available in the
+         data, default=3).  gold.minz<=0 turns off this function.
+         suitable for a `configuration' prepared by blend
+    standard (-n-1 not used): when initializing by `random shooting'
+         condition, min z > gold.minz is satisfied
+         
+====> MC not implemented
+
+
+  NEW data (to be placed in def- or get- file)
+    gold.g = gravity towards the golden plate [default=0], internal
+             prog. units
+    gold.minz = min z for initial config [3], in A
+    gold.rho = mass density of metal atoms [19320], in kg/m^3
+    gold.scalez = factor by which the randomlu shot z-coords are
+                  multiplied while initializing (init=3)
+    
+  Suport:
+    Option -c-# was added to `show' to show the surface as #x# mesh.  
+    The size is derived from the size of the system (if no box size
+    given either in file, or by option -l).  Example:
+
+      molcfg MOLNAME1 [MOLNAME2 ...] SIMNAME
+      show -c-5 -I% SIMNAME
+
+====> does not work in modes 6 and 7 (fast bond modes), 
+      see keys ! @ # $ % g G
+
+EXAMPLE:
+   blend -o test -p ala -h hoh au
+   molcfg ala hoh test
+   goldcut test -y-1 -z1 -q-100 -x
+
+CAVEATS: 
+  - Unify interpot.c and gold.c into one module???
+  - POLAR version in some cases innecessarily repeats calculation of
+    sqrt
+  - -j-# crashes without warning if #># of molecules
+
+WARNING
+  LJcutoff<0 means that the effective LJ cutoff is |LJcutoff|*van
+  der Waals diameter (not LJ sigma)
+
+BUG fixed: some extra terms proportional to the shift of the
+  cut-smoothed-and-shifted electrostatic potential were present (in
+  functions XQQ, XQQM, and *QQ14).  This affected internal energy and
+  pressure, but not trajectory.
+BUG: WARNING not fixed (yet) for gold!!!
+
+__EMX__ version: check kbd input every step and performs signal given
+  by option -i if ESC is hit (to overcome Windoze NT problems with ^C
+  handling)
+
+
+
+LIBRARY INTERFACE
+=================
+Installing:
+1/ in `metamake', add an `auxiliary' executable identical to the
+   chosen version (e.g., cookfree) with module `main' replaced by
+   `mainlib' (more replacements in future to optimize the functions of
+   interest).  Then, add a library making rule, using the respective
+   variable OPT#, where # is the consecutive number of the `auxiliary'
+   executable to be made.  Example (cookfree4lib is the 2nd
+   executable):
+------------------------------------------------------------------
+# will generate OBJ2, to be used for cookfree.a
+!cookfree4lib : alloc conjgrad ground rndgen0 statics varfile bitfile cputime \
+  peocg peogear interpot setss intrapot sitesite peonorm \
+  peoforce constrd peorhs peostruc \
+  pakcp simils siminit mainlib simpot simdef water simmeas sfdx linregr
+
+# this is for GNU ar, may differ on other systems
+cookfree.a : $(OBJ2)
+        ar rcs cookfree.a $(OBJ2)
+
+# and this is for compiling a test `testlib.c'
+# not complete..
+testlib.o : testlib.c  $(D2)/ground.h $(D2)/func.h $(D3)/peostruc.h 
+        $(CC) -o testlib.o -I$(D1) -I$(D2) -I$(D3) -I$(D4) -I$(D5) $(OPT) -c $(D1)/testlib.c
+
+testlib : testlib.o cookfree.a
+        $(CC) -o testlib testlib.o cookfree.a $(LIBOPT)
+------------------------------------------------------------------
+2/ make a blend file listing molecules of interest, e.g.
+      blend -_6 -o myblefile peptide -h hoh
+
+3/ in your program, use the following header files
+------------------------------------------------------------------
+#include "peostruc.h"
+#include "mainlib.h"
+------------------------------------------------------------------
+4/ assign options, if necessary, e.g.
+     option('u')=100000;
+   to cause all bonds be soft (harmonic)
+     option('u')=0;
+   to turn off bonds (this is the default)
+5/ call the initializer
+     initcook(BLEND_FILE,CUTOFF,LJCUTOFF);
+   where CUTOFF=electrostatic cutoff (for free b.c. is sharp)
+         LJCUTOFF=Lennard-Jones cutoff (will be smooth)
+                  negative=in multiples of LJ van der Waals radius
+6/ now you may use the following functions (see also mainlib.c and mainlib.h)
+  energy of species sp (numbered as in the blend file, starting from 0)
+  with coordinates given by r[0]..r[#_OF_SITES-1]:
+    double energy1(int sp,vector *r);
+
+  pair energy of species sp1..sp2 (=sum of all pair interactions)
+  does not contain internal terms of sp1 and sp2
+    double energy2(int sp1,int sp2,vector *r1,vector *r2);
+
+Implemetation:
+A `configuration' is build up containing just one molecule of each
+   species in the ble-file.  Functions calculating energy just copy
+   the coordinates to the `configuration' and then call the function
+   according to the table of functions (charmm1, charmm2, TIP3P,...).
+   Forces are thrown away.
+
+Caveats (to be cleaned later...):
+1/ The library just contains everything, including many modules that
+   are not needed.
+2/ There are many global variables with ugly short names (t,T,a,..).
+   Because of 1/, many of them are not needed at all.
+3/ The implementation is inefficient:
+   - unnecessarily calculates also forces which are thrown away
+   - uses extra copying
+
+BUG found: velocities are not correctly initialized for init<0 (cfg
+   read from playback) and Shake.  Perhaps there is something wrong
+   with constraints correcting (if data in playback are rounded?)
+   (another bug that caused segmentation violation for polyatomic
+   molecules has been fixed)
+
+BUG found: *.loc file not correctly removed if cook* -f is running
+
+TODO: cutelst, goldcut, default K=0,alpha=.9 check!
+     L instead of rho input
+
+NEW: -m1 option causes frames *.plb to be read (until no) instead of
+     simulating.  If necessary, the 1st frame is -init, stride noint 
+     (e.g., init=-10 no=20 noint=2 reads frames 10,12,14,16,18,20).  
+     Useful if some independent measurements were
+     fogotten. Recommended usage: copy SIMNAME to a new name, 
+     symlink the plb file, and run.  
+
+NEW: 5/00 consistency checks added to blendread(), useful is the ble-file 
+     is edited by hand
+
+=============================================================================
+NEW: 6/00 conductivity and autodiffusion measurements by Einstein relation
+
+Requirements:
+~~~~~~~~~~~~~
+  Periodic b.c.
+  NVT ensemble (for NPT, see below)
+  Stored configurations:
+    either in a plb-file (SIMNAME.plb, generated by cook* -y-1) 
+    or SIMNAME.1,SIMNAME.2,... (generated by cook* -r)
+
+Usage:
+~~~~~~
+  Re-run cook* :
+    either with option -f# (to read SIMNAME.plb) 
+    or -f-# (to read SIMNAME.1,...),
+    (# stands for the stride)
+  Input data are:
+    init=1st frame read
+    no=max configuration (frame) read (hint: use plbinfo SIMNAME.plb to
+      get the max frame!)
+  Example:
+    cook* -f2 xxx
+  with init=5 and no=9 will read frames 5,7,9 from xxx.plb
+  WARNING: in versions older than about 9/2000, -f# denoted the 1st
+           frame read, and noint was the stride.
+
+Results:
+~~~~~~~~
+  Protocol (SIMNAME.sfd or screen)
+
+  File SIMNAME.m.cp = mean square displacements of the center of mass:
+    COLUMN 1 : mean square displacement for species 0:
+
+                       1                               2           2
+               msd = ----- SUM {SUM m  [r (t) - r (0)]}  / {SUM m }
+                     6 N_0  n    i   i   i       i           i   i
+
+               where m_i = mass of site i,
+               SUM_i is over all sites of species 0,
+               SUM_n is over all molecules of species 0, 
+               N_0 = SUM_n 1 = number of molecules of species 0
+    COLUMN 2 : as above, species 1
+    ...
+    COLUMN nspec+1 : 
+                      1                         2
+               mdif = - {SUM m  [r (t) - r (0)]} 
+                      6   i   i   i       i       
+
+               the sum is now over the whole simulation box.  
+               NOTE: mdif=0 because of momentum conservation
+
+  File SIMNAME.q.cp = mean square charge displacement:
+    COLUMN 1 = cumulative mean square charge displacement for species 0:
+
+                      1                             2
+               mscd = - SUM {SUM q  [r (t) - r (0)]}
+                      6  n    i   i   i       i       
+
+               where q_i = charge of site i,
+               SUM_i is over all sites of species 0,
+               SUM_n is over all molecules of species 0,
+               NOTE: mscd is SUM while msd is AVERAGE (divided by N_0)
+
+    COLUMN 2 = as above, species 1
+    ...
+    COLUMN nspec+1 = total mean square charge displacement: 
+
+                      1                         2
+               cond = - {SUM q  [r (t) - r (0)]}
+                      6   i   i   i       i       
+
+               where the sum is now over the whole simulation box.  This is
+               related to the conductivity, see below
+
+Analysis of results:
+~~~~~~~~~~~~~~~~~~~~
+(see also plb2diff which makes time averages and automates the following!)
+  DIFFUSION COEFFICIENTS 
+  Run:
+    showcp -p99 SIMNAME.q.cp
+  and estimate  the time derivatives
+    D = d msd(t) / dt
+  Hints:
+    frames are separated by  dt.plb*#  or  dt.cfg*#  ps (# is in -f#
+       or -f-#)
+    several first data should be skipped
+    estimate the slope from from the plots or by linear regression of; the
+      linear regression should use weight 1/t because the error of msd(t) is
+      proportional to sqrt(t)
+    and all this should be done for several blocks to have statistics!
+  D is the diffusion coefficient of given species (column 1 = species 0) in
+  program units [A^2/ps]; in usual units it holds:
+    D*1e-8 = diffusion coefficient in m^2/s
+    D*1e-4 = diffusion coefficient in cm^2/s
+  Make also sure that the last column in SIMNAME.q.cp ("mdif") is small.
+  NOTE: 1st 2 columns of SIMNAME.q.cpa and the plots are incorrectly labeled
+        as "Etot" and "T" instead of "0" and "1".  In addition, the last
+        column in SIMNAME.q.cpa just repeats the 1st column, thus the "last
+        column in SIMNAME.q.cp" is actually the second-last in SIMNAME.q.cpa.
+  
+  CONDUCTIVITY  
+  Run:
+    showcp -p99 SIMNAME.q.cp
+  and the LAST  graph (named "cond") should be approximately linearly 
+  increasing function of time, cond(t); of course, it is not and
+  averaging should be done over different runs or blocks of one run!
+  The conductivity (per unite volume) in program units is:
+
+             1  d cond(t)
+    kappa = --- ---------
+            T V    dt
+
+  where T = average temperature in K and V is the volume of the
+  simulation box.  In usual units:
+    kappa*111.26502 = conductivity in S/m
+    kappa*1.1126502 = conductivity in S/cm
+
+  PARTIAL CONDUCTIVITIES 
+  kappa_n are obtained from columns 0,1,..nspec-1 in the same way.  Note that
+  the total bulk conductivity is a sum of the partial conductivities only if
+  the ions are uncorrelated which holds true in special cases and only
+  approximately.  It holds
+    kappa_n = D_n z^2 F^2 / (RTv), 
+  where z=charge in e, F=Faraday const., R=gas const., v=molar volume,
+  which in program units (k=1) becomes
+    kappa_n = N_n D_n q_n^2 / (TV),
+  where N_n=number of molecules of species n, V=volume of sim. box,
+  q_n=charge of species n
+
+  Note that for monoatomic ions, mscd = N_n q^2 msd.  For molecules
+  generally mscd(t) <> N_n q^2 msd(t) although the time derivatives
+  should be the same (but statistical noise)
+
+  MOLAR CONDUCTIVITIES
+  In dilute solutions, it is useful to use the molar conductivities
+    Lambda_0 = kappa_0 / v
+  They can be obtained from mscd(t) [if one ion in a solvent is simulated]
+  or generally cond(t) by
+
+                1   d mscd(t)
+    kappa_0 = ----- ---------
+              T N_0    dt
+
+  Where N_0 is the number of molecules of given species; if the number of
+  elementary charges is used, we get the normal (equivalent) conductivity.
+  
+  In real units it holds
+    kappa_0*6.7005318e-05 = molar conductivity in S m^2/mol
+
+  FINAL NOTES:
+  See also util/plb2diff.c!
+  For NPT ensemble (tau.P is nonzero), cook* produces scaled (by powers of
+    V^(1/3)) quantities and the above factors should be recalculated! 
+    (plb2diff does it for you)
+
+=============================================================================
+
+BUG found: POLAR: LJ (=Busing) and elst energies not partitioned correctly
+    (will not be fixed)
+
+FIXED: not sufficiently fool proof Ewald autoset (K=NaN for too large epsk)
+
+FIXED: precision problems with auxiliary charges close together for Ewald,
+  see switch EXACTERFC in simopt.h.  Necessary if there are large auxiliary
+  charges close together.  For water, proteins etc. under normal
+  circumstances not important.
+
+BUG: there is a SERIOUS PROBLEM in polarLJQQ(): when compiled by gcc 2.7.2.3
+  with -O2, the results are wrong; this is fixed by adding a line 
+    {static double PROBLEM=0; f+=PROBLEM;}  
+  This problem does not appear for gcc 2.7.2.1 and new versions.
+  This problem does not appear for C/Dec UNIX, SGI.
+  There may be a compiler bug in (the optimizer of) gcc 2.7.2.3
+
+FIXED: (very old) bug in ground.c: $L and $C in scrolling 
+
+NEW: util/plb2diff.c for analysis of diffusion and conductivity
+
+======================================================================
+NEW 7/00: cluster (oligomer) analysis
+
+What it does
+~~~~~~~~~~~~
+  0. Reads stored configurations (SIMNAME.plb or SIMNAME.1..., see option -f)
+  1. Calculates bonds between molecules (species), bonds are defined by a
+     distance criterion between selected sites (atoms) in molecules
+  2. Analyzes connectivity of molecules and splits each configuration into
+     clusters
+  3. Makes statistical analysis of clusters.  Clusters are distinguished by
+     size, stoichiometry, and topology (with the exception of very large
+     clusters)
+  4. Calculates time development of selected clusters, prints summary of
+     all clusters in all configurations 
+
+Compilation
+~~~~~~~~~~~
+  must be compiled with #define CLUSTERS, best in simopt.h
+
+Synopsis
+~~~~~~~~
+  cookXXX -f# SYSNAME [SIMNAME] [more options]
+    where # is stride (-f = -f1 means that every configuration is analyzed).
+  -v2 selects verbose mode: prints some technical info and a list of clusters
+    for every configuration
+Negative # means SIMNAME.1, SIMNAME.2,... read instead of SIMNAME.plb
+Note: At the same time calculates diffusion/conductivity and structure factor
+
+Input data
+~~~~~~~~~~
+  variables in SYSNAME.def or SIMNAME.get:
+    init=1st frame (configuration) read from SIMNAME.plb (init=2 means
+         that frame 1 is skipped)
+    no=max frame (to get # of frames, run plbinfo SIMNAME.plb)
+
+  more data in SYSNAME.def after `;' define distances, clusters, etc.
+------------------------ example of SYSNAME.def ---------------------
+init=1 no=10;
+! any comment
+off ! turns off any cluster processing
+
+bonds
+AL CL 2.1 ! bond created between AL and CL in different molecules for dist<2.1
+AL S 3    ! AL CL S are ATOM names
+
+maxcluster=15 ! larger clusters not topologically distinguished
+
+cluster AlCl3 ! named cluster for convergence profile
+Cl    Cl
+  \  /
+   Al
+   |
+   Cl
+
+cluster AlSCN ! another named cluster, Al CL SCN are MOLECULES
+Al--SCN
+
+$i extra.cl  ! include file (cannot nest)
+
+clusters ! mol and plb files will be created for clusters, showing the 
+         ! connectivity of molecules which are represented by site[0] only
+         ! use show to view the cluster structure (OK for monoatomic
+         ! molecules)
+
+configurations ! mol and plb files will be created for configurations 
+               ! (frames), full molecules shown, but molecule-molecule bonds
+               ! shown between site[0] only
+
+colors ! data used to make a gol-file when "clusters"
+Al MAGENTA 1.1
+Cl GREEN 1.5
+I YELLOW 1.8
+
+----------------------- end of SIMNAME.def ------------------
+  Comments:
+  - Bonds are created between sites (atoms) belonging to different molecules,
+    if there is a pair with distance less than the limit
+  - Of course, molecules may consist of one-atom only.  Molecule named "Al"
+    may contain only atom "AL" (note case sensitivity!).  "Al" refers to
+    "species Al" in a SYSNAME.ble and thus to files Al.mol etc. for blend
+  - maxcluster is the maximum cluster size (number of molecules) for which a
+    topological analysis is performed, larger clusters of the same
+    stoichiometry but different structure are not distinguished (even if they
+    are named)
+  - "cluster NAME" defines a named cluster in simplified CHE-format.  There
+    must not be any blank line after "cluster NAME" line
+  - if "colors" is given, gol files will be created for each cluster shown
+  - no gol file is created for "configurations", if you wish to have proper
+    colors, use "molcfg" and link or copy the SIMNAME.gol to SIMNAME.#.gol
+  - = is optional between keyword and value, e.g. $i=FILE
+  bugs: FILE in $i FILE must not contain `='
+  compatibility enhancement: also $iFILE (without space) is allowed
+
+Output
+~~~~~~
+  SIMNAME.sfd - contains final statistics of clusters.  The clusters are
+    sorted by size and stoichiometry (=standard order).  If the cluster is
+    named, the name is printed.  Then, a list
+    of bonds is printed: atoms are numbered consecutively in the order of the
+    stoichiometry formula.  E.g., Al.Cl4 has bonds 0-1 0-2 0-3 0-4 because Al
+    has number 0, Cl are numbered 1,2,3,4.
+
+  SIMNAME.cl.cpa - Convergence profile of counts of named clusters.
+    Columns correspond the named clusters in standard order (not in the order
+    the clusters appear in SIMNAME.def after ;).  Each line corresponds to one
+    configuration analyzed
+
+  SIMNAME.#.mol, SIMNAME.#.plb (#=frame number)
+    Only if "configurations" has been specified
+    To view the configuration with molecule-molecule connectivity, e.g.:
+      show SIMNAME.1
+
+  *.mol, *.plb (e.g., Al3.Cl9b.mol, Al3.Cl9b.plb)
+    Only if "clusters" has been specified, to view clusters.  The last
+    configuration (postition of atoms) encountered is used, each molecule is
+    represented by the 1st atom.  
+
+  SIMNAME.rm.sh 
+    script which will remove all files created with "clusters": run it as
+      sh SIMNAME.rm.sh
+    (DOS/WIN not supported...)
+
+Bugs
+~~~~
+  1. The topology analyzer is inefficient - it requires n1! n2!...nN!
+     operations for cluster MOL1_n1 MOL2_n2...MOLN_nN.  Hence, the practical
+     maximum maxcluster is around 15.
+  2. Molecule-molecule bonds in *.mol are always created between
+     site[0] irrespective of the actual site that passed the distance
+     condition (no problem with one-atom molecules)
+==========================================================================
+
+NEW 7/00: friction-like isobaric ensemble algorithm changed 
+  tau.P>0 : box is rescaled before every step, the scaling factor is
+    calculated at the end of the preceding cycle and is kept the same for all
+    steps in the cycle (new version, should be more stable, though biased)
+  tau.P<0 : box is rescaled at the end of every cycle using the current value
+    of virial pressure (this is the old version)
+  
+BUG reminder: GOLD version - cutelst still contains wrong Xqq, Xqq14
+    (constant added to the energy). To be fixed one day...
+
+NEW 9/00: option -b# extended:
+    If #<0, a check is made every #-th cycle for file SIMNAME.stp
+    If it exists, the current cycle is finished and the simulation is
+       stopped (as after ^C)
+
+    This is intended for "operating systems" like Micro$oft Windoze
+    where there is no way how to control remotely a running job,
+    although it is possible to create files on a remote filesystem.
+
+    Example (for NT; this is based on executables compiled by EMX port of gcc
+    and run via rsx.exe, for other compilers .cmd could be better than .bat):
+
+---------- file startjob.bat --------
+rem `startjob.bat' should be called with time by 2 minutes larger than the
+rem current time (running startjob without arg prints current time)
+@echo off
+if "%1" == "" goto how
+at %1 /interactive d:\jiri\simul\job.bat
+goto end
+:how
+echo to start job.bat, run
+echo   startjob HH:MM
+echo where HH:MM is by 2 minutes larger than the current time, which is
+time /T
+:end
+
+----------- job.bat ---------
+rem `demon.bat' started in a separate window, minimized, low priority
+start "cookpol" /low /min d:\jiri\simul\demon.bat
+
+---------- file demon.bat --------- 
+rem running run.bat, after it finishes newrun.bat, etc.
+:again
+d:
+cd \jiri\simul
+if not exist run.bat goto end
+call run.bat
+del run.bat
+ren newrun.bat run.bat
+goto again
+:end
+
+--------- run.bat ---------
+d:
+cd \jiri\simul
+del SIMNAME.stp
+d:\jiri\bin\rsx.exe d:\jiri\bin\cookpol.exe -b-5 SYSNAME SIMNAME
+    
+    Usage: start job using `startjob.bat'.  To interrupt, prepare `newrun.bat'
+    with all necessary commands (e.g., copying NEWSIMNAME.get to SIMNAME.get,
+    renaming the resulting SIMNAME.prt etc.), then create SIMNAME.stp.
+    `cookpol.exe' will be stopped and `newrun.bat' will become `run.bat' and
+    will be started.  If there is no `newrun.bat', the demon will stop.
+
+10/00: 
+  - most of output files (.cfg,.sta,.rdf,.dih...) are backed up
+    before writing; this is done every data set
+    .prt is backed up in the beginning
+    .cp, .plb, .pol ... are never backed up - they are appended
+    backup names are created by appending ~ (UNIX)
+
+  - for extreme rates of cooling or heating using friction thermostat, the
+    friction term is bounded by +-1/tau.T.
+    E.g., T=0 can be now safely used
+
+11/00: 
+  - $i statement allowed in cluster definition in SIMNAME.def
+  - cluster definition may now occur in SIMNAME.get, too (after 1st `;')
+    both sets are merged
+  - extra keyword `end' ends reading the cluster definition data, also `.'
+
+11/00:
+  #ifdef CLUSTERS, bond dynamics analysis.  
+  Files SIMNAME.created.cpa and SIMNAME.broken.cpa are created:
+    column 1 = time
+    column 2 = created[0] or broken[0] = 2*(# of broken/created bonds
+               since the previous frame)
+    column 3 = created[1] or broken[1], as above but the bond is not
+               counted if the same bond has been or will be
+               created/broken immediately before/after
+    column 4 = created[2] or broken[2], as above, one other change
+               allowed between creation/breakage of the same bond
+    etc., see #define BONDHIST
+  ALGORITHM:
+    - bond definition see the `cluster analysis' above
+    - the algorithm works on the basis of a list of bonded molecules
+      attached to each molecule.  The current and previous lists are
+      compared and the differences determine the broken and created
+      bonds (column 2).
+    - in addition, the list of created and broken bonds (at each
+      molecule) is searched for time-ordered sequences created-broken,
+      broken-created, created-broken-created, etc.; sequences with even
+      number of changes (the bond returns to the same state) are
+      omitted, odd sequences are included as one creation or breakage
+      (for time of the middle change, e.g. for created-broken-created for
+      the time of the middle breakage)
+      These sequences for created[1] or broken[1] must not be
+      interrupted by creation or breakage of another bond
+      (CreateBondTo77-CreateBondTo13-BreakBondTo77 is not recognized as
+      bond to molecule 77 created and immediately broken)
+    - for created[2] or broken[2], one change in between is allowed (the
+      above example is recognized and does not count for created/broken
+      bonds to molecule 77)
+    - etc. upto created[BONDHIST] or broken[BONDHIST]: BONDHIST-1
+      changes in between are allowed
+    - it may happen that created[i] or broken[i], i>0, are odd since the
+      `does not count' condition may occur for one molecule from the
+      bonded pair, e.g. (A-B C) --> (A B-C) --> (A-B C)
+
+-l option updated - see the manual
+
+NEW May-June 2001 (version 2.0a)
+  option -o removed, see variables center.K and center.r0
+  option -n removed, see variable thermostat
+  tau.Tintra etc. changed - see variable thermostat
+  Maxwell-Boltzmann thermostats added
+  Kin. energy in Shake/Verlet changed, Beaman added (alternative kin.e.) 
+  GOLD bug fixed - charge-inverted charge was missing 
+                   for 1-2 and 1-3 exceptions
+  Some renames (both .c and .h):
+    peonorm -> norm
+    peoforce -> forces
+    peogear -> simgear
+    peocg -> simcg
+    peostruc -> simglob
+    peorhs -> rhs
+
+  zip all sim/norm.? sim/forces.? sim/simgear.? \
+    sim/simcg.? sim/simglob.? sim/rhs.?
+
+  Caveat fixed: divergence of correcting constraints using Scorrect
+    now better detected.  This avoids problems when a very bad input
+    configuration could not be constrained.
+
+  Added: pressure measurement using virtual volume change 
+         (<dU/dV> with numerical derivative)
+  Bug fixed: virial for bond potential was missing
+             (note: virial for angles and torsions is zero.
+             This bug thus affected only calculations with vibrating
+             bonds and a few terms with UREY_BRADLEY)
+
+  Bug fixed: LINKCELL version failure of 1-4 predictor when no constraints
+
+------------------ MACSIMUS first posted Aug 3, 2001 ---------------------
+
+cook V 2.0b:
+  POLAR: dipole moments now measured in details (total and induced)
+
+  kill -ALRM = kill -14 : will print current state info (t,E,T)
+                          requires #define SIGALRM (system-dependent)
+
+  bug fixed: dependants now recalculated before cfg or plb is saved
+             if |norm|&4, dependants recalculated after each cycle
+
+--------------------- MACSIMUS posted Aug 24, 2001 -----------------------
+
+Sep 8, 2001:
+  option -u (cut CP file) added to showcp
+
+Sep 9, 2001:
+  bug fixed: POLAR and FREEBC 1-2 and 1-3 (polarXLJM()) compile error
+
+Sep 17-20, 2001:
+  ramachan.c: bugs fixed, any parameter set can be used
+  the old one (after bug fix) renamed to ramach21.c (for charmm21
+  only, deprecated)
+
+  option -o added (lock file check).  Not the same as the old option -o!
+
+  POLAR: bugs in P measurements partly fixed:
+    - PdV: mising self-energy in Epot
+    - Pvir with Ewald: virial of the aux charge did not include Ewald
+      corrections.  Now -2*self-energy used
+  BUG/PROBLEM: not checked for axial and/or saturated polarizability
+
+  -b4 added (progress indicator printed to stderr)
+
+Sep 26:
+  showcp.c: checksum of .cpz incorrectly reported as wrong for
+            reversed endian input -- fixed
+
+Oct, cook V 2.0c:
+  bug fixed: -j-# now range of # checked, -j-9999999 means `all molecules'
+
+  option -p-1 implemented (Lagrange or Car-Parinello method for
+  dipolar polarizability)
+
+  bug found: loc file not erased in case of ERROR missing def-file -- fixed
+
+  bug found: Tinter_intra bad initialization (because declaration) -- fixed
+
+TODO:
+  - check hoh.mol, hoh.che for HHO order
+  - show:
+      allow larger gold surface
+      gold in modes 6,7 - DONE
+  - init MC for gold?
+  - BUG while init - `gas' above bulk
+  - pins>3 for gold
+  - suppress CP-ing of Tmol for 1 molecule [FIXED]
+  - show hotkey i starts from frame 2
+
+  - GOLD: blend can generate metal not the last in the `Lennard-Jones'
+          table as reguired by cook/gold - fixed in .par files
+
+  - integrate molcfg to cook
+
+2003/2: virtual pressure (PdV) for Shake: bug (unknown Ekin) fixed
+
+Version is now cook 2.0d
+
+2003/10 (cook 2.0e):
+  - the initializer upgraded
+  - max velocity can be now reduced (see drmax)
+  - defaults for Emax, pins changed
+  - version WALL (GOLD  now a subset of WALL), 
+    control structure renamed to wall
+  - wall.g (former gold.g) now real gravity (force = g*mass)
+  - option -x slightly changed
+
+BUG/CAVEAT found: variable `norm' not set correctly if fix (option -k) used
+  use norm=-3 in this case!
+
+2003/12 (cook 2.0f): constraint force (-k0) implemented
+
+CAVEATS TO FIX:
+  - clean the fix/constraint force interface (-k0/-k#)
+  - allow measuring forces on spring (-k#)
+  - unify both options
+  - set `norm' correctly
+  - the coordinates in the .fix file must not be 0 because of ignoring
+    the periodic b.c. -- FIXED
+
+2004/3:
+  - drmax default reconsidered
+  - ANCHOR now accepts SIMNAME.fix while initializing by init=3
+  - periodic b.c. honored with .fix
+
+2004/5 (cook 2.0g)
+  - bug fixed (file .anc not closed -> problems for several get data blocks )
+
+2004/5 (cook 2.0h)
+  - changes of ANCHOR, see cook manual: Anchor
+    + output in SI
+    + more constraint types (axes)
+    + sign agreement changed
+  - bug for center-of-mass fixed (there was acceleration in .anc, not force)
+
+2004/6 (cook 2.0i)
+  - DIHHIST extended to full 360 degree range
+
+2004/6 (cook 2.0j)
+  - DIHHIST=-1: selection of dihedrals to dump added (.ddh, .dcp)
+    Caveat: species=0 only allowed
+
+2004/6 (cook 2.0k)
+  - ANCHOR site improved for too large moves
+
+BUG found: ANCHOR center-of-mass or site in the cookfree version
+  interferes with automatic centering of the whole config.  Can be fixed
+  by using center.r0=BIG, center.K=ANY.
+  To be fixed later...
+
+2004/10 (cook 2.0l)
+  ANCHOR: possibility to anchor CM of any group of atom added (keyword group)
+
+2004/11 - bug in ANCHOR initialization fixed (not counted as new version)
+
+2004/11 (cook 2.0m)
+  doublecheck of water models added to warn users about
+  previous TIP3P bug
+  Option -x-2 added: As -x-1 and disable doublecheck of water models.
+
+2004/12 molcfg fixed (to accept MAXVAL=6)
+
+2004/12 (cook 2.0n)
+  SIMNAME.s-s extended to support groups of sites
+  rdf.onefour added
+
+2005/2 (cook 2.0o)
+  bug fixed: wrong test of ANCHOR allowed combinations 
+
+PROBLEM to solve: rdf is inside forces(), makes problems if 
+  - iterated (POLAR)
+  - repeated (WIDOM)
+  - use -x for water around protein randomly
+  - WORM in the link-cell-list version???
+
+BUG: initializer for WALL failed
+w. initcryst: problem last molecule
+
+--- CUBE version last notes:
+
+CHECK auto statics w. cook
+RDF limit problems (w. Berendsen-NPT), pair factor NVT?
+? compressibility via Kirkwood-Buff is wrong
+
+7/06: PdV>0 - bug fixed
+
+--- L3 (not-cube) version:
+
+2005/3 (cook 2.1a)
+  - rectangular (not cube) box implemented, in this version with many caveats
+    L is vector in input data: set as L[0]=x-size, ...
+    interaction with initrho is unpredictable
+  - rescaling to reach given L,rho now 2* faster for enlarge than for
+    shrink option
+  - option -h extended, feature added to fix wrong "pyramidal"
+    configurations of e.g. methane
+    old "tetrahedral refinement" now the same as -h4
+  - box setup logic changed:
+    if any of L[0],L[1],L[2] is missing in input data, it is calculated
+      to reach given density rho (initrho)
+    if all L are given, rho is calculated
+  - switch INITCRYST removed (function always available)
+  - default alpha=0.7 for cookcut
+  - plb-file format extended (all numbers are float)
+    header[2] = ns 0 : free b.c., cfg.=fvector[ns]
+                ns L : cubic periodic b.c., cfg.=fvector[ns]
+                ns -3: periodic b.c., generally not a cube, variable L
+                       cfg.= L[3] + fvector[ns] 
+  - option -n: writes also velocities in a playback-like format
+    >>> WARNING: with SHAKE, velocity is shifted by h/2 <<<
+
+FOUND INCONSISTENCIES/WRONG MAN: 
+  - option -_ used as A[1] with Gear+polar, but k with "pred2"
+    default changed to -_2
+  - option -n will be used for writing the velocity playback 
+  - option -] not in man
+  - xs.sizelimit increased to 64 MiB
+
+2005/8: 
+  WIDOM version
+  Widom insertion particle method: use #define WIDOM
+  Not suitable for Ewald (k-sum ignored)
+  input data (general):
+    widom.sp = species to (virtually) insert (see .ble) [default=0]
+    widom.n = # of insertions per cycle (WALL version: and per slab) [0]
+  input data (WALL version):
+    widom.mode = sum of:
+      1: also record symmetrized functions
+         (makes sense for wall.rep=0 or wall.rep=3)
+      2: record <exp(-[U_pair+U_wall]/kT)>, leading to real mu
+      4: record <exp(-U_pair/kT)>; useful for monoatomic molecules
+         where the wall potential is simply added
+      8: record <exp(-U_wall)/kT)> -- the angle averaged
+         Boltzmann factor of the molecule-wall potential
+    widom.z0 = min. z
+    widom.z1 = max. z
+    widom.dz = step
+  the data are internally recorded by the statics module in variables
+    of names "Widom<mode> z=<z>"
+  output pritout is in SIMNAME.wid
+
+  DENSITYPROFILE version
+  Records the density profile by species.
+  input data:  
+    densprof.grid = grid (=# of points/A)
+    densprof.zmax = max. z (default is z=0 --> use actual L[2])
+  the data are internally recorded in SIMNAME.dpr (binary), the
+    readable ascii output is SIMNAME.z
+
+  Vector shift has been added to input data.  If specified, the
+  configuration (all molecules) is shifted by given vector.  This
+  vector is then set to zero so that no shift is performed in the next
+  job (unless specified again).  The maximum allowed shift in periodic
+  b.c. is +-L (no check!).
+
+  -[# extended: 
+    #<=999 : interpret dec. digits as periodic copies,
+             e.g., -[234 will make 2 periodic copies in the x-direction,
+                                   3 periodic copies in the y-direction,
+                                   4 periodic copies in the z-direction
+    1000<#<=999999 : as above by 2 digits, -[20304 = -[234
+    1000000<# : as above by 3 digits, -[2003004 = -[234
+    -[0 is the same as -[111 (=just 1 standard copy)
+
+
+todo: cutoff se spatne sam nastavuje
+
+epsinf=-1 forces pseudo-2D Ewald summation for an interface in a slab
+   (periodic in xy, longer in z)
+   WARNING: moving a charge periodically in z violates energy
+   conservation
+   in addition, the interface is centered if abs(norm)&8 (just once!)
+   should be turned on when an interface develops
+   Andersen, Maxwell themostat should not be used
+
+center extended, e.g.:
+  center.n[0]=800 center.Kz[0]=100 center.z[0]=27  center.r0[0]=18.5
+  center.n[1]=200 center.Kz[1]=100 center.z[1]=-20 center.r0[1]=28
+  - then, 1st line applies to 800 1st molecules and the 2nd to next 200
+  - center.Kz = harmonic potential in z-direction
+  - center.z = z of minimum potential, w. respect to L[2]/2 (box center)
+  - center.r0 = radius of zero energy (see center.r0 if FREEBC)
+  in addition, center.K[3] etc. still apply
+
+
+PROBLEMS for long box:
+  - set Ewald error
+  - erfc range
+  - initcryst pretends a cube
+
+cannot determine smooth cutoff for LJcutoff=3.5 : cook/lj/ar252
+
+NEW (norm)&16 removes z-drift and centers the slab at every step
+
+MANUAL BUG for molecule-wall potential:
+    U = eps rho sig^3 [(36 PI/5) (sig/z)^9 - 6 PI (sig/z)^3  ]
+The correct formula is
+     U = 4*eps rho sig^3 [(PI/45) (sig/z)^9 - (PI/6) (sig/z)^3]
+
+WARNING: #define PRESSURETENSOR does not accept electrostatics!
+
+HINT: 
+  - surface tension from slab geometry in case of negligible vapor tension:
+      gamma = - 3/4 * p * Lz
+  - with correction to vapor tension
+      gamma = - 3/4 * (p+2*pvap) * Lz
+    pvap can be estimated from the density (use density profile) and
+    the ideal gas EOS
+
+BUG: tip4p from parameter_set=water not recognized (zeros?),
+  probably needs section waters in the par-file
+
+??? plb2asc and asc2plb do not know the new format!!!
+
+DENSITYPROFILE : mol-based density profile was wrong (or oddly-defined)
+The replacement is called SIMNAME.cm.z and is center-of-mass based
+
+8/2006:
+DENSITYPROFILE : new features - mass density, number density,
+                 and charge density profiles
+cutoff corections for slab
+
+New utility: densprof calculates angular density profiles
+
+8/2006:
+DENSITYPROFILE changed, binary no longer compatible!
+(use simmeas-olddpr.c and main-olddpr.c)
+New version calculated also charge density profile by sites
+
+9/2006: WIDOM extended to bulk, cutoff corrections added
+  (WARNING: still no cutoff corrections for WIDOM + DENSITYPROFILE)
+  Widom and the Henry constant:
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  The Widom method gives the residual chemical potential, i.e. the
+  absolute chem. pot. is (for monoatomic gas)
+    mu = mu_res + mu_id = mu_res + kT ln (Lambda^3 N/V)
+  where Lambda is the de Broglie wavelength, N the number of solutes
+  and V the liquid volume.
+  This should be equal the gas abs. chem. pot. of gas at pressure p
+  (assumed to be ideal gas, Ng and Vg refer to the gas phase)
+    mu = kT ln (Lambda^3 Ng/Vg) = kT ln (Lambda^3 p/kT)
+  On comparing, the Henry constant with respect to definition
+    p = c Kc
+  (where concentration of gas in liquid is c=n/V amd n is in moles), is
+    Kc = RT exp (mu_res/RT)
+  and mu_res is in macroscopic units [J/mol].
+  For mu_res in program units = [K]:
+    Kc = RT exp (mu_res/T).
+  The resulting Kc is in [Pa.m^3.mol^-1].
+  OTHER UNITS:
+  For Henry law in form
+    p = x Kx 
+  where x = molar ratio = n_solute/n_solvent, it holds
+    Kx = rho_solvent/M_solvent*Kc
+  where rho_solvent and M_solvent are in matching real units.
+  E.g. (SI), [kg.m^-3] and [kg.mol-1] and then Kx is in [Pa].
+  For Henry law in form
+    mm = p Km
+  where mm = molality = n_solute/m_solvent, it holds
+    Km = 1/(rho_solvent*Kc).
+
+LLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLL
+
+9/2006: L3 and CUBE versions merged:
+* old cube version now with prefix CUBE- where both versions differ
+* there may be compatibility problems with plb-files:
+  use plbconv if neecessary
+* linked-cell list method not supported!
+
+11/2006: Widom included to CP
+
+BUG FOUND: message
+  closing sim.plb at position 231950408, last frame=9204 written at t=971.2
+contains wrong last frame
+..FIXED 12/2006
+
+TODO: write directly a statement to remedy crashed simulation
+BUG: autodiffusion (via plb2diff) does not work for NPT
+
+
+BUG FIXED 12/2006: see "readjusting K for rounding problems:" in ewald.c 
+  (normally quite improbable to happen and in old versions caught by
+   an ERROR)
+
+BUG (PARTLY?) FIXED 1/2007:
+  DIHHIST=2 phi-axis was half of what it should be
+
+BUG FIXED 1/2007: bad check of tip4p water; tip4p05 added
+
+BUG/FEATURE: no=0 never (re)writes *.cfg - sometimes useful, otherwise
+             (init<0) problematic; use cook -w to force write
+
+BUGS FIXED 2/2007: slab correction to surface tension contained 0/0 if
+                   N[i]=0 for some species, small error because of
+                   wrongly initiated sum
+
+BUGS FIXED 2/2007:
+ rndgen4 and similar (see info in rndgeni4.c):  
+ With newer optimizing compilers, both upper and lower 16 bits 
+ of 32 bit random numbers were identical.  
+ Random numbers had thus resolution of 1/2^16, which is not enough for
+ MC integration, but causes no problems in MD (simpler random numbers
+ are used in cook)
+
+2/2007: config (in ble-file): check of input N added, more needed to
+  be fool-proof
+2/2007: bug fixed: -j# is again supported (cache, init)
+
+2/2007: control variable densprof.slab added: if set, surface tension
+  incl. cutoff corr. are calculated.  The default is densprof.slab=0,
+  so that you should add densprof.slab to the data if you want to
+  calculate surface tension!
+
+3/2007: pair forces by recursive triangulation, useful for larger molecules
+  new meaing of cache:
+     cache=1: simplest pair forces in 2 nested loops
+        (good for small systems)
+     cache>0: blocked (4 nested loops total)
+        (large systems of small molecules)
+     cache<=0: recursive triangulation
+        (large systems of polyatomic molecules)
+3/2007: center extended
+  center.ns[k] (k=0..9): affected sites: 0: all, >0: i<ns only, <0: i>=|ns|
+  example:
+    center.n[1]=200 center.Kz[1]=100 center.r0[1]=28 center.ns[1]=1
+    the term applies for site 1 on 200 molecules selected
+  BUG: not (yet) in the initializer
+
+BUG FIXED: show.c: for L[0]!=L[1] and BALL mode wrong box was shown
+
+3/2007: linked-cell list method re-implemented for non-cube box
+  simple tests passed
+  No.cell is now vector, can be given in data
+  No.percell = average # of sites/cell, No.cell will be
+   determined accordingly (No.percell is real)
+  linked-cell list also for WALL
+  NOTE: WALL is not periodic in z, also in linked-cell list
+  WALL+EWALD not supported
+
+CAVEAT to fix: 
+  WIDOM is calculated by the simplest all-pairs code even with LINKCELL
+
+NOTE: in Widom+WALL, "Widm" column contains an average of Boltzmann
+  factors over slabs for (in this order) mode=4,2,8
+  (that's a question what is the best choice...)
+
+BUG: with Ewald, the simplest all-pairs code gives the same trajectory
+  as linked-cell list code but energy and virial differ by a constant
+
+VERSION 2.2a
+option -b changed; the default is -b-1 = reasonable default behavior
+  with -s: "beep mode" -bBEEPLEVEL [default=1]
+  without -s: "batch mode" how often to check for *.stp 
+              the default is derived from no,No.s, and noint
+              at the same time, forces fflush SIMNAME.prt
+new: USER, HOST, PWD printed; SIGALRM support removed
+
+showcp: creates /tmp/showcp.cpa if cannot create SIMNAME.cpa at the
+  current directory
+
+version SPLINE=0 added: cutoff electrostatic directly (no splines)
+  usu. slightly faster, more accurate
+
+BUGS FIXED: Widom, random rotation was not uniform
+	dependants were not calculated before Widom (tiny error)
+
+variable mirror added: also mirror reflection if random rotation
+  (while Widom or init cfg) requested
+
+NOTE: The Widom method inserts a virtual molecule into the
+configuration AFTER the last step in standard versions.  However, in
+the linked-cell list version BEFORE the last step (previous
+linked-list is re-used).  Therefore the results of non-linked-cell and
+linked-cell are not exactly the same even with option -z specified.
+But if you advance linked-cell by 1 timestep, then the Widom results
+with noint=1 are exactly synchronized with non-linked-cell.)
+
+TODO:
+- make test if no blend -h for various waters
+- cookelst uses LJQQM even if the LJ term is zero - EFFICIENCY LOSS
+- check 1-4 for Widom, linkcell etc
+- cutelst once more: optimize forces to avoid sqrt in [r0,r1]
+
+BUG: -j# with LINKCELL adds a constant energy - FIXED
+
+VERSION 2.2b:
+BUG FIXED: center not in linked-cell - (code moved to xforces.c)
+
+BUG? initcryst+linked-cell interaction?
+
+BUG fixed: rdf calculated wrongly when Widom used - fixed
+
+NEW:
+  @item center.cmK[*]
+  @item center.cmn
+  A central force (pointing to r0=(0,0,0) in case of FREEBC, or to the
+  center of the box for periodic b.c.) is added to all particles.  
+  The potential of the force is
+  @example
+    center.cmK*(CM-r0)^2
+  @end
+  where CM is the center-of-mass.  This force causes the whole
+  configuration (typically the slab for @code{center.cmK[2]>0}) to
+  move to the center of the box, but there is no force to keep the slab
+  together.  The force applies to the first @code{center.cmn} molecules
+  only (excl. those fixed by option -j).  Should be used with norm=-3,
+  exclusive with norm=16.  Typical usage is to keep a configuration
+  (slab) in place if other forces (fixed atoms) are present.
+  A suitable force constant may be around 100.
+
+VERSION 2.2c:
+  Support for gradual (scaled-particle-like) insertion (Widom-like).
+  It is selected by:
+    widom.spreal=<species to change>
+  then (instead of virtual insertion of species widom.sp), all
+  molecules of species widom.spreal are changed into widom.sp.  Since
+  all the coordinates are unchanged, the molecules  should differ in
+  partial charges and Lennard-Jones terms only.  Note that  widom.n
+  does not apply.  The recommended strategy to calculate the chemical
+  potential is to place the species into a ble-file several times with
+  the extra instances edited by hand to describe the partial molecules
+  during gradual insertions.  If LJ terms are changed, it requires to
+  create copies of atom types.
+  BUG: cutoff corrections are not calculated if DENSITYPROFILE (slab,
+  wall, ..) is active.  Final correction can be added.
+
+  -k# (for #>0) extended: 
+  It is possible to write positions to the .fix file;
+  then the initial file written while init>=3 is not needed.
+  example:
+    333 1.1 2.2 3.3
+    111-122 4. 5. 6.
+
+  NEW option -[-1 will enable processing of .cfg files with not matching size
+  Thus, a cfg-file with a different number of particles may be loaded.
+
+  z-center forces (for slab) added to the initializer
+
+  WARNING: with slab-centering (norm=16), it is generally
+  illegal to have a molecule close to z=L[2].  The LINKCELL method
+  may then detect coordinates out of range [0,L[2]].  Although (in the
+  interactive run) it may be sometimes possible to continue, this is not
+  recommended.  A protective potential (see center.Kz etc.) should be
+  used.
+
+  NOTES to Widom and gradual insertion with DENSITYPROFILE: 
+  * the Widom method inserts a molecule to a place with defined
+    z-coordinate with respect to the reference point as defined in the
+    ble-file (with random rotation added ).  It is the CM
+    (center-of-mass) by default if blend has been used (with the
+    default option -y).  
+  * Consequently, in the grow-molecule stages, the partial (scaled)
+    molecule(s) should be placed at CM, too.  To do this, cook* must be
+    compiled with "anchoring" and run with option -k0.  File
+    SIMNAME.fix must contain the molecule(s) being ficeds with keyword
+    cm, like
+      cm NUMBER X Y Z
+  * Equivalently, if the molecule in the blend stage has a selected
+    site as the reference point (e.g., O for water), use either cook -k0
+    with SIMNAME.fix containing:
+      site MOL_NUMBER SITE_NUMBER X Y X
+    This fixes the site exactly (as a constraint)
+    Or for figing the site by a harmonic spring, use cook -kK (K=force
+    constant) with SIMNAME.fix containing:
+      SITE X Y Z
+    CAVEATs:
+      SIMNAME.fix has a different format with -k0 and -kK, K>0
+        (to be changed in future?)
+      -k0 requires -DANCHOR, -kK, K>0 does not
+  * The slab should be centered.  
+    For -kK, K>0, norm=16 is OK.
+    For -k0, use whole-slab harmonic force defined by (in input data)
+      center.cmK[2]=100 ! tau=0.7755*\(M/cmK) [M=tot.mass in g/mol]
+      norm=-3
+    (If appropriate, use center.cmn for # of molecules; default=all)
+  * For scaled water, -x must be used to suppress true water detection
+  * If the anchored (fixed) atoms are not in place (coordinates in
+    SIMNAME.fix have changed or -k0 is turned on suddenly),
+    drmax=<negative value> should be used in input data and then
+    released.  Recommended value is
+      drmax=-0.1
+    If there are problems, use lower (in abs. value) value, e.g.
+      drmax=-0.03
+    however, too low drmax may cause too low temperature and after
+    drmax=0 is reset, the system must be equalibrated.
+    NEVER USE drmax IN PRODUCTIVE RUNS!!!
+
+7/2007: BUG FIXED wrong periodic b.c. in anchoring in the z-direction
+    (was OK for WALL)
+
+7/2007 V2.2d:
+  -[-# changed again and cleaned (instead of defaults, errors are printed)
+    READ THE MANUAL!
+  -l changed: 
+  -lGFAVC: (decimal digits, can be combined)
+     C :  writes the configuration to file SIMNAME.asc
+     V :  writes the velocities to file SIMNAME.vel
+     A :  writes the accelerations to file SIMNAME.acc
+     F :  writes the forces to file SIMNAME.for
+     G :  writes the gradient of energy (numerical derivative)
+          to file SIMNAME.gra (to compare with SIMNAME.for) SLOW!
+   digit=1 denotes the maximum precision in the g-format
+   digit=2..9: number of decimal digits in the f-format
+  EXAMPLE: -l1003 will dump the configuration (to 3 dec. digits) 
+            and forces (in max-precision g-format)
+
+The initializer was changed for case when fixed (ANCHOR version - file
+SIMNAME.fix) molecules/sites are present: The initializer first tries
+to place these particles according to the fixed location with random
+rotation; if the energy is too high, next attempts are close to the
+original location, with gradually increasing distance.  drmax should
+be set for "dragging" the fixed particles to place during
+equilibration.
+
+BUG fixed: force did not accept molecule number in a .fix-file
+ANCHOR extended - .fix file accepts:
+r MOLECULE                # print position of MOLECULE
+v MOLECULE                # print velocity of MOLECULE
+x MOLECULE                # print acceleration of MOLECULE
+
+logic (bug?) fixed for ASPC: the default omegap is the stability limit
+  of no -^ nor omegap has been specified
+  omegap in data overrides -^
+  omegap=-9 and -^-900 cannot be used
+
+7/2007 V2.2e: 
+  POLAR&31 added (= backward-compatible Busing polar ions)
+  technical changes, output formats...
+  some old DOS-like stuff cleaned, asksig moved to module asksig
+  bug (sometimes missing volatile in the declaration of sig) fixed
+  BUG fixed (partially): FREEBC centered the cfg even if ANCHOR
+    norm=+-1 now even with FREEBC, norm=-3 should be used with ANCHOR
+    WARNING: cumbersome - should be fixed in future
+  BUG fixed (was in recent versions only): site number in SIMNAME.fix
+    was not read - was always zero
+  BUGs fixed: 
+  - total slab mass was not initialized properly in repeated job (after ;)
+  - Widom, molecule added: unnecessarily initialized velocities
+  - adding repeated in repeated jobs
+
+12/2007:
+  BUG found, center.n bad if initialized again
+PROBLEM:
+  - rho=0 when restart prints WARNING now (should not any)
+
+2/2008: V2.2f
+  - auxiliary variables added
+    double: aux,a,b,c,x,y,z
+    int: i,j,k,n
+    note that pi=3.1415926... is also available
+  - surface tension by virtual box scaling
+    (x,y scaled q-times and z scaled 1/q^2-times)
+    [see "Test area simulation ..." by Gloor et al., JCP 123, 134703 (2005)]
+    Turned on by densprof.slab&2; dV must be also set
+    Example of surface tension measurements:
+      dV=-1e-4         ! center-of-mass rescaling
+      densprof.slab=3  ! 1=calculate corrections
+                       ! 2=use shape scaling V=const (default=all
+                       !   coordinates scaled q-times)
+    Formulas:
+      gamma = <dU/dA>, where A=2*Lx*Ly and the derivative is interpreted as
+      scaling of x and y coordinates and simultaneous contra-scaling of z so
+      that the volume is the same.  For technical reasons, implemented as:
+        dU/dA = -3/4*Lz*(Pvir+cutoff corrections)
+        Pvir = - [U(+dV)-U(-dV)]/(2*dV*V)
+      where U(d)=U(x*exp(d/3),y*exp(d/3),z/exp(2*d/3))
+      dV=-1e-3 is recommended (for water and 40Ax40A box, the systematic
+      error in eta is 1e-5 N/m)
+  - bug fixed: virtual volume change with linked-cell list method could
+      cause an atom (slightly) out of cell for dV<0 (CM-based scaling),
+      which was considered as error and simulation stopped.
+      This check (in this virtual calculation only) was released 
+      because the error introduced is tiny.
+  - code was changed (at most cases) to avoid warnings "dereferencing
+    type-punned pointer will break strict-aliasing rules"
+
+4/2008 V2.2g
+  -h upgraded to fix also cases as wrong PF6 (caused by high temperature)
+     hint: use -h6, let equilibrate, and try again if really fixed
+       
+7/2008 V2.3a
+  #define DENSITYPROFILE renamed to SLAB
+  slab forces now avalible with #define SLAB only
+
+  WARNING center.r0 renamed to center.z0
+  center.r0 changes meaning: the harmonic force offset in each coordinate
+  in periodic b.c., sphere in free b.c.
+    
+  #define SLAB 1 option:
+  bias function added:  _________             __________
+                                |\           /|     ^   
+                                | \         / |     |   
+                                |  \       /  |     Kz  
+                                |   \_____/   |    _|_  
+                                A   B  C  D   E         
+  This function (actually quadratically smoothed) is selected by center.z1!=0
+  where |BC|=|CD|=center.z0
+        |AC|=|CE|=center.z1 
+  and center.Kz=height of the outside part from bottom (bottom=potential 0)
+  Note: with center.Kz<0, and a slab placed at B..D, there are molecules
+  with a higher probability ~exp(-center.Kz/RT) outside the slab.
+  Note that the meaning of center.Kz differs from the standard (U-shape)
+  case for center.z1=0
+  
+  variable newt removed:
+    the time is now set to t=0 for init>=2 and is left unchanged otherwise
+    (in older versions, init=2 did not change t; newt must have been used)
+
+  rescale code change (WARNING: bugs may appear!)
+  variable rescale added: rescaling mode with tau.P, tau.rho, dV
+  Sum of 2^bits:
+    rescale=1 : x only rescaled
+    rescale=2 : y only rescaled
+    rescale=4 : z only rescaled
+    rescale=8 : CM-based rescaling
+  Does affect also virtual volume change method; negative dV is the same as
+  positive dV and bit 2^3 set in rescale.  
+  In surface tension measurement (densprof.slab&2), bits 2^0,2^1,2^2 are
+  ignored, but bit 2^3 (or negative dV) mean again molecule-based rescaling.
+
+  variable stop added - nomax probably not needed?
+  
+TO DO:
+  clean .plb writing in special cases, backup .plb and .cp after init>=2
+  
+8/2008 V2.3b
+  bug fixed: in automatic selection of the best initial crystal structure 
+
+9/2008 V2.3c: 
+  electrostatic force added (vector E)
+  usage: Eelst[0], Eelst[1], Eelst[2] in the data, in [V/m]
+  
+  POLAR: charge density profile now extended to induced dipoles
+  (they are apporoximated by a grid-based dipole)
+
+  ERROR "cannot determine smooth cutoff" changed to a WARNING only
+
+  bug fixed: wrong report of "cumulative error of acceleration" with massless
+    sites (dependants not solved, just original accelerations monitored)
+
+  WARNINGs added for too imprecise Ewald parameters
+
+  UNSOLVED:
+  - virtual pressure while polar is not fool-proof (add warnings?)
+  BUG plb2plb 1-site plb-file
+  
+CAVEAT: linked-cell and all-pair methods with isobaric ensemble give
+  densities at different times (before/after cycle)
+BUG: problems - automatic Ewald set:
+   finalL wrong (and used in Ewaldset) if no L ratio given
+   finalL wrong if based on  L given and other loaded (because of NPT)
+  CAVEAT: etest - should not print warnings while testing
+  
+10/2008 V2.3d:
+  tau.R and tau.i added: much like NPT, but instead of box size, 
+  parameter RvdW of site type i is changed
+  i is the order (counted from 0) of the site in the table Lennard-Jones or
+  similar in the ble-file; it is NOT the site number printed (which is
+  copied from the par-file)
+  tau.R should be quite long, >100 for liquid
+  BUG: works only within one MD run (i.e, not saved !!!!)
+
+10/2008 V2.3e:
+  -y-1,-y-2,-y-3 = write whole config as .plb and
+     -y-1 = generate .mol [and .gol] if init!=0,1 (via molcfg)
+     -y-2 = never generate .mol [and .gol]
+     -y-3 = always generate .mol [and .gol] (via molcfg)     
+  
+  (-y-4, -y-5, etc. = water around protein)
+  
+  BUG (feature): initcryst not good with not-cube
+
+BUG: rescale="zCM" does not work with tau.rho, L setting as well
+
+NPT moving in the box (NaCl)
+bug: thermostat=Andersen out of box even w. not-constraint
+
+12/2008--01/2008 V2.4a:
+  - PRESSURETENSOR added, also in Ewald
+    also surface tension support
+    NOTE: now unnecessarily duplicated ENVIR+- (small efficiency loss)
+  - Ewald a bit more optimized 
+  - linked-cell list bit optimized
+
+  - rescale via pressure tensor added to key rescale: (RESCALE_PT = 16)
+    also RESCALE_XisY = 32 ; homog. corr. are included!
+    mnemonics is uppercase, e.g., rescale="XYCM", "XX"...
+  - maxscale added (max allowed scaling of box, applies with tau.P, tau.R,
+    (tau.rho))
+  - tau.E and tau.P: now enthalpy kept constant, done once a cycle
+
+  - option -c changed, now sum of flags; default=9
+    1 = conjgrad used to correct constraints after every step, otherwise Scorrect
+    2 = constraint errors are measured before every integration step
+    4 = constraint errors are measured after integration step and before
+        Scorrect
+    8 = constraint errors are measured after every integration step
+  - automatic omegac optimization with SHAKE (omegac<0)
+
+  - epslc added: linked-cell list, accuracy limit for sites in the basic cell
+             (may happen that sites go out of cell if box rescaling)
+  - asc write/read updated but not tested
+
+BUGS found:
+  - linked-cell list out of cell with Gear: strictchecking?
+  - wrong dipole moment of ions - FIXED
+  - in cases when not measured, zero dipole moment unnecessarily reported
+  - dipole moment with dV probably calculated from rescaled cfg (SERIOUS!)
+  - rdfg segmenatation violation if no arg[2] - FIXED
+  - spc(e) (gromos96) problem with water doublecheck (used generic O, not
+    nbfix) - bening, FIXED
+
+02/2008 V2.4b:
+  - RvdW now in cfg-file (see tau.R, tau.i)
+  - init=10,20 refreshed (now 10,11,12)
+
+  CAVEAT found: although vectors defined as `double vector[4]' lead to a
+  slightly (1%) faster code because of better cacheline match, load/save
+  configuration is not compatible and there are problems with POLAR
+  (probably not worth fixing...)
+
+  - sort added: before writing .cfg, molecules of the same species are
+    sorted by given coordinates of CM
+    valid values:
+      increasing: 1="x", 2="y", 3="z"
+      decreasing: -1="-x", -2="-y", -3="-z"
+     0="off" (default)
+
+  BUGs: bad initialization if L[2]=0 and rho=0
+        second run rescales L using rho and L, then forgets it
+
+For newer changes, see file macsimus/history.txt
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

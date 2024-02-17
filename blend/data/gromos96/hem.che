@@ -1,0 +1,30 @@
+molecule   HEME 
+parameter_set = gromos96
+! charge=-2.00
+       OMn.635     OMn.635                      OMn.635   OMn.635
+            \     /                                  \   /
+             COp.27                                  COp.27
+               |                                      |
+              CH2             HCvp.10               CH2
+               |                |                    |
+             CH2             CR6n.10                CH2
+               |            /       \               |
+             CR5n.00---CRHp.00      CRHp.00---CR5n.00
+               |          |               |         |                   
+               |          |               |         |            
+CH3n.00--CR5n.00        NRHn.10           NRHn.10  CR5n.00--CH3n.00       
+                \       /     \          /  \      /              
+                 CRHp.00       \        /    CRHp.00                  
+                 /              \      /            \
+     HCp.10--CR6n.10             FEp.40             CR6n.10--HCp.10
+                 \              /      \            /
+               CRHp.00         /        \    CRHp.00            
+              /       \       /          \  /      \            
+CH3n.00--CR5n.00       NRHn.10           NRHn.10    CR5n.00--CR1
+             |          |                  |          |         \  
+             |          |                  |          |         CH2
+             CR5n.00---CRHp.00         CRHp.00---CR5n.00           
+               |              \       /              |             
+             CR1               CR6n.10            CH3n.00
+            /                     |                        
+         CH2                      HCp.10

@@ -1,0 +1,13 @@
+nter NH3+ (N-terminal patch for all aminoacids but PRO and GLY)
+
+parameter_set = charmm21
+number_of_atoms = 5
+! charge=1
+
+atoms
+! i  atomid  atomtype charge chiral nbonds bound-index
+  0  N:N     NT       -0.30    0    4      1 2 3 4
+  1  1H,HT1:H    HC       0.35     0    1      0
+  2  2H,HT2      HC       0.35     0    1      0
+  3  3H,HT3      HC       0.35     0    1      0
+  4  CA:CA   CH1E     0.25     1    1      0

@@ -1,0 +1,22 @@
+# Normal mode vibrations of biphenyl
+
+## Find molecule folder
+
+`$ cd ../../blend/che/`
+(or create your che-file)
+
+## Run script
+
+Three options:
+* `$ nmf.sh biphenyl.che`
+* `doubleclick biphenyl.che` from Midnight Commander and select 1
+* `start biphenyl.che` and select 1
+
+Then, check that the molecule is optimized:
+* Push [CG] or type [,] in panel --- optimize ---
+* Optionally, push [ran] or type ':'
+* Type [finish] or type [.]
+
+A window of `show` will appear:
+* Use buttons [<] and [>] or keys PgUp and PgDn to switch modes
+* Modes 0..5 (or 0..4 for a linear molecule) correspond to translation/rotation (zero eigenvalues)

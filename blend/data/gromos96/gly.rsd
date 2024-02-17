@@ -1,0 +1,13 @@
+aminoacid G GLY glycine  
+
+parameter_set = gromos96
+number_of_atoms = 5
+! charge=0
+
+atoms
+! i  atomid  atomtype charge chiral nbonds bound-index
+  0  C       CO       0.38     0    2      1 4
+  1  CA      CH2      0.00     0    2      3 0
+  2  H       H        0.28     0    1      3
+  3  N       N        -0.28    0    2      1 2
+  4  O       O        -0.38    0    1      0

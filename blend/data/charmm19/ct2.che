@@ -1,0 +1,7 @@
+cter CT2 - amidated C-terminus
+parameter_set = charmm19
+! charge=0.00
+        |
+      NH2n.6
+      /   \
+   Hp.3   Hp.3

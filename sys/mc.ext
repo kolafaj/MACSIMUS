@@ -1,0 +1,104 @@
+# Key bindings for MACSIMUS for Midnight Commander
+# See also start and .startdata
+# NB: Midnight Commander cannot handle stderr :(, so "2>&1" redirection...
+# old version of mc: ~/.mc/bindings
+# new version of mc: ~/.config/mc/mc.ext
+
+# common graphics files opened by ImageMagic utility "display":
+regex/\.(ppm|pgm|pbm|pnm|jpg|JPG|gif|GIF|png|PNG|bmp|BMP)$
+	Open=display %f
+
+# WARNING: since Midnight Commander V4.8, this must be appended to or 
+# pasted into ~/.config/mc/mc.ext
+
+# basic MACSIMUS extensions
+# former .mc/bindings copied here
+
+# MACSIMUS che-file (input): process by helper che.sh
+# CHE=0 che.sh NAME.che -> blend -g5 -r2 NAME.che
+# CHE=1 che.sh NAME.che -> nmf.sh NAME.che
+# CHE=2 che.sh NAME.che -> nmf4guest.sh NAME.che
+shell/.che
+	Open=che.sh %f 2>&1
+
+shell/.nmf
+	Open=shownmf.sh %f 2>&1
+
+# MACSIMUS molecular topology file: process by blend
+shell/.mol
+	Open=blend -g5 %f 2>&1
+
+# convergence profiles: show all of them using plot
+shell/.cp
+	Open=showcp -p %f 2>&1
+
+# convergence profiles: show all of them using plot
+shell/.cfg
+	Open=showcfg %f 2>&1
+
+# play the MACSIMUS playback file (.mol,.gol needed) in the ball mode
+shell/.plb
+	Open=show -I%%i %f 2>&1
+
+# as above
+shell/.gol
+	Open=show -I%% %f &
+
+# print summary statistics (use Ctrl-O to view)
+shell/.sta
+	Open=staprt -k %f
+	View=staprt %f
+
+# radial distribution functions: make all available .g and plot them
+shell/.rdf
+	Open=rdfg %f -g -p 2>&1
+	View=rdfg %f -c -p 2>&1
+
+# show a single RDF and similar simple plots
+regex/\.(g|cn|res|dat|sfr|sfg)$
+	Open=plot %f 2>&1
+
+# run simulation (using the 1st line of the file)
+shell/.get
+	Open=go %f
+
+# run simulation (using the 1st line of the file)
+shell/.def
+	Open=go %f
+
+
+# more extensions
+
+# convergence profiles: show all of them using plot
+shell/.cpz
+	Open=showcp -p %f &
+
+# show (already generated) ASCII image of .cp: Etot, T, Epot only
+shell/.cpa
+	Open=plotcpa %f
+
+# raytrace and show (.nff can be saved by show)
+shell/.nff
+	Open=ray -n %b -t -vdisplay
+
+# stop a simulation running in the background
+shell/.loc
+	Open=stop.sh %f
+
+# PDB file: convert to MACSIMUS using charmm21.par
+shell/.pdb
+	Open=pdb -fcharmm21 %f
+
+# show atom file, widely compatible (Gromacs, Gaussian, etc.)
+shell/.atm
+	Open=showatm %f
+
+# view residue
+shell/.rsd
+	Open=rsd %f
+
+# show z-profiles
+shell/.z
+	Open=plot %f:1:2 :3 :4 :5 :6 :7 :8 :9
+
+# end of MACSIMUS extensions

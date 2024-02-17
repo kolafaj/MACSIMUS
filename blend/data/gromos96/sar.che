@@ -1,0 +1,12 @@
+aminoacid X SAR sarcosine
+parameter_set = gromos96
+! charge=0.00
+        |
+       N^n.24-CH3p.24
+          |      
+          |      
+          CH2
+          |      
+          |      
+ On.38=CO^p.38
+        |

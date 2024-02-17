@@ -1,0 +1,12 @@
+aminoacid T THR threonine
+parameter_set = charmm22
+! charge=0.00
+        |    
+        NH1^n.47-Hp.31
+        |          OH1vn.66--Hvp.43
+        |         /
+HBvp.09-CT1p.07--CT1p.14-HAp.09    
+        |         \          
+        |          CT3vn.27--HAvp.09
+ On.51=C^p.51         /   \        
+        |         HAvp.09  HAp.09  

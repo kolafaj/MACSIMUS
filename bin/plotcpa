@@ -1,0 +1,11 @@
+export PLOTNAME=Etot
+export PLOTGEOMETRY=600x200+20+20
+plot $1:0:1 &
+sleep 1
+export PLOTNAME=Tkin Tin Ttr
+export PLOTGEOMETRY=600x200+40+40
+plot $1:0:2 :0:6 :0:7 &
+sleep 1
+export PLOTNAME=Epot
+export PLOTGEOMETRY=600x200+60+60
+plot $1:0:3

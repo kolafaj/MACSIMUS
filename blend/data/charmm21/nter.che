@@ -1,0 +1,10 @@
+nter NTER -NH3+ (N-terminal patch for all aminoacids but PRO and GLY)
+parameter_set = charmm21
+! charge=1
+      HCp.35
+         |
+HCp.35-NTn.3-HCp.35  !
+          |      !
+          |      !
+        CH1E.25--!>>> CH1E.1 side-chain of the following aminoacid
+        |

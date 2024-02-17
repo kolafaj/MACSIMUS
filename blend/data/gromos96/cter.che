@@ -1,0 +1,7 @@
+cter COO- (standard C-terminus)
+parameter_set = gromos96
+! charge=-1.00
+        |
+      CO^p.27  !<<<  On.38=CO^p.38 
+      /    \
+ OMn.635  OMn.635

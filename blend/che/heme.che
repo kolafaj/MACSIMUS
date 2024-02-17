@@ -1,0 +1,32 @@
+molecule   HEME
+parameter_set = charmm22
+! charge=-2.00
+              OCn.76      OCn.76                       OCn.76    OCn.76
+                   \     /                                  \   /
+                    CCp.62                                  CCp.62
+                      |                                      |
+        HAp.09--CT2n.28--HAp.09      HAvp.10      HAp.09^--CT2n.28^--HAp.09^^
+                      |                 |                    |
+        HAp.09--CT2n.18-HAp.09       CPMn.10       HAp.09v-CT2n.18--HAp.09v
+                      |             /       \              |
+                    CPBn.06---CPAp.12      CPAp.12---CPBn.06
+HAp.09                |          |               |         |             HAp.09
+      \               |          |               |         |            /
+HAp.09-CT3n.27--CPBn.06        NPHn.18           NPHn.18  CPBn.06--CT3n.27-HAp.09
+      /                \       /     \          /  \      /              \
+HAp.09                  CPAp.12       \        /    CPAp.12            HAp.09
+                        /              \      /            \
+            HAp.10--CPMn.10             FEp.24             CPMn.10--HAp.10
+                        \              /      \            /
+HAp.09                CPAp.12         /        \    CPAp.12               HAp.20
+      \              /       \       /          \  /      \              /
+HAp.09-CT3n.27--CPBn.06       NPHn.18           NPHn.18    CPBn.06--Cn.20    HAp.10
+      /             |          |                  |          |           \    /
+HAp.09              |          |                  |          |            Cn.20
+                    CPBn.06---CPAp.12         CPAp.12---CPBn.06                \
+                      |              \       /              |                 HAp.10
+                    Cn.20             CPMn.10             CT3n.27--HAp.09
+                   /    \                |               /      |
+                Cn.20    HAp.20          HAp.10       HAp.09    HAp.09
+               /     \
+         HAp.10    HAp.10

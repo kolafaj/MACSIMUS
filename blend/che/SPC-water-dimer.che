@@ -1,0 +1,10 @@
+SPC water model
+parameter_set = gromos96
+Hp.41v
+     \
+      OWn.82 
+     /   Hp.41         
+Hp.41^        \        
+               OWn.82  
+              /        
+         Hp.41         

@@ -1,0 +1,13 @@
+water ST2
+
+parameter_set = charmm19
+number_of_atoms = 5
+! charge=.000
+
+atoms
+!i  id   type charge chir nb bonded_atoms
+ 0  OX2   OH2    .00   0  4  1 2 3 4
+ 1  HX1   H      .24   0  1  0
+ 2  HX2   H      .24   0  1  0
+ 3  LX1   LP    -.24   0  1  0
+ 4  LX2   LP    -.24   0  1  0

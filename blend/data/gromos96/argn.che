@@ -1,0 +1,12 @@
+aminoacid R ARG arginine - neutral
+parameter_set = gromos96
+! charge=1.00
+        |                                    H.415
+       N^n.28-Hp.28                          |
+        |                         H.28      NZn.83-H.415
+        |                         |         /
+       CH1--CH2^--CH2v--CH2^p0.0--NEn.28-CZp.15
+        |                                   \
+        |                                   NZn.548-H.398
+  On.38=CO^p.38                   
+        |                         

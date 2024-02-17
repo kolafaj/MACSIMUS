@@ -1,0 +1,32 @@
+#!/bin/bash
+if [ $# -lt 1 ]; then 
+  echo "Show packed playback file (.plz). Call by:"
+  echo "  showplz [OPTION/ARGS] FILE[.plz]"
+  echo "- FILE.mol must exist"
+  echo "- if FILE.plb exists in curent directory, show it"
+  echo "- if FILE.plb does not exist, unpack FILE.plb to /tmp and show it"
+  echo "- OPTION/ARGS must not contain spaces nor other shell-active characters"
+  echo "Examples:"
+  echo "  showplz sim.plz"
+  echo "See also:"
+  echo "  show plbpak"
+  exit
+fi
+
+for f in "$@" ; do
+  F="$f"
+  LAST="$ARG"
+  ARG="$ARG $f"
+done
+
+F="${F/%.plz/}"
+
+if [ -e "$F.plb" ] ; then
+  PLB="$F.plb"
+else
+  rm /tmp/"$F".{plz,plb}
+  plbpak -p/tmp "$F.plz"
+  PLB="/tmp/$F.plb"
+fi
+
+show -I%%i $LAST $F $PLB

@@ -1,0 +1,13 @@
+aminoacid P PRO proline
+parameter_set = charmm19
+! charge=0.00
+        |
+        N^n.2--CH2E.1
+          |         \
+          |         CH2E
+          |          /
+          CH1E.1--CH2E
+          |
+          |
+ On.55=C^p.55
+        |

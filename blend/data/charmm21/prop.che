@@ -1,0 +1,14 @@
+P PRO proline protonated - terminal (instead of PRO+NTER)
+parameter_set = charmm21
+! charge=0.00
+       HC^.35
+          |
+  HCv.35-NT^n.2--CH2E.25
+          |         \
+          |         CH2E
+          |          /
+          CH1E.25-CH2E
+          |
+          |
+ On.55=C^p.55
+        |

@@ -1,0 +1,12 @@
+aminoacid E GLU glutamic acid
+parameter_set = charmm21
+! charge=-1.00
+        |
+        NP^n.35-Hp.25
+          |                        OCn.6
+          |                       /
+          CH1E.1--CH2E^-CH2En.16-C.36
+          |                       \
+          |                        OCn.6
+ On.55=C^p.55
+        |

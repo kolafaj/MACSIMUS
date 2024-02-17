@@ -1,0 +1,10 @@
+cter CT3 N-Methylamide C-terminus
+parameter_set = charmm22
+! charge=0.00
+        |
+        NH1^n.47-Hp.31
+        |
+HAp.09-CT3n.11-HAp.09
+        |  
+       HAp.09
+

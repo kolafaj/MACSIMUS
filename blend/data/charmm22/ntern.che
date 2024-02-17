@@ -1,0 +1,11 @@
+nter NH2 (neutral N-terminal patch for all aminoacids but PRO and GLY)
+parameter_set = charmm22
+! charge=0
+
+HC^^p.34 HC^^p.34
+       \ /              !
+       NH2^n.90         ! guess using methylamine (top_all22_model.inp)
+        |    
+        |    
+HBvp.09-CT1p.13-!>>> HBvp.09-CT1p.07- replace in next residue
+        |

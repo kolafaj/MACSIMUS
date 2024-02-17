@@ -1,0 +1,18 @@
+aminoacid E GLU glutamic acid (negatively charged)
+
+parameter_set = charmm21
+number_of_atoms = 10
+! charge=-1
+
+atoms
+! i  atomid  atomtype charge chiral nbonds bound-index
+  0  C       C        0.55     0    2      1 7 
+  1  CA      CH1E     0.10     1    3      6 0 2 
+  2  CB      CH2E     0.00     0    2      1 4 
+  3  CD      C        0.36     0    3      4 8 9 
+  4  CG      CH2E     -0.16    0    2      2 3 
+  5  H       H        0.25     0    1      6 
+  6  N       NP       -0.35    0    2      1 5 
+  7  O       O        -0.55    0    1      0 
+  8  OE1     OC       -0.60    0    1      3 
+  9  OE2     OC       -0.60    0    1      3 

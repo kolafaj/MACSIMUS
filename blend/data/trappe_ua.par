@@ -1,0 +1,285 @@
+! Parameter File for TraPPE-UA
+! Literature sources: publications of J.I. Siepmann:
+! 1. M.G. Martin, J.I. Siepmann, J. Phys. Chem. B 102 (1998) 2569-2577 - alkanes "1"
+! 2. M.G. Martin, J.I. Siepmann, J. Phys. Chem. B 103 (1999) 4508-4517 - branched alkanes "2"
+! 3. B. Chen, J.J. Potoff, J.I. Siepmann, J. Phys. Chem. B 105 (2001) 3093-3104 - alcohols "5"
+! 4. J.M. Stubbs, J.J. Potoff, J.I. Siepmann, J. Phys. Chem. B 108 (2004) 17596-17605 - ethers "6"
+! 5. J.J. Potoff, J.I. Siepmann, AIChE J. 47 (2001) 1676-1682 - carbon dioxide
+! Data collated by M.K. Kozlowska, 01/2007
+! SPC water added by JK 03/2007
+! amines added JK 02/2021
+! see also: http://trappe.oit.umn.edu/
+
+all_dihedrals=1  ! all dihedrals-several dihedrals per central bond
+ar_dih_limit=1   ! inclusion limit for dihedrals in aromatic rings
+all_impropers=0  ! one improper per central atom
+column_X=0       ! column X disabled (all atoms match = all X=1)
+sqrt_rule=1      ! sqrt combining rule for LJ energies, additive radii
+LJsigma=1        ! 'vdW' columns contain Lennard-Jones sigma
+factor14=0.5     ! multiplicative factor for 1-4 interactions (if not nbfixes)
+distance14=4     ! these interactions are really 1-4
+polar=0          ! polarizability not included
+;
+
+atoms
+!
+! X : if the atom can match wildcard atom X in the tables of dihedrals
+!     and impropers
+! A : if the atom is a member of an aromatic ring
+! mass : atomic mass in g/mol
+! c : color type (differing from chem. are M=metal, X=halogen, Z=rare gas)
+!
+!i name  X A    mass   Z  col description
+  1 C34  1 0 16.04303 10   C  CH4 sp3 methane
+  2 C33C 1 0 15.03506  9   C  CH3 sp3        [CH3]-CHx
+  3 C32C 1 0 14.02709  8   C  CH2 sp3    CHx-[CH2]-CHx
+  4 C31C 1 0 13.01912  7   C  CH1 sp3 (CHx)2-[CH]-CHx
+  5 C30C 1 0 12.01115  6   C  C   sp3 (CHx)3-[C]-CHx
+  6 C33T 1 0 15.03506  9   C  CH3 sp3        [CH3]-OH
+  7 C32T 1 0 14.02709  8   C  CH2 sp3    CHx-[CH2]-OH
+  8 C31T 1 0 13.01912  7   C  CH1 sp3 (CHx)2-[CH]-OH
+  9 C30T 1 0 12.01115  6   C  C   sp3 (CHx)3-[C]-OH
+ 10 C33E 1 0 15.03506  9   C  CH3 sp3        [CH3]-O-
+ 11 C32E 1 0 14.02709  8   C  CH2 sp3    CHx-[CH2]-O-
+ 12 C31E 1 0 13.01912  7   C  CH1 sp3 (CHx)2-[CH]-O-
+ 13 C30E 1 0 12.01115  6   C  C   sp3    CHx-[C]-O-
+ 14 O3T  1 0 15.99940  8   O  O   sp3    CHx-[O]-H    alcohol oxygen
+ 15 O3E  1 0 15.99940  8   O  O   sp3    CHx-[O]-CHx  ether oxygen
+ 16 CD   1 0 12.01115  6   C  C   sp1      O=[C]=O    C in carbon dioxide
+ 17 O2CD 1 0 15.99940  8   O  O   sp2        [O]=C=O O  in carbon dioxide
+ 18 HT   0 0  1.00800  1   H  alcohol hygrogen
+ 19 O    0 0 15.9994   8   O  SPC water oxygen
+ 20 H    0 0  1.008    1   H  SPC water hydrogen
+! 21 N    1 0  0        7   N  amine N
+! 22 HN   1 0  0        1   M  amine H
+! 23 M    0 0  0        0   M  on H-C bond for amines
+
+Lennard-Jones
+!       alpha   EMIN=-eps    Rmin=sigma  These columns used for
+!       [A^3]  (kcal/mol)      (A)         1-4 interactions
+C34      0.00    -0.2941       3.73
+C33C     0.00    -0.1947       3.75
+C32C     0.00    -0.091411365  3.95
+C31C     0.00    -0.0199       4.68
+C30C     0.00    -0.0010       6.40
+C33T     0.00    -0.1947       3.75
+C32T     0.00    -0.0914       3.95
+C31T     0.00    -0.0199       4.33
+C30T     0.00    -0.0010       5.80
+C33E     0.00    -0.1947       3.75
+C32E     0.00    -0.0914       3.95
+C31E     0.00    -0.0199       4.33
+C30E     0.00    -0.0010       5.80
+O3T      0.00    -0.18480993   3.02
+O3E      0.00    -0.1093       2.80
+CD       0.00    -0.0537       2.80
+O2CD     0.00    -0.1570       3.05
+O        0.840   -0.15539426   3.1655579
+H        0.044    0.000000     1.000000
+HT       0.044    0.000000     1.000000 
+!HT       0.00    -0.0050       0.920 ! ass.10% of HO (H from -OH) from charmm21.par-MKK
+
+bonds
+! K is force constant in kcal/mol/A^2: U=K(r-length)^2  No wildcards X !
+! note: vibration time=217.2fs sqrt(m/K), where m is effective mass in g/mol
+!       and K in kcal/mol/A^2
+!atom atom  K          length
+C33C C33C   240.0       1.54 ! Values of K taken from charmm21.par (our assumption)
+C33C C32C   268.0       1.54 ! I need K only for blend, cook will use bond-lenghts
+C33C C31C   268.0       1.54
+C33C C30C   240.0       1.54
+C32C C32C   268.0       1.54
+C32C C31C   268.0       1.54
+C32C C30C   268.0       1.54
+C31C C31C   268.0       1.54
+C31C C30C   268.0       1.54
+C30C C30C   268.0       1.54
+C33C C32T   268.0       1.54 ! Ass. the same K-values for C3xT & C3xE as for C3xC
+C33C C32E   268.0       1.54
+C33C C31T   268.0       1.54
+C33C C31E   268.0       1.54
+C33C C30T   240.0       1.54
+C33C C30E   240.0       1.54
+C32C C32T   268.0       1.54
+C32C C32E   268.0       1.54
+C32C C31T   268.0       1.54
+C32C C31E   268.0       1.54
+C32C C30T   268.0       1.54
+C32C C30E   268.0       1.54
+C31C C31T   268.0       1.54
+C31C C31E   268.0       1.54
+C31C C30T   268.0       1.54
+C31C C30E   268.0       1.54
+C30C C30T   268.0       1.54
+C30C C30E   268.0       1.54
+C32T C32T   268.0       1.54
+C32T C32E   268.0       1.54
+C32E C32E   268.0       1.54
+C32T C31T   268.0       1.54
+C32T C31E   268.0       1.54
+C32E C31T   268.0       1.54
+C32E C31E   268.0       1.54
+C32T C30T   268.0       1.54
+C32T C30E   268.0       1.54
+C32E C30T   268.0       1.54
+C32E C30E   268.0       1.54
+C31T C30T   268.0       1.54
+C31T C30E   268.0       1.54
+C31E C30T   268.0       1.54
+C31E C30E   268.0       1.54
+C30T C30T   268.0       1.54
+C30T C30E   268.0       1.54
+C30E C30E   268.0       1.54
+C33T O3T    340.0       1.43
+C32T O3T    340.0       1.43
+C31T O3T    340.0       1.43
+C30T O3T    320.0       1.43
+O3T  HT     450.0       0.945
+C33E O3E    330.0       1.41
+C32E O3E    330.0       1.41
+C31E O3E    380.0       1.41
+C30E O3E    380.0       1.41
+CD   O2CD  1115.0       1.16 ! K value of CM-OM carbon monoxide (lack of CO2)
+H    O      555         1.00   !only for blend
+
+angles
+!atom atom atom  K(theta)  theta
+!                kcal/mol  degree
+C33C C32C C33C     62.1    114.0 ! 124.2/2 = K(theta); 124.2 = k(theta) eq.4 Ethers"6"
+C33C C32C C32C     62.1    114.0
+C33C C32C C31C     62.1    114.0
+C33C C32C C30C     62.1    114.0
+C33C C31C C33C     62.1    112.0    
+C33C C31C C32C     62.1    112.0
+C33C C31C C31C     62.1    112.0
+C33C C31C C30C     62.1    112.0
+C33C C30C C33C     62.1    109.47    
+C33C C30C C32C     62.1    109.47
+C33C C30C C31C     62.1    109.47
+C33C C30C C30C     62.1    109.47
+C32C C32C C32C     62.1    114.0
+C32C C32C C31C     62.1    114.0
+C32C C32C C30C     62.1    114.0
+C32C C32C C32T     62.1    114.0 ! added because of n-ROH structure
+C33C C32C C32T     62.1    114.0 ! added by JK
+C32C C31C C32C     62.1    112.0
+C32C C31C C31C     62.1    112.0
+C32C C31C C30C     62.1    112.0
+C32C C30C C32C     62.1    109.47
+C32C C30C C31C     62.1    109.47
+C32C C30C C30C     62.1    109.47
+C31C C31C C31C     62.1    112.0
+C31C C31C C30C     62.1    112.0
+C31C C30C C30C     62.1    109.47
+C32T C31T C32E     62.0    112.0 ! from here parameters only for Polyglycerol/Hyperp.
+C32E C31E C32E     62.0    112.0
+C32E C31T C32E     62.0    112.0
+C32E C31E C32T     62.0    112.0
+O3T  C32T C32C     50.1    109.47 ! added because of n-ROH structure
+O3T  C32T C33C     50.1    109.47 ! ethanol (see ref. 3)/JK
+O3T  C32T C32T     50.1    109.47 ! JK
+O3T  C32T C31T     50.1    109.47
+O3T  C31T C32T     50.1    109.47
+O3T  C32T C31E     50.1    109.47
+O3T  C31T C32E     50.1    109.47
+O3E  C32E C31T     50.0    112.0
+O3E  C32E C31E     50.0    112.0
+O3E  C32E C33C     50.0    112.0 ! guessed JK
+O3E  C31E C32E     50.0    112.0
+C32E O3E  C32E     60.0    112.0
+C32E O3E  C31E     60.0    112.0
+C32T O3T  HT       55.05   108.5
+C31T O3T  HT       55.05   108.5
+O2CD CD   O2CD     50.0    180.0 ! assumed MKK     
+H    O    H        55      109.47122  !only for blend
+
+dihedrals
+!atom atom atom atom  C_n=K   n  phi0  C_n is equal to K(phi) from manual
+!                    kcal/mol
+C33C C32C C32C C32C  0.70552  1  0.0 ! added because of n-ROH structure
+C33C C32C C32C C32C  0.13551  2  0.0 ! C_2 term with an opposite sign
+C33C C32C C32C C32C  1.57252  3  0.0 ! C_0 is ignored(it's just zero level)
+C32C C32C C32C C32C  0.70552  1  0.0
+C32C C32C C32C C32C  0.13551  2  0.0
+C32C C32C C32C C32C  1.57252  3  0.0
+C32C C32C C32C C32T  0.70552  1  0.0
+C32C C32C C32C C32T  0.13551  2  0.0
+C32C C32C C32C C32T  1.57252  3  0.0
+C32C C32C C32T O3T   0.35098  1  0.0
+C32C C32C C32T O3T   0.10600  2  0.0
+C32C C32C C32T O3T   1.53002  3  0.0
+C33C C32T O3T  HT    0.41696  1  0.0 ! the same as C31T C32T O3T  HT (added JK)
+C33C C32T O3T  HT    0.05797  2  0.0
+C33C C32T O3T  HT    0.37346  3  0.0
+C32C C32T O3T  HT    0.41696  1  0.0
+C32C C32T O3T  HT    0.05797  2  0.0
+C32C C32T O3T  HT    0.37346  3  0.0
+C32T C32T O3T  HT    0.41696  1  0.0 ! JK from web
+C32T C32T O3T  HT    0.05797  2  0.0
+C32T C32T O3T  HT    0.37346  3  0.0
+C31T C32T O3T  HT    0.41696  1  0.0 ! C_0 is ignored(it's just zero level)
+C31T C32T O3T  HT    0.05797  2  0.0 ! C_2 term with an opposite sign
+C31T C32T O3T  HT    0.37346  3  0.0
+C32T C31T O3T  HT    0.39214  1  0.0
+C32T C31T O3T  HT    0.06252  2  0.0
+C32T C31T O3T  HT   -0.34562  3  0.0 ! C_3=-0.34562 - should I write negative value? YES!/JK (a bug was here)
+C31E C32T O3T  HT    0.41696  1  0.0 ! the same values as for C31T C32T O3T  HT
+C31E C32T O3T  HT    0.05797  2  0.0
+C31E C32T O3T  HT    0.37346  3  0.0
+C32E C31T O3T  HT    0.39214  1  0.0 ! the same values as for C32T C31T O3T  HT
+C32E C31T O3T  HT    0.06252  2  0.0
+C32E C31T O3T  HT   -0.34562  3  0.0 ! C_3=-0.34562 - should I write negative value?
+O3T  C31T C32T O3T   0.00000  1  0.0 ! ass.values for ether glycol O-CH2-CH2-O
+O3T  C31T C32T O3T   0.50002  2  0.0
+O3T  C31T C32T O3T   2.00007  3  0.0
+O3T  C32T C32T O3T   0.00000  1  0.0 ! H-O-CH2-CH2-O-H from the web
+O3T  C32T C32T O3T   0.50002  2  0.0
+O3T  C32T C32T O3T   2.00007  3  0.0
+O3E  C31E C32T O3T   0.00000  1  0.0 ! ass.values for ether glycol O-CH2-CH2-O
+O3E  C31E C32T O3T   0.50002  2  0.0
+O3E  C31E C32T O3T   2.00007  3  0.0
+O3E  C32E C31T O3T   0.00000  1  0.0 ! ass.values for ether glycol O-CH2-CH2-O
+O3E  C32E C31T O3T   0.50002  2  0.0
+O3E  C32E C31T O3T   2.00007  3  0.0
+O3E  C31E C32E O3E   0.00000  1  0.0 ! ass.values for ether glycol O-CH2-CH2-O
+O3E  C31E C32E O3E   0.50002  2  0.0
+O3E  C31E C32E O3E   2.00007  3  0.0
+C32E C31T C32T O3T   0.35098  1  0.0 ! ass.values for CHx-CH2-CH2-O(H)
+C32E C31T C32T O3T   0.10600  2  0.0
+C32E C31T C32T O3T   1.53002  3  0.0
+C32E C31E C32T O3T   0.35098  1  0.0 ! ass.values for CHx-CH2-CH2-O(H)
+C32E C31E C32T O3T   0.10600  2  0.0
+C32E C31E C32T O3T   1.53002  3  0.0
+C32E C31E C32E O3E   0.35098  1  0.0 ! ass.values for CHx-CH2-CH2-O(H)
+C32E C31E C32E O3E   0.10600  2  0.0
+C32E C31E C32E O3E   1.53002  3  0.0
+C32E C31T C32E O3E   0.35098  1  0.0 ! ass.values for CHx-CH2-CH2-O(H)
+C32E C31T C32E O3E   0.10600  2  0.0
+C32E C31T C32E O3E   1.53002  3  0.0
+C32E O3E  C31E C32T  1.44143  1  0.0
+C32E O3E  C31E C32T  0.32541  2  0.0
+C32E O3E  C31E C32T  1.10926  3  0.0
+C32E O3E  C31E C32E  1.44143  1  0.0
+C32E O3E  C31E C32E  0.32541  2  0.0
+C32E O3E  C31E C32E  1.10926  3  0.0
+C32E O3E  C32E C31E  1.44143  1  0.0
+C32E O3E  C32E C31E  0.32541  2  0.0
+C32E O3E  C32E C31E  1.10926  3  0.0
+C32E O3E  C32E C31T  1.44143  1  0.0
+C32E O3E  C32E C31T  0.32541  2  0.0
+C32E O3E  C32E C31T  1.10926  3  0.0
+C31E O3E  C32E C31T  1.44143  1  0.0
+C31E O3E  C32E C31T  0.32541  2  0.0
+C31E O3E  C32E C31T  1.10926  3  0.0
+C31E O3E  C32E C31E  1.44143  1  0.0
+C31E O3E  C32E C31E  0.32541  2  0.0
+C31E O3E  C32E C31E  1.10926  3  0.0
+
+waters
+! must be in standard order recognized by cook
+SPCE  3 H 0.4238 H 0.4238 O -0.8476
+SPC   3 H 0.41   H 0.41   O -0.82
+
+END
+
+

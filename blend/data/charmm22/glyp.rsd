@@ -1,0 +1,15 @@
+nter GLYP (terminal patch for GLY instead of NTER)
+
+parameter_set = charmm22
+number_of_atoms = 7
+! charge=1.00
+
+atoms
+!i  id   type charge chir nb bonded_atoms
+ 0  N:N   NH3  -0.30   0  3  1 2 3
+ 1  HT1:H   HC    0.33   0  1  0
+ 2  HT2   HC    0.33   0  1  0
+ 3  HT3   HC    0.33   0  1  0
+ 4  CA:CA CT2   0.13   0  0 
+ 5  HA1:HA1   HB    0.09   0  0 
+ 6  HA2:HA1   HB    0.09   0  0 

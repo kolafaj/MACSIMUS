@@ -1,0 +1,7 @@
+! NSLOTS=4 cookgcp0slcP1 NaCl.ble slab
+init="start"      ! read cfg
+thermostat="Nose" ! Nose-Hoover
+tau.T=0.25        ! time constant
+no=2000           ! max # of cycles as you wish
+;
+

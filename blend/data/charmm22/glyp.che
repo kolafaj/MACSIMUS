@@ -1,0 +1,14 @@
+G GLY glycine protonated terminal (instead of GLY+NTER)
+parameter_set = charmm22
+! charge=0.00
+
+       HC^^p.33
+        |
+ HCp.33-NH3^n.30-HCp.33
+        |    
+        |    
+HBp.09-CT2p.13-HBp.09
+        |    
+        |    
+  On.51=C^p.51
+        |
