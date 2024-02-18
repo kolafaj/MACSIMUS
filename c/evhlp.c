@@ -57,15 +57,15 @@ Quit if interactive: quit exit Ctrl-D +--------------------------------------+\n
 static char Poptions[]="\n\
 OPTIONS:\n\
 --[VERB]   filter (the same as --d with no prompt)\n\
----[VERB]  -|+ as 1st char is unary -|+ (default=+,- previous result)\n\
+---[VERB]  -|+ as 1st char is unary -|+\n\
+           [default=add to|subtract from previous result]\n\
 --c[WIDTH] prompt-oriented calculator in current terminal (ncurses editing)\n\
            if WIDTH is missing, $COLUMNS is checked, otherwise 80 applies\n\
            also ()interactive from this help\n\
 --dVERB    prompt-oriented calculator on a dumb terminal (no history/editing)\n\
 --fFMT     format (accepting double), LF appended; must be the last option\n\
 --FFMT     as above, no LF appended; must be the last option (override env)\n\
---iDATA    read file DATA with useful constants [default=$HOME/." EV "data]\n\
-           see (d)ata section\n\
+--iDATA    read file DATA with constants [default=$HOME/." EV "data], see (d)ata\n\
 --i        do not read any initial constants (except embedded pi=PI)\n\
 --r[VERB]  if the last result==0 then return code=1 and vice versa, e.g.:\n\
            if " EV " --r0 \"pi>3\"; then echo TRUE; else echo FALSE; fi\n\

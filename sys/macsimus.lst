@@ -885,9 +885,6 @@ macsimus/show/showhlp.c
 macsimus/show/showmenu.c
 macsimus/show/showmol.c
 macsimus/show/showmove.c
-macsimus/show/simhelpcz.c
-macsimus/show/simhelpen.c
-macsimus/show/simolant.c
 macsimus/show/stereo.c
 macsimus/sim/anchora.c
 macsimus/sim/anchorc.c

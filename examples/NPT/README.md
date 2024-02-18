@@ -1,14 +1,14 @@
 # Simple test of the NPT ensemble
 
-This example is based on paper *Novel barostat implementation for molecular dynamics* by J. **Janek** and J. **Kolafa**.  The Martyna-Tobias-Klein thermostat/barostat is implemented in MACSIMUS using Verlet/leap-frog, SHAKE, and predictors.
+This example is based on paper *Novel barostat implementation for molecular dynamics* by J. **Janek** and J. **Kolafa**.  The Martyna-Tobias-Klein extended Lagrangian equations for thermostat/barostat are in MACSIMUS implemented using Verlet/leap-frog, SHAKE, and predictors.
 
 ## Preparation
 
-Prepare force field from data in `MACSIMUS/blend/data/gases.par` and `N2.che`:
+Prepare force field from data in [gases.par](../../blend/data/gases.par) and [N2.che](N2.che):
 
 `$ blend -o n2 N2.che`
 
-Assuming that at least 4 threads are available, tell cook to use them.  It does not make sense to use more for such a small system.
+Assuming that at least 4 threads are available, tell `cook` to use them.  (It does not make sense to use more for such a small system.)
 
 `$ export NSLOTS=4`
 
@@ -30,22 +30,22 @@ Check the results:
   `$ start N256NPT1.cp`<br >
   from Midnight Commander: open file `N256NPT1.cp`
 
-* If not converged, remove the first block in `N256NPT1.get` up to the first `;` and repeat simulation.
+* If not converged, remove the first block in [N256NPT1.get](N256NPT1.get) up to the first `;` and repeat simulation.
 
 ## Productive run
 
-When converged, leave only block starting with<br />
-`! productive`<br />
-on file `N256NPT1.get` and run the simulation again.  It may take ~ 1–2 hours; the simulation for the paper was longer.
+When converged, leave only the block starting with<br />
+`! productive run:`<br />
+in file [N256NPT1.get](N256NPT1.get) and run the simulation again.  It may take ~ 1–2 hours; the simulation for the paper was longer.
 
 `$ cookewslcP1 n2.ble N256NPT1.get`
 
 ## Results
 
-The results can be found at the end of the protocol `file N256NPT1.prt`, or using command:
+The results can be found at the end of the protocol file `N256NPT1.prt`, or using command:
 
 `$ staprt -nV -kNaevnf N256NPT1.sta`<br />
 `$ staprt -n'P(tens) [Pa]' -kNaevnf N256NPT1.sta`<br />
 `$ staprt -n'enthalpy*' -kNaevnf N256NPT1.sta`
 
-Where the `-k` arguments correspont do the columns printed: N=variable name, a=average, e-error (1σ), v-variance, n=# of data, f=file
+Where the `-k` arguments correspond do the columns printed: N=variable name, a=average, e=error (1σ), v=variance, n=# of data, f=file.

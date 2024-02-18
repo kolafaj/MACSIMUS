@@ -2,9 +2,11 @@
 
 ## Copy biphenyl (or whatever you wish)
 
+From this directory:
+
 `$ cp ../../blend/che/biphenyl.che .`
 
-Alternatively, you can work in `blend/che/`
+Alternatively, you can work in `blend/che/`:
 
 `$ cd ../../blend/che/`
 
@@ -16,14 +18,17 @@ Alternatively, you can work in `blend/che/`
 ## Show and render
 
 Start `show` (three options):
+
 * `$ show biphenyl`
 * doubleclick `biphenyl.plb` from Midnight Commander
 * `$ start biphenyl`
 
 And then:
+
 * rotate as needed
-* Click button [xyz] or type `\\`
+* Click button [xyz] or type `\` to remove the coordinates
+* scale by mouse wheel or `+-`
 * Click button [ZBUF] or type `B`
 * Select [one frame+render] or type `O`
 
-NB: `stereo` to get more options
+NB: `stereo` and `show/stereo.c` to get more info
