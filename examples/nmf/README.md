@@ -1,9 +1,12 @@
 # Normal mode vibrations of biphenyl
 
-## Find molecule folder
+## Copy biphenyl (or whatever you wish)
+
+`$ cp ../../blend/che/biphenyl.che .`
+
+Alternatively, you can work in `blend/che/`
 
 `$ cd ../../blend/che/`
-(or create your che-file)
 
 ## Run script
 

@@ -1,46 +1,51 @@
 # Simple test of the NPT ensemble
 
-This example based on paper *Novel barostat implementation for molecular dynamics* by J. Janek and J. Kolafa: The Martyna-Tobias-Klein thermostat/barostat implemented in MACSIMUS using Verlet/leap-frog, SHAKE, and predictors
+This example is based on paper *Novel barostat implementation for molecular dynamics* by J. **Janek** and J. **Kolafa**.  The Martyna-Tobias-Klein thermostat/barostat is implemented in MACSIMUS using Verlet/leap-frog, SHAKE, and predictors.
+
+## Preparation
 
 Prepare force field from data in `MACSIMUS/blend/data/gases.par` and `N2.che`:
 
 `$ blend -o n2 N2.che`
 
-Assuming that at least 4 threads are available, tell cook to use them.  It does not mae sense to use more for such a small system.
+Assuming that at least 4 threads are available, tell cook to use them.  It does not make sense to use more for such a small system.
 
 `$ export NSLOTS=4`
+
+## Initialization
 
 Run initialization:
 
 `$ cookewslcP1 n2.ble N256NPT1.get`
 
-Check the convergence profiles:
+Check the results:
 
-* Command:
+* Have a look at protocol `N256NPT1.prt`
 
-  `$ showcp -p N256NPT1.cp Tkin rho P`
+* Check the timing:<br >
+  `$ fgrep speed N256NPT1.prt`                                             
 
-* The same if `start` is installed:
+* Check the convergence profiles (three equivalent ways):<br >
+  `$ showcp -p N256NPT1.cp Tkin rho P`<br >
+  `$ start N256NPT1.cp`<br >
+  from Midnight Commander: open file `N256NPT1.cp`
 
-  start N256NPT1.cp
+* If not converged, remove the first block in `N256NPT1.get` up to the first `;` and repeat simulation.
 
-* Or from Midnight Commander:
+## Productive run
 
-  open file `N256NPT1.cp`
+When converged, leave only block starting with<br />
+`! productive`<br />
+on file `N256NPT1.get` and run the simulation again.  It may take ~ 1–2 hours; the simulation for the paper was longer.
 
-Check the timing by:
+`$ cookewslcP1 n2.ble N256NPT1.get`
 
-`$ fgrep speed N256NPT1.prt`                                             
+## Results
 
-*If not converged, remove the first block in `N256NPT1.get` up to the first `;` and repeat simulation.*
+The results can be found at the end of the protocol `file N256NPT1.prt`, or using command:
 
-If converged, run (~ 1-2 hours; the simulation for the paper was longer):
-  `$ cookewslcP1 n2.ble N256NPT1.get`
+`$ staprt -nV -kNaevnf N256NPT1.sta`<br />
+`$ staprt -n'P(tens) [Pa]' -kNaevnf N256NPT1.sta`<br />
+`$ staprt -n'enthalpy*' -kNaevnf N256NPT1.sta`
 
-The results can be found at the end of the protocol file N256NPT1.prt, or using command:
-
-`$ staprt -nV -knaevnf N256NPT1.sta`
-`$ staprt -n'P(tens) [Pa]' -knaevnf N256NPT1.sta`
-`$ staprt -n'enthalpy*' -knaevnf N256NPT1.sta`
-
-Where the `-k` arguments mean: n=name, a=average, e-error (1σ), v-variance, f=file
+Where the `-k` arguments correspont do the columns printed: N=variable name, a=average, e-error (1σ), v-variance, n=# of data, f=file

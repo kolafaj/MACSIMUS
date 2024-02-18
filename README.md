@@ -25,7 +25,7 @@
 * Troubleshooting:
   * lot of errors, directory bin/ is almost empty: check script `bin/mvexe.sh`
   * cannot find libraries to link: check file `compile.mmk`
-  * `blend, pdb` do not work: check enviroment variable BLENDPATH
+  * `blend, pdb` do not work: check environment variable BLENDPATH
 
 ## Features
 
@@ -54,7 +54,7 @@
   * essential dynamics
   * normal mode vibrations
   * simple molecule editor
-  * rmsd, inertia matrix, and internal angle analysis
+  * RMSD, inertia matrix, and internal angle analysis
   * second virial coefficient
   * several models of dipolar polarizability (except Gaussian charges)
   * anaglyph
@@ -70,7 +70,7 @@
   * `plbinfo +u`: tools to work with trajectories
   * `spectrum`: FFT for any factorization of the number of points, not only 2^n
 * selected utilities:
-  * `pdb`: simple converter from the PDB format with some editing
+  * `pdb`: very simple converter from the PDB format with some editing
   * `plot`: plot graph (with formulas, fitting...)
   * `tabproc`: command-prompt oriented spreadsheet (I love command prompt)
   * `ev evu`: prompt oriented calculator, without and with units

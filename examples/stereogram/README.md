@@ -4,6 +4,10 @@
 
 `$ cp ../../blend/che/biphenyl.che .`
 
+Alternatively, you can work in `blend/che/`
+
+`$ cd ../../blend/che/`
+
 ## Create the plb-file
 
 * `$ blend -g biphenyl.che`
@@ -13,12 +17,13 @@
 
 Start `show` (three options):
 * `$ show biphenyl`
-* rotate as needed
 * doubleclick `biphenyl.plb` from Midnight Commander
 * `$ start biphenyl`
 
-Click button [xyz] or type `\\`
-Click button [ZBUF] or type `B`
-Select [one frame+render] or type `O`
+And then:
+* rotate as needed
+* Click button [xyz] or type `\\`
+* Click button [ZBUF] or type `B`
+* Select [one frame+render] or type `O`
 
-NB: use `stereo` to get more options
+NB: `stereo` to get more options

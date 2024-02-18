@@ -327,9 +327,9 @@ q
 EOF
 echo "Comparing (using diff):"
 echo "  the contents of \"${PWD}/\" (> instbin.lst)"
-echo "  with the expected listing \"bin/bin.lst\""
+echo "  with the expected listing \"sys/bin.lst\""
 echo "----------------------------------------------------------------------------"
-if diff bin/bin.lst instbin.lst > diff.lst ; then
+if diff sys/bin.lst instbin.lst > diff.lst ; then
   echo "=== MACSIMUS HAS BEEN SUCCESSFULLY COMPILED ==="
 else
   cat diff.lst
@@ -352,9 +352,10 @@ MACSIMUS offers the following commands:
   evu   - as above with units: evu "exp(-1.1[kcal/mol]/298[K]/R)"
   start - extension-based start (MACSIMUS files and more): start simul.plb
 Get help by running them without parameters.
-Installation will copy the executables to ~/bin/
-and initialization .files to ~/.
-Not installation will remove the temporary $PWD/bin/{ev,evu,start}.
+* Installation will copy the executables to ~/bin/
+  and initialization .files to ~/.
+* Not installation will remove the temporary files
+  $PWD/bin/{ev,evu,start}.
 Install ev,evu,start (y/N)?
 EOF
 read

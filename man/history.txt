@@ -109,7 +109,7 @@ HISTORY
 
 ********** Posted to GitHub **********
 
-examples/{edu,NPT,brine} added.
+examples/*/ added.
 
 cook 3.6s:
   * default slab.geom changed to 0, to suppress warnings if a SLAB version is used for a cubic box
