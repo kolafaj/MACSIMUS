@@ -113,7 +113,9 @@ examples/*/ added.
 
 cook 3.6s:
   * default slab.geom changed to 0, to suppress warnings if a SLAB version is used for a cubic box
- !! due to bad sync, the version of sim/intrapot.c at home (from 2020-04-16) omitted intramolecular virial of force
+  !! due to bad sync, the version of sim/intrapot.c at home omitted intramolecular virial of force
+-rw-rw-r-- 1 15635 2020-04-16 10:17 home/sim/intrapot.c
+-rw-rw-r-- 1 15528 2022-06-07 14:43 work/sim/intrapot.c
 
 makemake:
   * metamake renamed to metamake.mmk, command !private added
