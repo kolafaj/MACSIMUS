@@ -100,7 +100,7 @@ other:
 
 HISTORY
 ^^^^^^^
-  !! dangerous bug fixed
+  !! serious/dangerous bug fixed
   ! bug fixed
   + feature added
   * feature changed
@@ -113,6 +113,7 @@ examples/*/ added.
 
 cook 3.6s:
   * default slab.geom changed to 0, to suppress warnings if a SLAB version is used for a cubic box
+ !! due to bad sync, the version of sim/intrapot.c at home (from 2020-04-16) omitted intramolecular virial of force
 
 makemake:
   * metamake renamed to metamake.mmk, command !private added
