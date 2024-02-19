@@ -21,9 +21,9 @@
   * Right mouse click a function button gives context help
 * Customization:
   * To compile a tailored version of the simulation program cook, run `./configure.sh` from subdirectory `cook`
-  * List of compile-time switches: `MACSIMUS/cook/generic/simopt.h`
+  * List of compile-time switches: `cook/generic/simopt.h`
   * To tailor `blend`, find `blend/metamake.mmk`
-  * Force field parameters are in `MACSIMUS/blend/data/`
+  * Force field parameters are in `blend/data/`
 * Troubleshooting:
   * lot of errors, directory bin/ is almost empty: check script `bin/mvexe.sh`
   * cannot find libraries to link: check file `compile.mmk`
