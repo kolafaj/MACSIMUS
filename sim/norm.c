@@ -1062,7 +1062,7 @@ void distancecheck(void) /********************************** distancecheck */
   int i,j,k;
   vector *r=cfg[0]->rp,dr;
   double rrmin[2],rrmax[2],rr;
-  int imin[2],imax[2],jmin[2],jmax[2];
+  int imin[2],imax[2],jmin[2]={0,0},jmax[2]={0,0}; // init to suppress warning
 
   if (!cfg[0]) return;
 

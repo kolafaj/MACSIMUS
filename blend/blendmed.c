@@ -2156,7 +2156,7 @@ void writePDB2(species_t *spec) /******************************* writePDB2 */
 */
 {
   site_t *si;
-  int i,ns=spec->ns,j,resno,het;
+  int i,ns=spec->ns,j=0/*needed?*/,resno,het;
   char id[24],*c,chain;
 
   site=spec->site;
@@ -2204,7 +2204,7 @@ void writePDB2(species_t *spec) /******************************* writePDB2 */
 	j=atoi(c);
 	if (j>9 && j>=10*resno) j/=10;
 	resno=j; }
-      do *c++=0; while (j/=10);
+      do *c++=0; while (j/=10); // ? undefined j here
       chain='~';
       if (*c=='~' || (*c>='a' && *c<='z')) chain=*c++;
       if (chain=='~') chain=' ';

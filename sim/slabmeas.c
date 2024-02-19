@@ -572,7 +572,7 @@ gamma/[N/m] = -Pt/[Pa]*%g = -P/[Pa]*%g (for NPT in x,y)",Lzf,Lzf/1.5);
       prt("fix (to be added to homogeneously-corrected value):%13.8f N/m",
           -sc[2]*Lzf); }
 
-    if (!extext | (option('v')&4)) {
+    if (!extext | ((option('v')&4))) {
       if (slab.K)
         prt("\n\
 Fourier expansion cutoff corrections for the slab geometry (slab.K=%d):\n\

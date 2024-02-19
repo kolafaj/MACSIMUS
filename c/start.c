@@ -97,7 +97,7 @@ int EQUAL(char *a,char *b)
 
 int main(int narg,char **arg)
 {
-  struct reg_s *r,*rr,*r0;
+  struct reg_s *r,*rr,*r0=NULL;
   int iarg;
   int ii,n,ask=1,pass;
   char *dot,*ext,*fn,*x;

@@ -84,6 +84,7 @@ EOF
 echo "!home=\"${PWD}\"" >> home.mmk
 echo "home.mmk generated"
 
+echo ">>>>>>>>>>>>>>"
 echo
 echo ">>> int4 check"
 cd gen/
@@ -102,6 +103,7 @@ if ! ./int4 ; then
 fi
 cd ..
 
+echo ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
 echo
 echo ">>> Compiling the makemake utility"
 cd c/
@@ -113,6 +115,7 @@ if ! ./makemake $UNIX "$CC" ; then
 fi
 rm makemake # will be recompiled
 
+echo ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
 echo
 echo ">>> Compiling general utilities from subdirectory c/"
 # do not forget to include these modules to metamake.mmk
@@ -144,6 +147,7 @@ mv makefile makefile.high
 mv makefile makefile.double
 cd ../..
 
+echo ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
 echo
 echo ">>> Compiling blend (lj version), pdb, and similar from blend/"
 cd blend/
@@ -160,6 +164,7 @@ do
   ../bin/makeone.sh $f
 done
 
+echo ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
 echo
 echo ">>> Installing bin versions of common force fields from blend/data/"
 cd data
@@ -185,6 +190,7 @@ do
 done
 cd ..
 
+echo ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
 echo
 echo ">>> Compiling different simulation utilities from util/"
 cd util/
@@ -207,6 +213,7 @@ do
 done
 cd ..
 
+echo ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
 echo
 echo ">>> Compiling the raytracer + related software from ray/"
 echo "(more utilities available upon request)"
@@ -247,6 +254,8 @@ KEY=$REPLY
 
 while [ "$KEY" != "" ] ; do
 
+  echo ">>>>>>>>>>>>>>>>>>>"
+  echo
   echo ">>> compiling key=${KEY:0:1}"
 
   case ${KEY:0:1} in
@@ -363,10 +372,10 @@ if [ "$REPLY" == "y" ] ; then
   echo "copying customizable initialization files .evdata .evudata .startdata to ~/"
   pushd sys
   cp -ip .evdata .evudata .startdata ~/
-  popd sys
+  popd
 else
   echo "removing executables $PWD/bin/{ev,evu,start}"
-  rm -i bin/ev bin/evu bin/start
+  rm bin/ev bin/evu bin/start
 fi
 
 if [ -d ~/.config/mc ] ; then
@@ -455,7 +464,7 @@ If a utility mentioned after "See also:" is not present, please let me know.
 EOF
 
 if [ "$RUNTEST" == "1" ]; then
-  X=later
+  X=' later'
   echo "Would you like to start a simple test of MACSIMUS now (y/N)?"
   read
   if [ "$REPLY" == "y" ] ; then
@@ -469,7 +478,7 @@ if [ "$RUNTEST" == "1" ]; then
   fi
 
   echo
-  echo "You can run the test$X as ./test.sh from ${PWD}/examples/inst"
+  echo "You can run the test$X as ./test.sh from ${PWD}/examples/inst/"
   echo
 
   echo "MORE: To show normal mode vibrations of selected molecules:"

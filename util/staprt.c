@@ -5,7 +5,6 @@
 */
 
 #include "ground.h"
-#include "alloc.h"
 #include "statics.h"
 
 static char how[2048];

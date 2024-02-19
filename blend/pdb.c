@@ -238,11 +238,11 @@ int main(int narg, char **arg) /************************************** main */
           r->ter=-1; /* chain head marked */ } } }
   
     breakchain = !resnext ||
-      resnext && ( option('g') && resnext->resno-res->resno!=1
+      resnext && ( (option('g') && resnext->resno-res->resno!=1)
                    || resnext->chain != res->chain
-                   || resnext->moltype != res->moltype 
+                   || (resnext->moltype != res->moltype 
                       && !(res->moltype==NTER && resnext->moltype==AMINOACID)
-                      && !(res->moltype==AMINOACID && resnext->moltype==CTER) );
+                       && !(res->moltype==AMINOACID && resnext->moltype==CTER)) );
   
     if (res->moltype==CTER) {
       breakchain=1;

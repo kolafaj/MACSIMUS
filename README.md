@@ -7,11 +7,13 @@
 * Needed:
   * Linux, Windows/WSLg, Windows+CygWin...
   * `gcc` or other ANSI C compiler
-  * packages `libc6-dev libx11-dev`
+  * packages `libc6-dev libx11-dev make`
   * for some utilities also: `g++ ncurses-base libncurses5-dev`
 * Installation:  
   * Download/unzip the package
-  * Run script `./install.sh` from the package home
+  * Run script `./install.sh` from the package home, typically with `gcc`:<br />
+    `./install.sh gcc`
+  * Ignore many WARNINGs and wait for questions
 * Help:
   * [MANUAL](man/macsimus.pdf)
   * Most utilities and programs print a help if run without a parameter, a few need option `-h`

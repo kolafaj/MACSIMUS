@@ -370,7 +370,7 @@ void elstforces(ToIntPtr B, ToIntPtr A)  /********************** elstforces */
       mn=molec+n;
       f=rof(mn,B->rp);
       r=rof(mn,A->rp);
-      if (mn->sp==el.m.sp || el.m.sp<0 && el.m.sp+mn->sp>=0) {
+      if (mn->sp==el.m.sp || (el.m.sp<0 && el.m.sp+mn->sp>=0)) {
         double rr=SQRD(r[el.m.plus],r[el.m.minus]);
         double qm=Eext.m/sqrt(rr);
 

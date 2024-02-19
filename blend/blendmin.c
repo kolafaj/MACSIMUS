@@ -882,7 +882,7 @@ static void show(double U,species_t *spec,int gr) /******************* show */
 
     case 'P'&31:
     case 'P': {
-      static char fn[16]="blend000",fn0[16];
+      static char fn[32]="blend000",fn0[32]; // increased to suppress compiler warning
       FILE *f;
       int x,y,wbg,c,ch;
       unsigned4 pix4;

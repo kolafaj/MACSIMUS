@@ -1,4 +1,4 @@
-/* cc -O2 -o makemake makemake.c
+/* cc -O2 -Wall -o makemake makemake.c
 */
 
 #define METAMAKE "metamake.mmk" /* source file */
@@ -373,7 +373,6 @@ void putobj(char *name) /******************************************* putobj */
 /* prints name of 1 obj file */
 {
   int l=strlen(name)+strlen(objext)+1;
-  struct objlist_s *ol;
 
   if ( (len+=l) > LINELEN ) {
     fprintf(out," \\\n "); len=l+1; }
@@ -409,7 +408,7 @@ int cmpfilelist(const void *a,const void *b) /****************** cmpfilelist */
 void putitem(char *name,int type) /********************************* putitem */
 /* prints 1 item (typically file name) */
 {
-  int l,last=(type==ndirs-1)&omitlastpath;
+  int l;
   if (!type) return;
 
   if (filelist) includefilelist(dirs[type],name);
@@ -644,7 +643,6 @@ int main(int narg,char **arg) /**************************************** main */
   struct def_s *def;
 
   struct project_s *project;
-  struct namelist_s *namelist;
 
   fprintf(stderr,"\
 MAKEMAKE 02/2024: MACSIMUS makefile generator\n");

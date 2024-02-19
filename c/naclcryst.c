@@ -95,7 +95,6 @@ int main(int narg,char **arg) /**************************************** main */
   floatvector *R;
   int *mark;
   double d;
-  char *ch;
   char *FORMAT=NULL;
 
   if (narg<4) {

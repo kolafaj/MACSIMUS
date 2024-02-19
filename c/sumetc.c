@@ -174,6 +174,7 @@ See also:\n\
         case GE: loop (i,0,n) one->sum[i]+=(x[i]>=one->power); break;
         case LT: loop (i,0,n) one->sum[i]+=(x[i]< one->power); break;
         case LE: loop (i,0,n) one->sum[i]+=(x[i]<=one->power); break;
+        default: ; /* suppress compiler warning */
       }
       Max(maxn,n) }
 
