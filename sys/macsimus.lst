@@ -14,6 +14,8 @@ macsimus/bin/shownmf.sh
 macsimus/bin/showplz
 macsimus/bin/stop.sh
 macsimus/bin/visc.sh
+macsimus/blend/README.md
+macsimus/blend/README.md         
 macsimus/blend/blefilt.c
 macsimus/blend/blend.c
 macsimus/blend/blendar.c
@@ -545,6 +547,7 @@ macsimus/blend/simopt.h
 macsimus/blend/view3db.c
 macsimus/blend/waterdep.c
 macsimus/c/4lc.c
+macsimus/c/README.md             
 macsimus/c/binrepl.c
 macsimus/c/blocktab.c
 macsimus/c/comment.c
@@ -590,6 +593,7 @@ macsimus/c/sumetc.c
 macsimus/c/tab.c
 macsimus/c/tabproc.c
 macsimus/c/ungrouptab.c
+macsimus/cook/README.md          
 macsimus/cook/bonded.c
 macsimus/cook/configure.sh
 macsimus/cook/cookaa.c
@@ -709,16 +713,17 @@ macsimus/examples/inst/README.md
 macsimus/examples/inst/test.sh
 macsimus/examples/man/I.che
 macsimus/examples/man/LI.che
+macsimus/examples/man/README.md
 macsimus/examples/man/crambin.pdb
 macsimus/examples/man/crambinw.def
 macsimus/examples/man/crambinw.get
 macsimus/examples/man/li180i180.def
 macsimus/examples/man/li180i180.get
 macsimus/examples/man/ps.def
-macsimus/examples/man/README.md
 macsimus/examples/man/wurtzite.atm
 macsimus/examples/nmf/README.md
 macsimus/examples/stereogram/README.md
+macsimus/gen/README.md           
 macsimus/gen/alloc.h
 macsimus/gen/bitfile.c
 macsimus/gen/bitfile.h
@@ -831,6 +836,7 @@ macsimus/install.sh
 macsimus/man/dog.jpg
 macsimus/man/history.txt
 macsimus/man/macsimus.pdf
+macsimus/ray/README.md           
 macsimus/ray/antialia.c
 macsimus/ray/bound.c
 macsimus/ray/color.c
@@ -863,6 +869,7 @@ macsimus/ray/trace.c
 macsimus/ray/tri.c
 macsimus/ray/vector.c
 macsimus/ray/y_tab.h
+macsimus/show/README.md          
 macsimus/show/getdata.c
 macsimus/show/groupc.c
 macsimus/show/inshell.c
@@ -886,6 +893,7 @@ macsimus/show/showmenu.c
 macsimus/show/showmol.c
 macsimus/show/showmove.c
 macsimus/show/stereo.c
+macsimus/sim/README.md           
 macsimus/sim/anchora.c
 macsimus/sim/anchorc.c
 macsimus/sim/anchorg.c
@@ -1024,10 +1032,12 @@ macsimus/sim/xsection.c
 macsimus/sys/.evdata
 macsimus/sys/.evudata
 macsimus/sys/.startdata
+macsimus/sys/README.md           
 macsimus/sys/bin.lst
 macsimus/sys/compile.mmk
 macsimus/sys/macsimus.lst
 macsimus/sys/mc.ext
+macsimus/util/README.md          
 macsimus/util/asc2cfg.c
 macsimus/util/asc2plb.c
 macsimus/util/atomdist.c
