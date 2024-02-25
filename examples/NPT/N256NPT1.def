@@ -1,16 +1,15 @@
 ! this file is read first, can be changed by the data in *.get
-N[0]=256        ! number of molecules
-cutoff=10       ! cutoff in [AA]; max density 638 kg/m3
-LJcutoff=cutoff ! Lennard-Jones cutodd
-! rdf.grid=100  ! optional: grid for RDF
-! rdf.cutoff=cutoff ! optional: RDF range
-rho=775         ! initial and reference density [kg/m3]
-corr=0          ! no cutoff corrections (this is not standard)
-noint=4         ! MD steps per cycle
-h=0.01/noint    ! timestep [ps]
-T=77            ! tmeperature [K]
-thermostat="NPT"! thermostat+barostat type = MTK with predicted velocities by TRVP and predicted box size
-P=200000        ! pressure [Pa]
-tau.T=0.2       ! thermostat 
-dt.prt=1        ! how often to write a line of info [ps]
+N[0]=256           ! number of molecules
+cutoff=10          ! cutoff in [AA]; max density 1488 kg/m3
+LJcutoff=cutoff    ! Lennard-Jones cutodd
+! rdf.grid=100     ! optional: grid for RDF
+! rdf.cutoff=cutoff! optional: RDF range
+rho=775            ! initial and reference density [kg/m3]
+corr=0             ! no cutoff corrections (this is not standard)
+noint=4            ! MD steps per cycle
+h=0.01/noint       ! timestep [ps]
+T=77               ! temperature [K]
+tau.T=0.25         ! thermostat time constant (good for Berendsen and MTK)
+P=200000           ! pressure [Pa]
+dt.prt=1           ! how often to write a line of info [ps]
 ;

@@ -1,7 +1,6 @@
 !! makemake gcc
 
 !include "../home.mmk"
-!include "../compile.mmk"
 
 ! required by cygwin:
 OPT += -DSCR -I/usr/include/ncurses

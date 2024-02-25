@@ -412,6 +412,7 @@ typedef struct tau_s {
   double E;      /* correlation time to keep energy constant */
   double rho;    /* typical time for density changes to reach given density */
   double P;      /* isobaric friction-like correlation time */
+  double CM;     /* center of mass thermostat correlation time */
 #  ifdef POLAR
   double dip;    /* for Lagrange (Car-Parrinello) mechanical dipoles */
 #  endif /*# POLAR */

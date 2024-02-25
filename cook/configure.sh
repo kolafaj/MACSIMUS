@@ -1,9 +1,9 @@
 #!/bin/bash
 echo "================= cook configurator (part of MACSIMUS) ====================="
-echo "|  This script must be called from the macsimus/cook directory!            |"
+echo "|  This script must be called from the MACSIMUS/cook/ directory!            |"
 echo "|  The cook version will be configured and compiled in a SUBDIRectory.     |"
 echo "|  Synopsis:                                                               |"
-echo "|    configure.sh [SUBDIR [EXENAME]]                                       |"
+echo "|    ./configure.sh [SUBDIR [EXENAME]]                                     |"
 echo "|  where EXENAME must not contain spaces and other control characters      |"
 echo "|  You will be asked for compile-time options:                             |"
 echo "|    Answer by a letter or a number; just <Enter> means \"no\" or \"default\"  |"
@@ -80,7 +80,7 @@ echo "> p = Periodic in 3D, spherical cut-off of Lennard-Jones interactions"
 echo "      Allows later modifications (wall, slab, periodic sum) (DEFAULT)"
 echo "  f = Free (vacuum), true electrostatic 1/r (no cutoff)"
 echo "      NB: not compatible with Gaussian charges"
-echo "  s = Slit, as above but periodic in x,y only; DO NOT USE: not slab"
+echo "  s = Slit, as above but periodic in x,y only; NOT TESTED RECENTLY"
 echo "  n = Periodic in 3D, all pair interactions use nearest-image distance"
 echo "      (special, cutoff corections not implemented; NOT TESTED RECENTLY)"
 read
@@ -184,10 +184,10 @@ echo "  s = Slab: z-forces (incl. walls), dens.profiles, surf.tension, NPzzE mel
 echo "      also more geometries (droplet, trickle, cavities)"
 echo "  c = Cleaving (with most Slab features)"
 echo "      (see cook/generic/simopt.h for more SLAB options)"
-echo "  g = Gold (conducting) wall, charge inversion method"
-echo "      Incompatible with Ewald+linked-cell list; NOT TESTED RECENTLY"
-echo "NOTES: Versions w and g imply z-density profile measurements"
-echo "       WIDOM (if selected) is measured in z-slabs, too"
+# echo "  g = Gold (conducting) wall, charge inversion method"
+# echo "      Incompatible with Ewald+linked-cell list; NOT TESTED RECENTLY"
+# echo "NOTES: Versions w and g imply z-density profile measurements"
+# echo "       WIDOM (if selected) is measured in z-slabs, too"
 read
 SV=$REPLY
 if [ "$SV" = "" ] ; then
@@ -204,18 +204,18 @@ c )
   NAME=$NAME"c"
   echo "#define SLAB 2" >> simopt.h
   ;;
-w )
-  PROJECT=$PROJECT"-wall"
-  NAME=$NAME"w"
-  echo "#define WALL" >> simopt.h
-  echo "#define SLAB 0" >> simopt.h
-  ;;
-g )
-  NAME=$NAME"g"
-  PROJECT=$PROJECT"-gold"
-  echo "#define GOLD" >> simopt.h
-  echo "#define SLAB 0" >> simopt.h
-  ;;
+# w )
+#   PROJECT=$PROJECT"-wall"
+#   NAME=$NAME"w"
+#   echo "#define WALL" >> simopt.h
+#   echo "#define SLAB 0" >> simopt.h
+#   ;;
+# g )
+#   NAME=$NAME"g"
+#   PROJECT=$PROJECT"-gold"
+#   echo "#define GOLD" >> simopt.h
+#   echo "#define SLAB 0" >> simopt.h
+#   ;;
 * )
 esac
 
@@ -485,13 +485,10 @@ echo "O = -DSCR" >> $METAMAKE
 
 if [ -e ../../home.mmk ]; then
   echo "!include \"../../home.mmk\"" >> $METAMAKE
-  echo "!include \"../../compile.mmk\"" >> $METAMAKE
 elif [ -e ../../../home.mmk ]; then
   echo "!include \"../../../home.mmk\"" >> $METAMAKE
-  echo "!include \"../../../compile.mmk\"" >> $METAMAKE
 elif [ -e ../../../../home.mmk ]; then
   echo "!include \"../../../../home.mmk\"" >> $METAMAKE
-  echo "!include \"../../../../compile.mmk\"" >> $METAMAKE
 else
   echo "ERROR: home.mmk not found!"
   echo "(none of ../../home.mmk ../../../home.mmk ../../../../home.mmk exists)"

@@ -14,20 +14,15 @@ where COMPILER is the C compiler name:
         locale must be set, LANG=C is recommended
   pgcc = Portland Group, Inc. (PGI) compiler - not tested recently, old info:
         bug: random numbers do not work
-To implement a new compiler, edit file "compile.mmk".
+To implement a new compiler, edit file "sys/compile.mmk".
 
 In linux, the following packages are needed:
-  make gcc g++ libncurses-dev libx11-dev
+  gcc make g++ libncurses-dev libx11-dev
+
+Example (Ubuntu, Debian):
+  sudo apt install gcc make g++ libncurses-dev libx11-dev
+  ./install.sh gcc
 EOF
-  if [ -n "$CC" ] ; then
-    echo "Example (Ubuntu, Debian; based on your \$CC=$CC):"
-    echo "  sudo apt install make gcc g++ libncurses-dev libx11-dev"
-    echo "  ./install.sh $CC"
-  else
-    echo "Example (Ubuntu, Debian):"
-    echo "  sudo apt install make gcc g++ libncurses-dev libx11-dev"
-    echo "  ./install.sh gcc"
-  fi
   exit
 fi
 
@@ -75,10 +70,13 @@ cp sys/*.mmk .
 
 # export MACSIMUS home directory for makemake
 cat > home.mmk <<EOF
-# this file defines the MACSIMUS home directory
-# it is !included by all metamake.mmk files
-# non-! statements will become a part of the generated makefile files
+# This setup file is !included by all project metamake.mmk files.
+# Non-! statements will become a part of the generated makefile files.
 
+# Read the compiler setup first:
+!include sys/compile.mmk
+
+# define MACSIMUS home directory:
 EOF
 # NEW: spaces etc. allowed in PWD
 echo "!home=\"${PWD}\"" >> home.mmk
@@ -350,7 +348,7 @@ else
   fi
   if [ "$GT" != "0" ] ; then
     [ "$LT" == "0" ] && echo "=== MACSIMUS HAS BEEN SUCCESSFULLY COMPILED ==="
-    echo "> above denotes additional executables"
+    echo "> the additional executables are denoted by > above"
   fi
 fi
 
@@ -363,7 +361,7 @@ MACSIMUS offers the following commands:
 Get help by running them without parameters.
 * Installation will copy the executables to ~/bin/
   and initialization .files to ~/.
-* Not installation will remove the temporary files
+* Not-installation will remove the temporary files
   $PWD/bin/{ev,evu,start}.
 Install ev,evu,start (y/N)?
 EOF
@@ -436,32 +434,7 @@ if [ -d ~/.mc ] ; then
   esac
 fi
 
-cat <<EOF
-
-=============================================================================
-TO FINISH INSTALLATION:
-* If you are using sh or bash, append the following lines to your ~/.bashrc:
-    export BLENDPATH="${PWD}/blend/data"
-    export PATH="${PWD}/bin:\$PATH"
-  If you are using another shell, use the syntax of your shell.
-
-* You may customize and compile your own cook* version(s) as follows:
-    cd "${PWD}/cook"
-    ./configure.sh
-  Alternatively, customize files "${PWD}/generic/metamake.mmk" and
-  "${PWD}/generic/simopt.h", then run
-     makemake "$CC"
-     make cook*
-
-* The basic Lennard-Jones version of blend was compiled.
-  To customize other versions, follow the instructions in
-  "${PWD}/blend/metamake.mmk".
-
-Most utilities print help if run without any option, sometimes -h is needed.
-If a utility mentioned after "See also:" is not present, please let me know.
-=============================================================================
-
-EOF
+cat sys/FINISHINST.txt
 
 if [ "$RUNTEST" == "1" ]; then
   X=' later'
@@ -478,11 +451,12 @@ if [ "$RUNTEST" == "1" ]; then
   fi
 
   echo
-  echo "You can run the test$X as ./test.sh from ${PWD}/examples/inst/"
+  echo "You can run the test$X as ./test.sh from directory"
+  echo "${PWD}/examples/inst/"
   echo
 
   echo "MORE: To show normal mode vibrations of selected molecules:"
-  cd blend/che
+  pushd blend/che
   cat <<EOF
   cd "$PWD"
 Then EITHER from the command prompt as:
@@ -492,4 +466,6 @@ OR using the Midnight Commander (if the MACSIMUS associations are installed)
 and double click a molecule.
 If minimized, press button [finish] or hotkey .
 EOF
+  popd
+  cat sys/FINISHINST.txt
 fi

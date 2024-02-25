@@ -9,7 +9,7 @@
 
       /* DEVELOPMENT NOTE:
          VV(V2,/=scale) and VV(V2,*=scale)
-         NPT: fluctuations in total energy increased, drift not affcted
+         NPT: fluctuations in total energy increased, drift not affected
          tau.rho<0: wrong! */
 
       mi=si[i].mass;

@@ -5,7 +5,6 @@
 !!   makemake linux gcc high ; mv makefile makefile.high # mapped to T
 
 !include "../../home.mmk"
-!include "../../compile.mmk"
 
 !dir = gen c/fit4plot
 

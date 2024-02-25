@@ -968,6 +968,7 @@ macsimus/sim/maindef.c
 macsimus/sim/mainextf.c
 macsimus/sim/mainget.c
 macsimus/sim/mainhlp.c
+macsimus/sim/mainkinc.c
 macsimus/sim/mainres.c
 macsimus/sim/mainresc.c
 macsimus/sim/mark.c
@@ -1017,6 +1018,7 @@ macsimus/sim/slabmeas.c
 macsimus/sim/splines.c
 macsimus/sim/ssdecl.h
 macsimus/sim/thermo.c
+macsimus/sim/thermocm.c
 macsimus/sim/trvpscale.c
 macsimus/sim/units.h
 macsimus/sim/vector.h
@@ -1032,6 +1034,7 @@ macsimus/sys/.evdata
 macsimus/sys/.evudata
 macsimus/sys/.startdata
 macsimus/sys/README.md
+macsimus/sys/finishinfo.sh
 macsimus/sys/bin.lst
 macsimus/sys/compile.mmk
 macsimus/sys/macsimus.lst

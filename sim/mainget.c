@@ -72,6 +72,7 @@
         get(el.sat)
         get(virial)
         get(tau.sat)
+        get(tau.CM)
 #endif /*# FREEBC */
 
         get(t)

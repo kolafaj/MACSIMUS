@@ -1,7 +1,6 @@
 !! makemake linux
 
 !include "../home.mmk"
-!include "../compile.mmk"
 
 !dir = gen ray
 

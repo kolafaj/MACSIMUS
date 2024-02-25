@@ -96,18 +96,20 @@
 
 /*
 #define GOLD
+  DO NOT USE
+  WARNING: support removed and/or have not been used for a long time
   Simulation on a `golden plate' - conducting surface
   Compatible with FREEBC and COULOMB>=0 (cutoff electrostatics: periodic
     b.c. in x,y)
   Incompatible with LINKCELL
-  Implies WALL
-  WARNING: have not been used for a long time
+  Implies WALL (SLAB&4)
 */
 
 /*
 #define WALL
+  DO NOT USE
+  Replaced by SLAB&4, NOT TESTED RECENTLY
   1 or 2 walls at z=0 and z=L are added
-  COULOMB>=0 (cutoff electrostatics): periodic in x,y only
   GOLD version is automatically also WALL
 */
 
@@ -121,12 +123,12 @@
 
 /*
 #define SHARPCUTOFF
-turn off LJ-like cutoff; needed by METAL
+  turn off LJ-like cutoff; needed by METAL
 */
 
 /*
 #define POTCONST
-print LJ potential constants, see sim/lj/sitesite.c and sim/setss.c
+  print LJ potential constants, see sim/lj/sitesite.c and sim/setss.c
 */
 
 /*************************** PERFORMANCE **************************/
@@ -262,8 +264,9 @@ print LJ potential constants, see sim/lj/sitesite.c and sim/setss.c
 
 /*
 #define WIDOM
-   Widom insertion particle method
-   there are two versions: for WALL and plain (bulk)
+  WARNING: have not been tested recently, WALL removed
+  Widom insertion particle method
+  there are two versions: for WALL and plain (bulk)
 */
 
 /*
@@ -283,9 +286,9 @@ print LJ potential constants, see sim/lj/sitesite.c and sim/setss.c
 #define SLAB 2
   - cleaving
 #define SLAB 4
-  - LJ wall, simple and inconsistent code (see also WALL)
+  - LJ wall, replacing the WALL switch, NOT TESTED RECENTLY
 #define SLAB 8
-  - testing of "mapped averaging"
+  - experimental: testing of "mapped averaging"
 
 NB: efficiency is not affected if these options are included and not used
 

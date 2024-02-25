@@ -1,8 +1,8 @@
 !! makemake gcc
 
+!define x11
 !include "../home.mmk"
 
-!define x11
 # O = -DSCR
 !include "../compile.mmk"
 

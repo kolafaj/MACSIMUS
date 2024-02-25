@@ -13,10 +13,17 @@
 
 // #define DUMP
 
-#ifndef BLEND
+#ifdef BLEND
+#  ifdef COOK
+#    error both COOK and BLEND #defined
+#  endif /*# COOK */
+#else /*# BLEND */
+#  ifndef COOK
+#    error none of COOK and BLEND #defined
+#  endif /*# COOK */
 #  include "simglob.h"
 #  include "units.h"
-#endif /*# BLEND */
+#endif /*#!BLEND */
 
 #if PRESSURETENSOR&PT_VIR
 #  if PRESSURETENSOR&PT_OFF

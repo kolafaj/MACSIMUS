@@ -128,7 +128,7 @@ RANGE,BlOCK,LAG:\n\
 static char Pactions[]="\n\
 ACTIONS [default=print pseudographs of selected columns]:\n\
 \n\
-  --   BUG, DO NOT USE (1-pass filter, only b1,-z,-f,-t,-1,-2..,no names)\n\
+  --   simple one pass filter, no names/blocking, allowed -z,-f,-t,-1,-2..\n\
   -    filter: good with -a,-b etc.; consider filter | comment -# | dellines 1\n\
   -a   export ASCII file SIMNAME.cpa without time in 1st column (legacy mode)\n\
   -a2  export ASCII file SIMNAME.cpa with simulation time column prepended\n\

@@ -126,7 +126,7 @@ int eread(void) /***************************************************** eread */
 
   if (rewound) { /* newly opened or rewound */
     char key='@';
-    
+
     next=0;
     r=getcpheader(CP,&NCP,verbose);
     if (!r) Error("showcp: read CP/CPZ");
@@ -158,9 +158,9 @@ int eread(void) /***************************************************** eread */
       allocarrayzero(sumr,NCP);
       allocarrayzero(sumrT,NCP);
       allocarrayzero(drdT,NCP); }
-    
+
     rewound=0;
-    
+
     return 1; }
 
   if (!packed) {
@@ -378,7 +378,7 @@ int main(int narg, char **arg) /*************************************** main */
 
     if (zlist[0]) {
       i=atoi(zlist);
-    
+
       while (i) {
         if (i<=NCP) zero[i-1]++;
         zlist=strchr(zlist,',');
@@ -386,7 +386,7 @@ int main(int narg, char **arg) /*************************************** main */
         else i=0; } }
     else
       loop (i,0,NCP) zero[i]++; }
-      
+
   if (argname)
     loop (i,argname,narg) if (arg[i][0]!='-') {
       int n;
@@ -398,7 +398,7 @@ int main(int narg, char **arg) /*************************************** main */
       ERROR(("field \"%s\" not found",arg[i]))
    found: ; }
 
-  loop (i,0,NCP) if (cols[i]) ncols++; 
+  loop (i,0,NCP) if (cols[i]) ncols++;
 
   /* no action and any column selected forces pseudograph */
   if (!(option('p') || option('e') || option('T') || option('a') || option('c')))
@@ -428,13 +428,11 @@ int main(int narg, char **arg) /*************************************** main */
       if (r[0]>CPmark) {
         if (++ncp>=from) {
           if (to) if (ncp>to) break;
-          if (simplepipe) {
-            loop (i,0,NCP) if (zlist[i]) lastr[i]=r[i];
-            simplepipe=0; }
+          if (zlist) loop (i,0,NCP) if (zero[i]) { lastr[i]=r[i]; zero[i]=0; }
           loop (i,0,NCP) if (cols[i]) printf("%11.8g ",r[i]-lastr[i]);
           putchar('\n'); } } }
     return 0; }
-            
+
   /* determining min/max and non-blocked statistics */
   while (eread()==1) {
     if (r[0]>CPmark) {
@@ -565,7 +563,7 @@ and it has not been specified using option -h. DT=1 will be used.\n\
       if (option('c')&4) StaPrintAll(option('c')&32?"+":""); }
     StaFree(); }
 
-  
+
   rewind(CP);
   rewound=1;
 

@@ -4,7 +4,6 @@
 # -DReverse causes some utilities to support reversed endian, now rarely needed
 # -DSCR extra code for scrolling screens of output (internal `less')
 # O = -DSCR -DReverse
-!include "../compile.mmk"
 
 !dir = gen sim util
 

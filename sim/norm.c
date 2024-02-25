@@ -600,13 +600,10 @@ void CoM(vector CM,ToIntPtr A) /**************************************** CoM */
     molecule_t *mn=molec+n;
     siteinfo_t *si=spec[mn->sp]->si;
     vector *r;
-    double mi;
 
     r=rof(mn,A->rp);
 
-    loop (i,0,mn->ns) {
-      mi=si[i].mass;
-      VV(CM,+=mi*r[i]) } }
+    loop (i,0,mn->ns) VV(CM,+=si[i].mass*r[i]) }
 
   VO(CM,/=No.mass)
   // NOT VV(CM,-=box.center): to be applied elsewhere
@@ -666,7 +663,7 @@ void removedrifts(int pr) /************************************ removedrifts */
       loop (i,0,ns) VV(r[i],-=CM) }
 
     VV(CM,=box.center) // new value, to be used in angular momenum drift
-    
+
     normalize(-1); /* inefficient: normalizes always all coordinates */ }
 
   /* linear momentum (velocity drift) */

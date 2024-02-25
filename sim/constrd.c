@@ -246,12 +246,12 @@ static void measurePconstraints(void) /***************** measurePconstraints */
       + En.ECC_Pcorr
 #endif
     ;
-  
+
   /* @91  (NB: No.Pkinq=1 assumed for NPT/MTK) */
   switch (virial) {
     case 1: En.Pcfg=En.P; break;
     case 2: En.Pcfg=En.PdV; break;
-#if PRESSURETENSOR&PT_VIR                                                     
+#if PRESSURETENSOR&PT_VIR
     case 3: En.Pcfg=En.trPt; break;
 #endif
     default: ERROR(("pressure type virial=%d not supported",virial))
@@ -368,7 +368,9 @@ void constraintdynamics(ToIntPtr B, ToIntPtr A, ToIntPtr V)
       else ERROR(("not implemented"))
       break;
     case T_LANGEVIN: case T_LANGEVIN_CM:
-      Vlogs=0.5/tau.T;
+      /* WARNING: for better interpretation of tau.T, Vlogs=1/tau.T should be here
+         and the random force should be doubled */
+      Vlogs=0.5/tau.T; 
       break;
     case T_TR: /* friction thermostat - intermolecular only */
       Vlogs_mol=blogT(En.kin_tr/No.f_tr,T)/tau.T;
@@ -547,7 +549,9 @@ void constraintdynamics(ToIntPtr B, ToIntPtr A, ToIntPtr V)
         ;
 
   En.T=En.kin/No.f; /* NB: En.kin still doubled here ! */
-  En.kin/=2;
+
+  En.kin/=2; /* En.kin no longer doubled */
+
 #ifdef POLAR
   En.pot += En.self;
 #endif /*# POLAR */
@@ -768,11 +772,11 @@ void Shake(double eps, double prob) /********************************* Shake */
     if (Eext.isB)
       loop (i,0,mn->ns) {
         vector F;
-        
+
         VECT(F,v[i],Eext.Bh)
         /* BUG: virial ignored */
         VV(p[i],+=si[i].charge*F) }
-    
+
 #if SHAKE>0 /* simplified and in general more efficient algorithm */
 #  define CALCULATE_RXP rxp=bondq;
 #else /* more complicated algorithm using angle between p & r */ /*# SHAKE>0 */
@@ -974,7 +978,6 @@ void Shake(double eps, double prob) /********************************* Shake */
   if (moved!=NULL) { free(moved); free(moving); }
 #endif /*# SHAKE==2 || SHAKE==-2 */
 
-  /* En.kin etc = TWICE the respective kinetic energies: */
 #if VERLET==3
   hscale = 0.5/hh;
 #elif VERLET==1
@@ -985,6 +988,7 @@ void Shake(double eps, double prob) /********************************* Shake */
 
   if (h==0) hscale=0;
 
+  /* En.kin etc = TWICE the respective kinetic energies: */
   En.kin *= hscale;
   En.kin_tr *= hscale;
 
@@ -1037,6 +1041,11 @@ void Shake(double eps, double prob) /********************************* Shake */
 
   /* (finishing) thermostats and tau.rho<0 */
 #include "thermo.c"
+
+  if (tau.CM) {
+    /* patch to thermostat the center of mass */
+#  include "thermocm.c"
+  }
 
   En.kin /= 2;
 

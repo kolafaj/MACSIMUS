@@ -11,6 +11,7 @@ cook:
   9 Langevin thermostat not sufficiently implemented, Gear only:
     with -m4 gives *** Too low virial pressure vs. tensor accuracy
     consider DOI: 10.1080/00268976.2012.760055
+    also, tau.T should be reinterpreted (double it and modify random force)
   9 Andersen thermostat issues:
     AndersenCM thermostat wrong for TIP4P (not SPC) -- why?
     Andersen wrong for RTIL -u9999 (all bonds vibrating)
@@ -113,9 +114,6 @@ examples/*/ added.
 
 cook 3.6s:
   * default slab.geom changed to 0, to suppress warnings if a SLAB version is used for a cubic box
-  !! due to bad sync, the version of sim/intrapot.c at home omitted intramolecular virial of force
--rw-rw-r-- 1 15635 2020-04-16 10:17 home/sim/intrapot.c
--rw-rw-r-- 1 15528 2022-06-07 14:43 work/sim/intrapot.c
 
 makemake:
   * metamake renamed to metamake.mmk, command !private added

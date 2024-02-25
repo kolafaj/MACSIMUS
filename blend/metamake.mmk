@@ -25,9 +25,8 @@
 !!   rep12 = add D/r^12 terms to exp-6/buck/busing potentials
 !!   gui = GTK-based GUI (OLD VERSIONS ONLY)
 
-!include "../home.mmk"
 !define x11
-!include "../compile.mmk"
+!include "../home.mmk"
 
 !dir = gen sim blend
 
@@ -43,7 +42,7 @@ OREP = -DPOW=8
 #   -DPOLAR : force field with polarizability
 #   -DPOW={0,8,12} : [do not] add term D/r^POW to the exp6/Buckingham/Busing FF
 #   -DSCR : extra code for scrolling screens of output (internal `less')
-#   -DX11 : X windows graphics (see !if dos for the DOS stuff), now added later
+#   -DX11 : X windows graphics, needed, added later
 
 # SS_TABLE is #defined in MACSIMUS/sim/FIELD/sitesite.h and refers to the name
 # of the table containing atom potential parameters: RvdW, EvdW, parm[SS_PARMS]
