@@ -29,6 +29,7 @@ fi
 # makemake option: now unix and linux are equivalent
 UNIX=linux
 CC="$1"
+export BIN=$PWD/bin/
 
 # # no spaces in the path allowed
 # if [ "${PWD/ /z}" != "${PWD}" ] ; then
@@ -39,7 +40,17 @@ CC="$1"
 
 # check if the selected compiler exists
 if ! which "$CC" ; then
-  echo "compiler $1 not found"
+  echo "ERROR: compiler $1 not found"
+  exit
+fi
+
+# checking diff and ed
+if ! which diff ; then
+  echo "utility diff not found"
+  exit
+fi
+if ! which ed ; then
+  echo "utility ed not found"
   exit
 fi
 
@@ -228,13 +239,47 @@ do
 done
 cd ..
 
+
+echo "Comparing (using diff):"
+echo "  the contents of \"${PWD}/\" (> instbin.lst)"
+echo "  with the expected listing \"sys/bin.lst\""
+echo "----------------------------------------------------------------------------"
+cd bin
+# LC_COLLATE=C added by T.Trnka (../bin.lst is of C locale order)
+LC_COLLATE=C \ls -1 > ../instbin.lst
+cd ..
+# this is because of CygWin (removing .exe)
+cat <<EOF | ed instbin.lst
+,s:\.exe::g
+w
+q
+EOF
+echo
+if diff sys/bin.lst instbin.lst > diff.lst ; then
+  echo "=== MACSIMUS UTILITIES HAVE BEEN SUCCESSFULLY COMPILED ==="
+else
+  cat diff.lst
+  LT=`fgrep '<' diff.lst | wc -c`
+  GT=`fgrep '>' diff.lst | wc -c`
+  if [ "$LT" == "0" ] ; then
+    echo "=== All registered MACSIMUS have been successfully compiled ==="
+  else
+    echo "ERRORS DETECTED, symbol '<' above denotes not compiled executables"
+  fi
+  if [ "$GT" != "0" ] ; then
+    echo "=== but there are additional executables marked by '>' (check bin.lst) ==="
+  else
+    echo "=== there is a problem with diff ==="
+  fi
+fi
 cat <<EOF
 
 >>> Precompile selected cook version (or versions: use string; e.g.. "eE"):
   f = cookfree: free (vacuum, Cartesian) boundary conditions,
                 pair sum of Lennard-Jones and point charges
   e = cookewslc: periodic boundary conditions, slab support, linked-cell list,
-                 Lennard-Jones, Ewald (point charges), serial version [default]
+                 Lennard-Jones, Ewald (point charges), serial version
+                 [This is the default needed to run a test]
   E = cookewslcP1: as above, thread-parallel version
   c = cookceslc: periodic boundary conditions, slab support, linked-cell list,
                  Lennard-Jones, smoothed cutoff electrostatics, serial version
@@ -250,6 +295,8 @@ KEY=$REPLY
 [ "$KEY" == "A" ] && KEY=fecEC
 [ "$KEY" == "" ] && KEY=e
 
+FAILED=""
+
 while [ "$KEY" != "" ] ; do
 
   echo ">>>>>>>>>>>>>>>>>>>"
@@ -264,8 +311,7 @@ while [ "$KEY" != "" ] ; do
         echo "makemake problem, exit"
         exit
       fi
-      ../../../bin/makeone.sh cookfree
-      mv cookfree ../../../bin/
+      ../../../bin/makeone.sh cookfree || FAILED=$FAILED' f=cookfree'
       popd
       ;;
     e )
@@ -275,8 +321,7 @@ while [ "$KEY" != "" ] ; do
         echo "makemake problem, exit"
         exit
       fi
-      ../../../bin/makeone.sh cookewslc
-      mv cookewslc ../../../bin/
+      ../../../bin/makeone.sh cookewslc || FAILED=$FAILED' e=cookewslc'
       popd
       RUNTEST=1
       ;;
@@ -287,8 +332,7 @@ while [ "$KEY" != "" ] ; do
         echo "makemake problem, exit"
         exit
       fi
-      ../../../bin/makeone.sh cookewslcP1
-      mv cookewslcP1 ../../../bin/
+      ../../../bin/makeone.sh cookewslcP1 || FAILED=$FAILED' E=cookewslcP1'
       popd
       ;;
     c )
@@ -298,8 +342,7 @@ while [ "$KEY" != "" ] ; do
         echo "makemake problem, exit"
         exit
       fi
-      ../../../bin/makeone.sh cookceslc
-      mv cookceslc ../../../bin/
+      ../../../bin/makeone.sh cookceslc || FAILED=$FAILED' c=cookceslc'
       popd
       ;;
     C )
@@ -309,8 +352,7 @@ while [ "$KEY" != "" ] ; do
         echo "makemake problem, exit"
         exit
       fi
-      ../../../bin/makeone.sh cookceslcP1
-      mv cookceslcP1 ../../../bin/
+      ../../../bin/makeone.sh cookceslcP1 || FAILED=$FAILED' C=cookceslc'
       popd
       ;;
     n )
@@ -321,38 +363,18 @@ while [ "$KEY" != "" ] ; do
   KEY=${KEY:1:9}
 done
 
-echo
-cd bin
-# LC_COLLATE=C added by T.Trnka (../bin.lst is of C locale order)
-LC_COLLATE=C \ls -1 > ../instbin.lst
-# this is because of CygWin
-cd ..
-cat <<EOF | ed instbin.lst
-,s:\.exe::g
-w
-q
-EOF
-echo "Comparing (using diff):"
-echo "  the contents of \"${PWD}/\" (> instbin.lst)"
-echo "  with the expected listing \"sys/bin.lst\""
-echo "----------------------------------------------------------------------------"
-if diff sys/bin.lst instbin.lst > diff.lst ; then
-  echo "=== MACSIMUS HAS BEEN SUCCESSFULLY COMPILED ==="
+if [ "$FAILED" == "" ] ; then
+   echo "=== All cook* have been successfully compiled ==="
 else
-  cat diff.lst
-  LT=`fgrep '<' diff.lst | wc -c`
-  GT=`fgrep '>' diff.lst | wc -c`
-  if [ "$LT" != "0" ] ; then
-     echo "ERRORS DETECTED, symbol < above denotes not compiled executables"
-     echo " (or the following utilities are missing: diff ed)."
-  fi
-  if [ "$GT" != "0" ] ; then
-    [ "$LT" == "0" ] && echo "=== MACSIMUS HAS BEEN SUCCESSFULLY COMPILED ==="
-    echo "> the additional executables are denoted by > above"
-  fi
+  echo "=== THE FOLLOWING COMPILATIONS HAVE FAILED:"
+  echo "===$FAILED"
 fi
 
+echo "Type Enter to continue installation."
+read
+
 cat <<EOF
+
 ----------------------------------------------------------------------------
 MACSIMUS offers the following commands:
   ev    - command-line-oriented calculator: ev "exp(-1.1*kcal/298/R)"
@@ -365,6 +387,7 @@ Get help by running them without parameters.
   $PWD/bin/{ev,evu,start}.
 Install ev,evu,start (y/N)?
 EOF
+
 read
 if [ "$REPLY" == "y" ] ; then
   echo "copying customizable initialization files .evdata .evudata .startdata to ~/"

@@ -21,6 +21,8 @@ function checkinst () {
   echo "Bad MACSIMUS installation - '$1' not found!"
   echo "Check whether '$1' has been compiled and is in your path:"
   echo "PATH=$PATH"
+  echo "Type Enter to continue anyway or Ctrl-C to quit."
+  read
   exit
 }
 

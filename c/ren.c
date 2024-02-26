@@ -2,7 +2,7 @@
  */
 #include "../gen/include.h"
 
-int main(int narg,char **arg)
+int main(int narg,char **arg) /**************************************** main */
 {
   char *opt="",*op="mv";
   int from=3,i,ok=0,ko=0;
@@ -67,7 +67,7 @@ See also:\n\
   if (mode && all) Error("-a with -ebx: only one replacement allowed");
 
   loop (i,from,narg) if (strlen(arg[1])<=strlen(arg[i])) {
-    char *match=NULL,*a,*b;
+    char *match=NULL;
     FILE *f;
     char newname[1024];
     char line[1024];
