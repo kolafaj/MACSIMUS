@@ -325,7 +325,7 @@ static void measurePconstraints(void) /***************** measurePconstraints */
 /*** Lagrange equations of motion *********************** constraintdynamics */
 void constraintdynamics(ToIntPtr B, ToIntPtr A, ToIntPtr V)
 {
-  int n,a,b,nc,ns,sp,i,j,k;
+  int n,a,b,nc,ns,i,j,k;
   static int irhs=0;
   vector *v,*f,*r,*ra=NULL,*rp=A->rp;
 #ifdef PRECOND
@@ -390,9 +390,8 @@ void constraintdynamics(ToIntPtr B, ToIntPtr A, ToIntPtr V)
   /*** constraints: computing M and P ***/
   loop (n,FROM,No.N) { /* <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< */
     mn=molec+n;
-    sp=mn->sp;
     ns=mn->ns;
-    si=spec[sp]->si;
+    si=spec[mn->sp]->si;
     r=rof(mn,rp);
     v=rof(mn,V->rp);
     f=rof(mn,B->rp);
@@ -403,7 +402,7 @@ void constraintdynamics(ToIntPtr B, ToIntPtr A, ToIntPtr V)
         loop (k,0,No.pred) gg[k]=gs[k]+mn->ig;
         g=gg[0]; }
 
-      M=Msp=Ms[option('c')&1 ? n : sp];
+      M=Msp=Ms[option('c')&1 ? n : mn->sp];
 
       loop (a,0,nc) {
         i=si[a].pair[0]; j=si[a].pair[1];
@@ -449,7 +448,7 @@ void constraintdynamics(ToIntPtr B, ToIntPtr A, ToIntPtr V)
 #endif /*# PRECOND */
 
       /*** solving the eqs. for Lagrange multipliers ***/
-      constrit[sp].nit[LAGR_MULT] += omega==0
+      constrit[mn->sp].nit[LAGR_MULT] += omega==0
         ? conjgrad  (nc,g,Mvec,Msp,G, irhs<No.pred && eps>=1?1e-12:eps)
         : directiter(nc,g,Msp,G,omega,irhs<No.pred && eps>=1?1e-12:eps);
 
@@ -503,7 +502,7 @@ void constraintdynamics(ToIntPtr B, ToIntPtr A, ToIntPtr V)
     else if (thermostat==T_LANGEVIN_CM) {
       /*** molecule-based Langevin thermostat ***/
       /* WARNING: OK with long tau.T only */
-      double x=sqrt(T/(spec[sp]->mass*tau.T*h)); /* TO BE OPTIMIZED */
+      double x=sqrt(T/(spec[mn->sp]->mass*tau.T*h)); /* TO BE OPTIMIZED */
       vector rf;
 
       VO(rf,=x*rndgauss())
@@ -591,9 +590,8 @@ void constraintdynamics(ToIntPtr B, ToIntPtr A, ToIntPtr V)
 
     loop (n,0/*FROM ?*/,No.N) {
       mn=molec+n;
-      sp=mn->sp;
       ns=mn->ns;
-      si=spec[sp]->si;
+      si=spec[mn->sp]->si;
       r=polarrof(mn,rp);
       v=polarrof(mn,V->rp);
       f=polarrof(mn,B->rp);
@@ -652,7 +650,7 @@ void Shake(double eps, double prob) /********************************* Shake */
 */
 {
   vector rij,pij;
-  int al,n,i,j,sp,nc,ns=-1,it,maxit0=-16*log(eps*0.1);
+  int al,n,i,j,nc,ns=-1,it,maxit0=-16*log(eps*0.1);
   molecule_t *mn;
   vector *r,*p,*rp=cfg[0]->rp,*rp1=cfg[1]->rp,*r1,*rp2=cfg[2]->rp,*v;
   siteinfo_t *si;
@@ -760,14 +758,13 @@ void Shake(double eps, double prob) /********************************* Shake */
 
   loop (n,FROM,No.N) {
     mn=molec+n;
-    sp=mn->sp;
     r=rof(mn,rp);
     p=rof(mn,rp2);
     v=rof(mn,vpred);
     r1=rof(mn,rp1);
-    si=spec[sp]->si;
+    si=spec[mn->sp]->si;
     nc=mn->nc;
-    omega=constrit[sp].omega; /* HALF omegac, the relaxation parameter */
+    omega=constrit[mn->sp].omega; /* HALF omegac, the relaxation parameter */
 
     if (Eext.isB)
       loop (i,0,mn->ns) {
@@ -913,7 +910,7 @@ void Shake(double eps, double prob) /********************************* Shake */
 #endif /*#!SHAKE==1 || SHAKE==-1 */
     //    prt("%d %g %g %g",n,VARG(rof(molec+1,rp)[0]));
 
-    if (nc) constrit[sp].nit[COR_BONDS] += it;
+    if (nc) constrit[mn->sp].nit[COR_BONDS] += it;
 
 #ifdef ANCHOR
   } /* Shake n-loop over all molecules ends here (ANCHOR)  */
@@ -925,12 +922,11 @@ void Shake(double eps, double prob) /********************************* Shake */
   loop (n,FROM,No.N) {
     mn=molec+n;
     ns=mn->ns;
-    sp=mn->sp;
     r=rof(mn,rp);
     p=rof(mn,rp2);
     v=rof(mn,vpred);
     r1=rof(mn,rp1);
-    si=spec[sp]->si;
+    si=spec[mn->sp]->si;
 #endif /*# ANCHOR */
 
 /*
@@ -1107,7 +1103,7 @@ void Shear(ToIntPtr B, ToIntPtr A, ToIntPtr VH,double H) /************ Shear */
 {
   molecule_t *mn;
   siteinfo_t *si;
-  int ns,sp,n,i;
+  int ns,n,i;
   vector *r,*f,*v;
   double
     cosz,m,fx,
@@ -1155,8 +1151,7 @@ void Shear(ToIntPtr B, ToIntPtr A, ToIntPtr VH,double H) /************ Shear */
   loop (n,FROM,No.N) {
     mn=molec+n;
     ns=mn->ns;
-    sp=mn->sp;
-    si=spec[sp]->si;
+    si=spec[mn->sp]->si;
     f=rof(mn,B->rp);
     r=rof(mn,A->rp);
     v=rof(mn,VH->rp);
@@ -1175,8 +1170,7 @@ void Shear(ToIntPtr B, ToIntPtr A, ToIntPtr VH,double H) /************ Shear */
   loop (n,FROM,No.N) {
     mn=molec+n;
     ns=mn->ns;
-    sp=mn->sp;
-    si=spec[sp]->si;
+    si=spec[mn->sp]->si;
     f=rof(mn,B->rp);
     loop (i,0,ns) {
       m=si[i].mass;

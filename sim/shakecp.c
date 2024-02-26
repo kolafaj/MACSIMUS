@@ -18,12 +18,11 @@
 
     loop (n,FROM,No.N) {
       mn=molec+n;
-      sp=mn->sp;
       ns=mn->ns;
       r=polarrof(mn,rp); /* at time t */
       r1=polarrof(mn,cfg[1]->rp); /* at time t-h */
       p=polarrof(mn,rp2); /* forces */
-      si=spec[sp]->si;
+      si=spec[mn->sp]->si;
       loop (i,0,ns) if (si[i].chargepol) {
         double K=1./si[i].alpha_qq; /* = Q*Q/alpha */
         double M=Sqr(tau.dip)*K,IM=1./M;

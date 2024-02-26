@@ -9,7 +9,7 @@
 
 void rhs(ToIntPtr B, ToIntPtr A, ToIntPtr V) /* ======================== rhs */
 {
-  int n,ns,sp,i;
+  int n,ns,i;
   vector *v,p_mol;
   double m_mol,mi;
   molecule_t *mn;
@@ -49,8 +49,7 @@ void rhs(ToIntPtr B, ToIntPtr A, ToIntPtr V) /* ======================== rhs */
     loop (n,FROM,No.N) {
       mn=molec+n;
       ns=mn->ns;
-      sp=mn->sp;
-      si=spec[sp]->si;
+      si=spec[mn->sp]->si;
       v=rof(mn,V->rp);
       VO(p_mol,=0)
       m_mol=0;
@@ -98,8 +97,7 @@ void rhs(ToIntPtr B, ToIntPtr A, ToIntPtr V) /* ======================== rhs */
     loop (n,FROM,No.N) {
       mn=molec+n;
       ns=mn->ns;
-      sp=mn->sp;
-      si=spec[sp]->si;
+      si=spec[mn->sp]->si;
       v=rof(mn,V->rp);
       loop (i,0,ns)
         En.kin += SQR(v[i])*si[i].mass; } }

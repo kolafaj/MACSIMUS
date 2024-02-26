@@ -1,6 +1,6 @@
 ! NSLOTS=4 cookewslcP1 n2.ble N256NPT1.get
 
-initialization:
+! initialization:
 init="crystal"         ! initial configuration
 thermostat="Berendsen" ! NVT (no barostat: tau.P=0 is the default)
 no=200                 ! short NVT initialization 2 ps

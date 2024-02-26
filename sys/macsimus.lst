@@ -1033,10 +1033,11 @@ macsimus/sim/xsection.c
 macsimus/sys/.evdata
 macsimus/sys/.evudata
 macsimus/sys/.startdata
+macsimus/sys/FINISHINST.txt
 macsimus/sys/README.md
-macsimus/sys/finishinfo.sh
 macsimus/sys/bin.lst
 macsimus/sys/compile.mmk
+macsimus/sys/finishinfo.sh
 macsimus/sys/macsimus.lst
 macsimus/sys/mc.ext
 macsimus/util/README.md

@@ -11,9 +11,8 @@ if (anchor.xyz) {
   loop (n,FROM,No.N) {
     mn=molec+n;
     if (!mn->anchor) {
-      sp=mn->sp;
       p=rof(mn,rp2);
-      si=spec[sp]->si;
+      si=spec[mn->sp]->si;
       ns=mn->ns;
       M+=spec[mn->sp]->mass;
       loop (i,0,ns) VV(cm,+=si[i].mass*p[i]) } }

@@ -9,14 +9,14 @@ TO FINISH INSTALLATION:
 * You may customize and compile your own cook* version(s) as follows:
     cd "${PWD}/cook"
     ./configure.sh
-  Alternatively, customize files "${PWD}/generic/metamake.mmk" and
+  Alternatively, customize files "${PWD}/generic/metamake" and
   "${PWD}/generic/simopt.h", then run
      makemake "$CC"
      make cook*
 
 * The basic Lennard-Jones version of blend was compiled.
   To customize other versions, follow the instructions in
-  "${PWD}/blend/metamake.mmk".
+  "${PWD}/blend/metamake".
 
 Most utilities print help if run without any option, sometimes -h is needed.
 If a utility mentioned after "See also:" is not present, please let me know.

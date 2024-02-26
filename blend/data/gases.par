@@ -38,8 +38,8 @@ N     1     -0.072876717 3.3078
 
 bonds
 H	O		555  1.00	! K only for blend
-N       N               1000 1.0889278
-! N       N               1000 1.0977 ! newer
+!N       N               1000 1.0889278
+N       N               1000 1.0977 ! newer value
 
 angles
 H	O	H	55   109.47122  ! K only for blend

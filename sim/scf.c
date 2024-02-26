@@ -44,7 +44,7 @@ int selffield(ToIntPtr B,ToIntPtr A, /**************************** selffield */
 {
   molecule_t *mn;
   siteinfo_t *si;
-  int ns,sp,n,i,nmax=-1,imax=-1;
+  int ns,n,i,nmax=-1,imax=-1;
   vector *fc,*fpol,*rpol,dr,dd;
 #if POLAR&(8|32)
   vector *rc;
@@ -80,8 +80,7 @@ int selffield(ToIntPtr B,ToIntPtr A, /**************************** selffield */
   loop (n,FROM,No.N) {
     mn=molec+n;
     ns=mn->ns;
-    sp=mn->sp;
-    si=spec[sp]->si;
+    si=spec[mn->sp]->si;
 #if POLAR&(8|32)
     rc=rof(mn,A->rp);
 #endif /*# POLAR&(8|32) */
@@ -93,7 +92,7 @@ int selffield(ToIntPtr B,ToIntPtr A, /**************************** selffield */
     {
       fq4_t *fq4;
 
-      looplist (fq4,spec[sp]->fq4) {
+      looplist (fq4,spec[mn->sp]->fq4) {
         int H1=fq4->indx[0];
         int H2=fq4->indx[1];
         int L1=fq4->indx[2];
@@ -342,8 +341,7 @@ int selffield(ToIntPtr B,ToIntPtr A, /**************************** selffield */
     loop (n,FROM,No.N) {
       mn=molec+n;
       ns=mn->ns;
-      sp=mn->sp;
-      si=spec[sp]->si;
+      si=spec[mn->sp]->si;
       rpol=polarrof(mn,A->rp);
 #define ND 10
       loop (i,0,ns) {

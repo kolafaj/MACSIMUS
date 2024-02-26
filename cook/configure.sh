@@ -533,7 +533,10 @@ if [ "$PAR" != "" ] ; then
 fi
 
 echo $MM $CC $MMOPT
-$MM $CC $MMOPT
+if ! $MM $CC $MMOPT ; then
+  echo $MM $CC $MMOPT failed
+  exit 1
+fi
 
 echo
 echo -n "SITE-SITE: "

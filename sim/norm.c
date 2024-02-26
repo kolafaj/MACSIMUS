@@ -220,7 +220,7 @@ int shake_r(ToIntPtr A) /* ========================================= shake_r */
 {
   vector ra,dr,*r;
   molecule_t *mn;
-  int n,nc,i,j,a,it=0,sp;
+  int n,nc,i,j,a,it=0;
   int sumit=0,ifit=eps>=1,maxit;
   siteinfo_t *si;
   double sq,maxsq,mi,mj;
@@ -237,8 +237,7 @@ int shake_r(ToIntPtr A) /* ========================================= shake_r */
     if ( (nc=mn->nc) ) {
 
       maxit = ifit ? (int)eps : nc*100;
-      sp=mn->sp;
-      si=spec[sp]->si;
+      si=spec[mn->sp]->si;
       r=rof(mn,A->rp);
 
       if (nc>No.maxc) Error("nc");
@@ -278,7 +277,7 @@ void Lcorrect(ToIntPtr B, ToIntPtr V) /* ========================== Lcorrect */
   See also comments on the constraint dynamics later!
 ***/
 {
-  int n,a,nc,sp,i,j;
+  int n,a,nc,i,j;
   vector *v,*r,*ra=NULL;
   molecule_t *mn;
   vector auxv;
@@ -299,9 +298,7 @@ void Lcorrect(ToIntPtr B, ToIntPtr V) /* ========================== Lcorrect */
     mn=molec+n;
 
     if ( (nc=mn->nc) ) {
-
-      sp=mn->sp;
-      si=spec[sp]->si;
+      si=spec[mn->sp]->si;
       r=rof(mn,B->rp);
       v=rof(mn,V->rp);
 
@@ -320,12 +317,12 @@ void Lcorrect(ToIntPtr B, ToIntPtr V) /* ========================== Lcorrect */
         dc[a]=sq/2; } /* a */
 
       memset(e,0,nc*sizeof(e[0]));
-      constrit[sp].nit[COR_BONDS] += omega==0
+      constrit[mn->sp].nit[COR_BONDS] += omega==0
         ? conjgrad(nc,e,Mvec,Msp,dc,epsc)
         : directiter(nc,e,Msp,dc,omegac,epsc);
 
       memset(ve,0,nc*sizeof(ve[0]));
-      constrit[sp].nit[COR_VELOC] += omega==0
+      constrit[mn->sp].nit[COR_VELOC] += omega==0
         ? conjgrad(nc,ve,Mvec,Msp,dv,epsc)
         : directiter(nc,ve,Msp,dv,omegac,epsc);
 
@@ -1059,7 +1056,7 @@ void distancecheck(void) /********************************** distancecheck */
   int i,j,k;
   vector *r=cfg[0]->rp,dr;
   double rrmin[2],rrmax[2],rr;
-  int imin[2],imax[2],jmin[2]={0,0},jmax[2]={0,0}; // init to suppress warning
+  int imin[2]={0,0},imax[2]={0,0},jmin[2]={0,0},jmax[2]={0,0}; // init to suppress warning
 
   if (!cfg[0]) return;
 
