@@ -31,6 +31,7 @@ UNIX=linux
 CC="$1"
 export BIN=$PWD/bin/
 
+# OLD, now spaces are allowed
 # # no spaces in the path allowed
 # if [ "${PWD/ /z}" != "${PWD}" ] ; then
 #   echo "Sorry, I cannot handle spaces in PWD=\"$PWD\"!"
@@ -239,7 +240,7 @@ do
 done
 cd ..
 
-
+echo
 echo "Comparing (using diff):"
 echo "  the contents of \"${PWD}/\" (> instbin.lst)"
 echo "  with the expected listing \"sys/bin.lst\""
@@ -279,14 +280,14 @@ cat <<EOF
                 pair sum of Lennard-Jones and point charges
   e = cookewslc: periodic boundary conditions, slab support, linked-cell list,
                  Lennard-Jones, Ewald (point charges), serial version
-                 [This is the default needed to run a test]
+                 [This is the default needed to run the installation test]
   E = cookewslcP1: as above, thread-parallel version
   c = cookceslc: periodic boundary conditions, slab support, linked-cell list,
                  Lennard-Jones, smoothed cutoff electrostatics, serial version
   C = cookceslcP1: as above, thread-parallel version
   a = fec (all serial versions)
   A = fecEC (all serial and parallel)
-  n = nothing (cannot run the final test)
+  n = nothing (cannot run the installation test)
 EOF
 
 read
