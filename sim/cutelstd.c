@@ -1,6 +1,8 @@
 /*
-  Short-range electrostatic approximation, DIRECT version (no splines)
-  (The k-space part should be turned off)
+  Short-range electrostatic approximation provided in the same interface as
+  Ewald r-space functions, but not using splines; cf. cutelst.c.
+  The k-space part should be turned off.
+
   Should conform elst.h, (ERFC not #defined)
 
   eru(r*r) = 1/r - shift,                             r<alpha*cutoff
@@ -11,7 +13,7 @@
   shift,A,B are so that the second derivative of eru is continuous
   FA and FB are appropriate base functions
 
-  (old version cutelst0.c)
+  Cf. cutelst.c (splines used).
 */
 
 #define FA(x) (1)
@@ -32,10 +34,10 @@ erreal byerd; /* by-product result of erud
   if #ifdef ermacro then a local byerd may be faster, however,
   you must not declare local byerd if ermacro is not #defined ! */
 
-void initerfc(int Grid, double minr, double maxr, double cutoff, double alpha, int shifted)
-/* NEW: Grid<0 means suppressed info */
+void initerfc(int grid, double minr, double maxr, double cutoff, double alpha)
 {
-  int verbose=alpha<0;
+  int dump=alpha<0;
+  //  int verbose=grid>0; /* NB: grid not needed */
 
   alpha=fabs(alpha);
 
@@ -53,16 +55,23 @@ void initerfc(int Grid, double minr, double maxr, double cutoff, double alpha, i
     double B2=6*d*FB(Erfc.r0)+6*d*d*FBd(Erfc.r0)+d*d*d*FBdd(Erfc.r0);
     double rhs2=2/Cub(Erfc.r0);
     double det=A1*B2-A2*B1;
+
     Erfc.A=(rhs1*B2-rhs2*B1)/det;
     Erfc.B=(A1*rhs2-A2*rhs1)/det;
     Erfc.A3=-3*Erfc.A;
     Erfc.B3=-3*Erfc.B;
     Erfc.shift=1/Erfc.r0-d*d*d*(Erfc.A*FA(Erfc.r0)+Erfc.B*FB(Erfc.r0)); }
 
+  prt("\n:::::: cutelst shifted/truncated electrostatics directly ::::::");
   put2(Erfc.r0,cutoff)
   put3(Erfc.A,Erfc.B,Erfc.shift)
 
-  if (verbose) {
+  if (dump) {
+    ermacrodcl
+    double r;
+    /* patch beause box.cutoff use in eru,erd */
+    struct box_s { double cutoff; } box = {cutoff};
+
 #define xput(X) prt("%s = %.15g",#X,X)
     xput(cutoff);
     xput(Erfc.shift);
@@ -72,22 +81,14 @@ void initerfc(int Grid, double minr, double maxr, double cutoff, double alpha, i
     xput(Erfc.B);
     xput(Erfc.r0);
 #undef xput
-  }
 
-#if 0
-    {
-      ermacrodcl
-      double r;
-      for (r=1; r<cutoff; r+=0.001) {
-	double byerd,rr=r*r;
-	double u=erud(rr);
-	prt("%.15g %.15g %.15g",er_x,u,byerd*er_x); }
-      exit(0); 
-    }
-#endif
+    for (r=1; r<cutoff; r*=1.001) {
+      double rr=r*r;
+      double u=erud(rr);
+      prt("%.15g %.15g %.15g ELST",er_x,u,byerd*er_x); } }
 
 } /* initerfc */
 
 #ifdef erexact_eps
-#error erexact_eps (#undef EXACTERUD)
+#  error erexact_eps (#undef EXACTERUD)
 #endif

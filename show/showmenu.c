@@ -40,20 +40,21 @@ void makemenu(int which) /***************************************** makemenu */
     outtextxy(atx,aty,string("Export %s:",dumpinfo[dumpmode]));
     atx=atxb0; aty+=dyhdr1;
     makebutton(atx,aty,'o',"one frame","export one frame in the selected format\nhotkey=[o]");
+    dosmouse.button[2]=palcolor(LIGHTGRAY);
     aty+=dybutt;
-    makebutton(atx,aty,'O',"one frame+render","export one frame in the selected format\nand render or show it with\nthe software registered in .startdata\nutility \'start\' must be installed\nhotkey=[O]");
+    makebutton(atx,aty,'O',"One frame+render","export one frame in the selected format\nand render or show it with\nthe software registered in .startdata\nutility \'start\' must be installed\nhotkey=[O]");
     aty+=dybutt;
     makebutton(atx,aty,'s',"series","export a whole series of frames\nuntil hotkey [e] is pressed\nor button [end series] pushed\nhotkey=[s]");
-    if (dumpmode==PPM) {
+    if (dumpmode==PIC) {
       aty+=dybutt;
-      makebutton(atx,aty,'a',"animated GIF","make animated GIF\nall PPM files are erased before conversion\nsee option -L for parameters\nuntil hotkey [e] is pressed\nor button [end series] pushed\nhotkey=[a]");
-    }
-    if (dumpmode!=PPM && dumpmode!=ZBUF) {
+      makebutton(atx,aty,'a',"animated GIF","make animated GIF\nall PPM files are erased before conversion\nsee option -L for parameters\nuntil hotkey [e] is pressed\nor button [end series] pushed\nhotkey=[a]"); }
+
+    if (ISMERGED) {
       aty+=dybutt;
       makebutton(atx,aty,'m',"merge","merge a series of frames to one output file\nuntil hotkey [e] is pressed\nor button [end series] pushed\nhotkey=[m]");
       aty+=dybutt;
-      makebutton(atx,aty,'M',"merge + render","merge a series of frames to one output file\nuntil hotkey [e] is pressed\nor button [end series] pushed\nhotkey=[M]");
-    }
+      makebutton(atx,aty,'M',"Merge + render","merge a series of frames to one output file\nuntil hotkey [e] is pressed\nor button [end series] pushed\nhotkey=[M]"); }
+
     aty+=dybutt;
     makebutton(getmaxx()-6*xfont.width-9,aty,ESC,"cancel","cancel the export\nhotkey=[any other]");
     setcolor(palcolor(WHITE));
@@ -66,6 +67,9 @@ void makemenu(int which) /***************************************** makemenu */
     aty+=xfont.height+1; outtextxy(atx,aty,"will call a ray-");
     aty+=xfont.height+1; outtextxy(atx,aty,"tracer and then");
     aty+=xfont.height+1; outtextxy(atx,aty,"ImageMagick.");
+    aty+=xfont.height/2;
+    aty+=xfont.height+1; outtextxy(atx,aty,"Background:");
+    aty+=xfont.height+1; outtextxy(atx,aty,"show -bgRRGGBB");
 
     if (dumpmode==ZBUF) {
       int res=96;
@@ -116,8 +120,8 @@ void makemenu(int which) /***************************************** makemenu */
 
     makebutton(ATX[0],aty,F1,"help","get full help\nhotkeys=[?] [F1] [h]");
     makebutton(ATX[1],aty,'O'&31,"font","toggle font size\nhotkey=[F6] or [Ctrl-O]");
-    makebutton(ATX[2],aty,'Q'&31,"quit","quit immediately without saving\nhotkey=[Ctrl-Q]");
-  }
+    makebutton(ATX[2],aty,'Q'&31,"quit","quit immediately without saving\nhotkey=[Ctrl-Q]"); }
+
   makebutton(getmaxx()-xfont.width-5,aty,F10,"\22","menu on/off\nhotkey=[F10]");
   if (!menu) return;
 
@@ -149,9 +153,8 @@ void makemenu(int which) /***************************************** makemenu */
   atx+=makebutton(atx,aty,'r',"-","decrease ball size\nin modes 1-4 also bar/dumbell size\nhotkey=[r]");
   atx+=makebutton(atx,aty,'R',"+","increase ball size\nin modes 1-4 also bar/dumbell size\nhotkey=[R]");
 
-
   if (curmode==DUMBELL || curmode==DUMBELL2) {
-    aty+=dybutt; atx=atx0;
+    atx=atx0; aty+=dybutt;
     setcolor(palcolor(WHITE));
     atx+=outtextxy(atx,aty,"ball/bar")-2;
     atx+=outtextxy(atx,aty,":")+2;
@@ -162,7 +165,7 @@ void makemenu(int which) /***************************************** makemenu */
     makebutton(ATX[3],aty,'d',"=d","ball:bar ratio=default (dumbbell)\nhotkey=[d]"); }
 
   if (curmode<DUMBELL || curmode>DUMBELL2 || aty<maxy-13*dybutt+8) {
-    aty+=dybutt; atx=atxb0;
+    atx=atxb0; aty+=dybutt;
     dosmouse.button[2]=palcolor(hbdist?colortab[ihbcolor].turbocolor:LIGHTGRAY);
     atx+=makebutton(atx,aty,'H'&31,"H-bonds","toggle show H-bonds\nsee options -H (turn on and set threshold distance and color)\n-A (set acceptor)\n-D (set donor)\nhotkey=[Ctrl-H]")+1;
     dosmouse.button[2]=palcolor(colortab[ihbcolor].turbocolor);
@@ -184,7 +187,7 @@ void makemenu(int which) /***************************************** makemenu */
 
   aty+=dyhdr1;
   setcolor(palcolor(WHITE));
-  outtextxy(atx0,aty,"---- selection ----"); // 18 letters
+  outtextxy(atx0,aty,"-- selection -----"); // 18 letters
   aty+=dyhdr2;
   planline(atxb0,"\4\6\3\2");
   dosmouse.button[2]=movesel?palcolor(ORANGE):palcolor(LIGHTGRAY);
@@ -198,7 +201,7 @@ void makemenu(int which) /***************************************** makemenu */
   aty+=dybutt;
   planline(atxb0,"\4\7\4");
   makebutton(ATX[0],aty,'S'&31,"save","Save the frame in standard orientation;\nif SELECTION (button [move]) is on, save only the selection.\nSaved files are numbered\nhotkey=[ctrl-s]");
-  makebutton(ATX[1],aty,'R'&31,"rotated","Save the rotated frame;\nif SELECTION (button [move]) is on, save only it\nsaved files are numbered\nhotkey=[ctrl-r]");
+  makebutton(ATX[1],aty,'R'&31,"rotated","Save the rotated frame;\nif SELECTION (button [move]) is on, save only it\nThe saved files are numbered\nhotkey=[ctrl-r]");
   dosmouse.button[2]=bodyframe?palcolor(LIGHTCYAN):palcolor(LIGHTGRAY);
   makebutton(ATX[2],aty,'F'&31,"body","use body-frame coordinates\nWARNING: not intuitive to use with mouse\nhot keys [x] [X] [y] [Y] [z] [Z] [/] [*] recommended\nhotkey=[Ctrl-F]");
   dosmouse.button[2]=palcolor(LIGHTGRAY);
@@ -207,31 +210,40 @@ void makemenu(int which) /***************************************** makemenu */
 
   aty+=dyhdr1;
   setcolor(palcolor(WHITE));
-  outtextxy(atx0,aty,"---- export ------");
+  outtextxy(atx0,aty,"-- export bg=");
+
+  atbg=aty;
+
+  printbg();
+
   aty+=dyhdr2;
   if (dumpstat==SERIES || dumpstat==START) {
     makebutton(atxb0,aty,'e',"end series","end a series of dumps\nor a merged dump\nhotkey=[e]"); }
   else {
+    planline(atxb0,"\4\3\3\3");
+    makebutton(ATX[0],aty,'G'&31,"w/bg","white/real background toggle\nfor exported PIC EPS NFF POV\nreal = black or as given by -bgRRGGBB\nhotkey=[Ctrl-G]");
+    makebutton(ATX[1],aty,'E',"EPS","printscreen in EPS format\nhotkey=[E]");
+
     if (curmode<=BALL) {
-      planline(atxb0,"\3\3\4\3");
-      makebutton(ATX[0],aty,'N',"NFF","NFF file, data for Mark VandeWettering's\nReasonable Intelligent Raytracer\n(use \'ray\' to raytrace)\nhotkey=[N]");
-      makebutton(ATX[1],aty,'V',"POV","POV file, data for Persistence of Vision\nraytracer\n(use \'povray\' to raytrace)\nhotkey=[V]");
-      makebutton(ATX[2],aty,'B',"ZBUF","ZBUF file, z-buffer for stereogram\n(use \'stereo\' to render)\nthe .zbuf file is a Portable GrayMap (P5)\nhotkey=[B]");
+      makebutton(ATX[1],aty+dybutt,'P',"PIC","printscreen in PPM (Portable PixMap, P6) format\n+ show with the app registered in .startdata\n+ dump a series of PPMs (for a movie)\n+ make animated GIF (ImageMagick needed)\nhotkey=[P]");
+      makebutton(ATX[2],aty,'N',"NFF","NFF file, data for Mark VandeWettering's\nReasonable Intelligent Raytracer\n(use \'ray\' to raytrace)\nhotkey=[N]");
+      makebutton(ATX[2],aty+dybutt,'V',"POV","POV file, data for Persistence of Vision\nraytracer\n(use \'povray\' to raytrace)\nhotkey=[V]");
+      makebutton(ATX[3],aty+dybutt,'L',"PLB","dump shown frame/trajectory in the .plb format\nhotkey=[L]");
       if (curmode>=DUMBELL)
         makebutton(ATX[3],aty,'A',"ATM","ATM file, ASCII file of format:\n#_of_atoms\n{box size | box_x box_y box_z | empty line}\nAt x y z  (repeated)\nhotkey=[A]");
-      aty+=dybutt;
-      planline(atxb0,"\3\3\2\6");
-      makebutton(ATX[0],aty,'P',"PPM","printscreen in PPM (Portable PixMap, P6) format\n+ show with the app registered in .startdata\n+ dump a series of PPMs (for a movie)\n+ make animated GIF (ImageMagick needed)\nhotkey=[P]");
-      makebutton(ATX[1],aty,'E',"EPS","printscreen in EPS format\nhotkey=[E]");
-      makebutton(ATX[2],aty,'C',"PS","(color) printscreen in PS format\nhotkey=[C]"); }
-    if (curmode!=BOND2)
-      makebutton(getmaxx()-6*xfont.width-5,aty,'W',"B/W PS","B/W printscreen in PS format\nhotkey=[W]"); }
+      makebutton(ATX[0],aty+dybutt,'B',"ZBUF","ZBUF file, z-buffer for stereogram\n(use \'stereo\' to render)\nthe .zbuf file is a Portable GrayMap (P5)\nhotkey=[B]"); }
+    else {
+      outbgtextxy(ATX[2]-xfont.width+2,aty,font,palcolor(WHITE),palcolor(LIGHTGRAY),"modes");
+      outbgtextxy(ATX[2]+xfont.width*5-1,aty,font,palcolor(WHITE),palcolor(LIGHTGRAY),"3-5");
+      outbgtextxy(ATX[0]+xfont.width-1,aty+dybutt-1,font,palcolor(WHITE),palcolor(LIGHTGRAY),"for all functions"); }
+
+    aty+=dybutt; }
 
  playback:
 
   atx=maxxn+3; aty=maxyn-4*dybutt-11;
   setcolor(palcolor(WHITE));
-  outtextxy(atx,aty,"---- playback ----");
+  outtextxy(atx,aty,"-- playback ------");
 
   aty+=dyhdr2;
   planline(atxb0,"\2\1\2\1\2\1\1");
@@ -261,7 +273,7 @@ void makemenu(int which) /***************************************** makemenu */
   dosmouse.button[2]=trace?palcolor(LIGHTCYAN):palcolor(LIGHTGRAY);
   makebutton(ATX[0],aty,'t',"trace","trace mode\nhot key=[t]");
   dosmouse.button[2]=trace>2?palcolor(LIGHTCYAN):palcolor(LIGHTGRAY);
-  makebutton(ATX[1],aty,'T',"fade","trace mode with gradual erasing the old frames\ncancel by button trace\nhotkey=[T]");
+  makebutton(ATX[1],aty,'T',"fade","trace mode with gradual erasing the old frames\nrrepeat for faster shading\ncancel by button trace\nhotkey=[T]");
   dosmouse.button[2]=palcolor(LIGHTGRAY);
   makebutton(ATX[2],aty,'L'&31,"reset","while playback: reset delay to zero and set step to 1\nwire mode still image: redraw the configuration\nhotkey=[Ctrl-L], redraw also [n][n]\n(to cancel tracing, use button trace or key [t])");
 

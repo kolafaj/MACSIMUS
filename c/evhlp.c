@@ -120,17 +120,17 @@ Examples:\n\
 
 static char Pexpr[]="\n\
 EXPRESSIONS:\n\
-Unary operators (cf. functions): + - \\(sqrt)\n\
-  parentheses may be omitted after a unary operator or function\n\
-Binary real operators: + - * / ^(power) **(power) @(modulo)\n\
+Unary operators, cf. (f)unctions: + - \\(sqrt) not(bitwise) `(logical not)\n\
+  parentheses may be omitted after a unary operator/function\n\
+Binary real: + - * / ^(power) **(power) (modulo)\n\
   as the 1st character of an expression they are prepended by #(last result)\n\
-Binary bitwise operators: &(and) |(or)  $(xor)\n\
-Boolean operators (give 0=false, 1=true):  < > <= >= == <>\n\
+Binary bitwise: &(and) |(or)  $(xor)  (&& || not supported, cf. `` & |)\n\
+Boolean (give 0=false, 1=true):  < > <= >= == <>\n\
 Assignment and calculate+assign operators (can be chained):\n\
-  = :=(the same as =) += -= *= /= @=(modulo and assign)\n\
+  = :=(the same as =) += -= *= /= `=(modulo and assign)\n\
 Assign the last result to variable X (the same as X=#): =X\n\
-Put one expression or assignments on a line, expressions and assignments\n\
-  not containing macros can also be separated by \';\'\n\
+One expression or assignments on a line.\n\
+Expressions/assignments not containing macros can also be separated by \';\'.\n\
 Examples:\n\
   1+sin(5*pi); pi>5; ln 2; 2^10-0x400\n\
 CAVEATS:\n\
@@ -138,13 +138,13 @@ CAVEATS:\n\
   \'a=1; -2\' is the same as \'a=1;(-2)\'\n\
   chained powers are left-associated: 2^3^4 = (2^3)^4\n\
   (-8)^(1/3) is -nan, cbrt(-8) is -2\n\
-  unary minus has a lower precedence than power: (-2^2') = (-(2^2))\n\
+  unary minus has a lower precedence than power: (-2^2) = (-(2^2))\n\
 ";
 
 static char Pcommands[]="\n\
 CONTROL COMMANDS:\n\
 \n\
-!      Anything after ! is comment\n\
+!      Anything after ! is comment; bug: '!' is not character !\n\
 *%*    set format (C-style); e.g.: %7.9f, RES=%.4g, \'%c\', 0x%x, 0%o\n\
 %      set default format \" %.8g\"\n\
 %?     query format\n\
@@ -196,15 +196,15 @@ FUNCTIONS of one variable, cf. unary operators:\n\
 "The above functions are dimensionless and accept dimensionless arg. Examples:\n\
   \\2; ln x/ln 3; sh(asinh(2))\n\
 Unit-based: unit val (using SI units; val(1[g])=0.001).\n\
-M(FORMULA) returns molar mass (BUG: no parentheses accepted in FORMULA):\n"
+M(FORMULA) returns molar mass, m(FORMULA) returns mass of the compound:\n"
 #else
 "Examples:\n\
   \\2; ln x/ln 3; sh(asinh(2))\n\
-Function M() returns molar mass in g/mol:\n"
+M(FORMULA) returns molar mass in g/mol, m(FORMULA) returns mass in kg:\n"
 #endif
-"  M(Ar) M(H2SO4) ! correct\n\
+"  M(Ar) m(H2SO4) ! correct\n\
   M(CuSO4.5H2O)  ! M(Cu)+M(S)+4.5*M(O)+M(H2O)  (NOT WHAT YOU MAY EXPECT)\n\
-  M(Ca(CN)2)     ! ERROR\n\
+  M(Ca(CN)2)     ! ERROR - no () in chemical formula allowed\n\
 rnd(X) returns a random number according to integer argument X:\n\
   X<-1: set the seed\n\
   X=-1: return a uniformly distributed random number in [-1,1)\n\
@@ -237,12 +237,13 @@ Example:\n\
 
 static char Pplot[]="\n\
 PLOT function:\n\
-  plot X=FROM,TO[,BY] EXPR\n\
+  plot X=FROM,TO[,[-]N] EXPR\n\
 Where:\n\
   X = independent variable\n\
   EXPR = function of X\n\
   FROM,TO = range of X to plot\n\
-  BY = stride (Delta X)\n\
+  N = number of intervals (interval ends included)\n\
+  -N = N=number of points (interval ends not included - shifted by half)\n\
   FROM,TO,BY may be numbers or expressions\n\
 \n\
 MACSIMUS plot must be installed, run plot for help\n\

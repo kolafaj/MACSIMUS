@@ -395,7 +395,7 @@ void calculatediff(int n,int no) /**************************** calculatediff */
             n,    VARG(lastCM),
             no,   VARG(CM)))
         // sleep(1);
-      
+
       loop (k,0,3) if (fabs(maxthisjump.xi[k])>fabs(maxD)) {
         j=maxthisjump.n[k];
         maxD=maxthisjump.xi[k];
@@ -414,7 +414,7 @@ void calculatediff(int n,int no) /**************************** calculatediff */
       CMshift=sqrt(SQRD(lastCM,CM));
       put(CMshift)
       if (CMshift>CMSHIFTERR)
-        ERROR(("sorry, the fixup failed"))    
+        ERROR(("sorry, the fixup failed"))
     }
 
     VV(lastCM,=CM)
@@ -587,3 +587,7 @@ static void mpl(vector a,matrix M,vector b) /*************************** mpl */
 #endif
 
 #include "drifts.c"
+
+#ifdef SPCTCF
+# include "spctcf.c"
+#endif

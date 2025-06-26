@@ -35,7 +35,7 @@ static struct ga_s {
   double maxg; /* max(g12,sg1,sg2) */
 } ga;
 
-static void erfcs(int to,double *e,double *z) /******************** erfcs */
+static void erfcs(int to,double *e,double *z) /*********************** erfcs */
 {
   /* library erfc() used */
   double rr=to*Erfc.h,r=sqrt(rr);
@@ -77,14 +77,16 @@ static void erfcs(int to,double *e,double *z) /******************** erfcs */
 
 #include "splines.c"
 
-double initerfc(ertab_p *tab, double qq,
+double initerfc(ertab_p *tab, double qq, /************************* initerfc */
                 double sigma1, double sigma2,
-                double factor14, int Grid, double maxr, double cutoff, double Alpha, int shift)
+                double factor14,
+                int grid, double maxr, double cutoff,
+                double alpha, int shift, double kappa, erreal *alphar)
 {
+  int dump=alpha<0;
+  int verbose=grid>0;
   /* Erfc.tab is allocated */
-  double alpha=fabs(Alpha); /* refreshed meaning: -v4 verbose passed here */
   long ito;
-  int grid=abs(Grid),verbose=Grid>0;
   double x,z;
   double minr=0; /* not argument */
   ermacrodcl
@@ -95,15 +97,30 @@ double initerfc(ertab_p *tab, double qq,
     //    (*tab)->Cd=(*tab)->Cu=1;
     return 1e-9; }
 
-  ito=(int)(Sqr(maxr*alpha)*grid)+1;
-  /* ito is in units of 1/grid */
+  grid=abs(grid);
+  if (grid==0) ERROR(("spline grid=0"))
 
-  /* to be solved: already initialized */
+#if 0
+  /* this is wrong for several q-q pairs - to check these pairs? */
+  if (Erfc.grid==grid && Erfc.shift==shift
+      && Erfc.minr==minr && Erfc.maxr==maxr
+      && Erfc.alpha==*alphar) {
+    prt(":::::: gcelst(erfc) already initialized ::::::");
+    return Erfc.sgrid; }
+#endif
+  
+  alpha=fabs(alpha);
+  if (shift&4) {
+    *alphar=alpha*erf(PI*kappa/alpha);
+    if (verbose) prt("WARNING: the Hammonds-Heyes method is experimental, be careful"); }
+  else
+    *alphar=alpha;
+
   Erfc.shift=shift;
   Erfc.sgrid=grid*Sqr(alpha);
   Erfc.grid=grid;
   Erfc.minr=0; Erfc.maxr=maxr;
-  Erfc.alpha=alpha;
+  Erfc.alpha=*alphar;
 
 #ifdef erexact_eps
   Erfc.A=alpha*(-2/SQRTPI);
@@ -111,19 +128,23 @@ double initerfc(ertab_p *tab, double qq,
   Erfc.B=Erfc.A*Erfc.alphaq*2;
 #endif /*# erexact_eps */
 
+  /* ito is in units of 1/grid */
+  ito=(int)(Sqr(maxr*alpha)*grid)+1;
+
   /* cf. initss in simdef.c */
   rallocarray(*tab,ito);
 
-  // for macro compatibility
+  /* local macro using ERFC will be used below */
+#undef ERFC
 #  define ERFC Erfc
   Erfc.tab=*tab;
 
-  prt("\n:::::: erfc(qq=%g p.u.) :::::: tab 0..%ld = %ld B  grid=%d", qq,ito,ito*sizeof(ertab_t),grid);
+  prt("\n:::::: gcelst(qq=%g p.u.) :::::: tab 0..%ld = %ld B  grid=%d", qq,ito,ito*sizeof(ertab_t),grid);
 
   if (verbose) {
     prt("splines based on library erfc");
-    prt("alpha=%g  sigma=%g  range=[%g,%g)  cutoff=%g",
-        alpha,sqrt(Sqr(sigma1)+Sqr(sigma2)), minr,maxr,cutoff); }
+    prt("alpha=%g  sigma=%g  range=[%g,%g)  cutoff=%g  1st interval=[0,%g]",
+        alpha,sqrt(Sqr(sigma1)+Sqr(sigma2)), minr,maxr,cutoff,sqrt(1/Erfc.sgrid)); }
 
   //  Erfc.from=Erfc.tab+ifrom; Erfc.to=Erfc.tab+ito;
 
@@ -155,12 +176,11 @@ double initerfc(ertab_p *tab, double qq,
     loop (er_p,Erfc.tab,Erfc.tab+ito) er_p->Ad -= x;
     prt("erd(r) shifted by %g to avoid jump in elst forces",x); }
 
-  if (shift&4 || Alpha<0)
 #include "ertest.c"
 
     if (Erfc.sgrid<3) WARNING(("Erfc.sgrid=%g<3: splines inaccurate at r=1 AA\n\
 *** check Ewald parameters, particularly el.grid might be insufficient",Erfc.sgrid))
-    
+
   return Erfc.sgrid;
 } /* initerfc */
 

@@ -14,11 +14,13 @@ all_dihedrals=1  ! all dihedrals-several dihedrals per central bond
 ar_dih_limit=1   ! inclusion limit for dihedrals in aromatic rings
 all_impropers=0  ! one improper per central atom
 column_X=0       ! column X disabled (all atoms match = all X=1)
-sqrt_rule=1      ! sqrt combining rule for LJ energies, additive radii
+comb_rule=1      ! sqrt combining rule for LJ energies, additive radii
 LJsigma=1        ! 'vdW' columns contain Lennard-Jones sigma
-factor14=0.5     ! multiplicative factor for 1-4 interactions (if not nbfixes)
 distance14=4     ! these interactions are really 1-4
 polar=0          ! polarizability not included
+factor14=0.5     ! multiplicative factor for 1-4 interactions (if not nbfixes)
+!factor14=1       ! ?, see http://trappe.oit.umn.edu/#param_content
+factor14=0       ! xylene only <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< WARNING
 ;
 
 atoms
@@ -50,6 +52,9 @@ atoms
  18 HT   0 0  1.00800  1   H  alcohol hygrogen
  19 O    0 0 15.9994   8   O  SPC water oxygen
  20 H    0 0  1.008    1   H  SPC water hydrogen
+ 21 C    1 1 12.01     6   C  C   sp2     benzene ring [for xylene]
+ 22 CH   1 1 13.01     7   C  CH  sp2     benzene ring
+ 23 CH3  0 0 15.01     9   C  CH3 sp3     methyl [for xylene]
 ! 21 N    1 0  0        7   N  amine N
 ! 22 HN   1 0  0        1   M  amine H
 ! 23 M    0 0  0        0   M  on H-C bond for amines
@@ -76,8 +81,11 @@ CD       0.00    -0.0537       2.80
 O2CD     0.00    -0.1570       3.05
 O        0.840   -0.15539426   3.1655579
 H        0.044    0.000000     1.000000
-HT       0.044    0.000000     1.000000 
+HT       0.044    0.000000     1.000000
 !HT       0.00    -0.0050       0.920 ! ass.10% of HO (H from -OH) from charmm21.par-MKK
+CH3      0       -0.19474689   3.75 ! = C33C
+CH       0       -0.10035421   3.695
+C        0       -0.041731597  3.88
 
 bonds
 ! K is force constant in kcal/mol/A^2: U=K(r-length)^2  No wildcards X !
@@ -141,6 +149,9 @@ C31E O3E    380.0       1.41
 C30E O3E    380.0       1.41
 CD   O2CD  1115.0       1.16 ! K value of CM-OM carbon monoxide (lack of CO2)
 H    O      555         1.00   !only for blend
+C,CH C      310         1.4
+CH   CH     310         1.4
+CH3  C      310         1.54
 
 angles
 !atom atom atom  K(theta)  theta
@@ -149,11 +160,11 @@ C33C C32C C33C     62.1    114.0 ! 124.2/2 = K(theta); 124.2 = k(theta) eq.4 Eth
 C33C C32C C32C     62.1    114.0
 C33C C32C C31C     62.1    114.0
 C33C C32C C30C     62.1    114.0
-C33C C31C C33C     62.1    112.0    
+C33C C31C C33C     62.1    112.0
 C33C C31C C32C     62.1    112.0
 C33C C31C C31C     62.1    112.0
 C33C C31C C30C     62.1    112.0
-C33C C30C C33C     62.1    109.47    
+C33C C30C C33C     62.1    109.47
 C33C C30C C32C     62.1    109.47
 C33C C30C C31C     62.1    109.47
 C33C C30C C30C     62.1    109.47
@@ -190,8 +201,11 @@ C32E O3E  C32E     60.0    112.0
 C32E O3E  C31E     60.0    112.0
 C32T O3T  HT       55.05   108.5
 C31T O3T  HT       55.05   108.5
-O2CD CD   O2CD     50.0    180.0 ! assumed MKK     
+O2CD CD   O2CD     50.0    180.0 ! assumed MKK
 H    O    H        55      109.47122  !only for blend
+C    CH   CH       63      120
+CH   C    CH       63      120
+CH3  C    CH       63      120
 
 dihedrals
 !atom atom atom atom  C_n=K   n  phi0  C_n is equal to K(phi) from manual
@@ -275,11 +289,14 @@ C31E O3E  C32E C31E  1.44143  1  0.0
 C31E O3E  C32E C31E  0.32541  2  0.0
 C31E O3E  C32E C31E  1.10926  3  0.0
 
+impropers
+C    CH   CH   CH3   11.950287 0 0
+C    CH   CH   C     11.950287 0 0 ! aromatic
+CH   CH   C    CH    11.950287 0 0 ! aromatic
+
 waters
 ! must be in standard order recognized by cook
 SPCE  3 H 0.4238 H 0.4238 O -0.8476
 SPC   3 H 0.41   H 0.41   O -0.82
 
 END
-
-

@@ -40,7 +40,6 @@ double scaling(double tau,int noint,double factor,double maxscale);
 
 void addEnnit(double *En_nit,int n,double add);
 void distancecheck(void);
-int debugcfg(int quit);
 void zeroEn(void);
 
 void depend_r(ToIntPtr A,int always);

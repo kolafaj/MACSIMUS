@@ -1,18 +1,19 @@
 
 MODULE="$MODULE elst ewald"
 
-echo
-echo "===== Select algorithm for ELECTROSTATIC calculations:"
-echo " -3 = Gaussian charges (on spring or nonpolarizable) + Ewald"
-echo ">-2 = The same as -1 with more accurate erfc for 1-2 and 1-3 interactions"
-echo "      For models with partial charges close together (DEFAULT)"
-echo " -1 = Ewald summation"
-echo "      All r-space terms (erfc) are calculated by hyperbolic splines"
-echo "  0 = Cut-and-shift approximation (MACSIMUS style)"
-echo "  2 = Deprecated: COULOMB=0 implemented by splines"
-echo "  3 = Cut-and-shift approximation by Fennell, Gezelter, JCP 124, 234104 (2006)"
-echo "      Not suitable for models with large partial charges very close together"
-echo "NOTE: Consider also switches QQTAB and SPLINES, see ../cook/generic/simopt.h"
+cat <<EOF
+===== Select algorithm for ELECTROSTATIC calculations:
+ -3 = Gaussian charges (on spring or nonpolarizable) + Ewald
+>-2 = The same as -1 with more accurate erfc for 1-2 and 1-3 interactions
+      For models with partial charges close together (DEFAULT)
+ -1 = Ewald summation
+      All r-space terms (erfc) are calculated by hyperbolic splines
+  0 = Cut-and-shift approximation (MACSIMUS style)
+  2 = As above via quadratic splines (slightly faster but less accurate)
+  3 = Cut-and-shift approximation by Fennell, Gezelter, JCP 124, 234104 (2006)
+      Not suitable for models with large partial charges very close together
+NOTE: Consider also switches QQTAB and SPLINES, see ../cook/generic/simopt.h
+EOF
 read
 
 COULOMB=$REPLY

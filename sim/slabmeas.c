@@ -8,12 +8,12 @@
 
 static struct dpr_s {
   int4 size;          /* SDS size */
-  int n;              /* # of bins; negative value means [0,Lz] scaled to [0,1]
-                         Should be the same for all density profiles! */
+  int n;              /* # of bins; n<0 means [0,Lz] scaled to [0,1]
+                         caveat: must be the same for all density profiles! */
   int nmeas;          /* number of measurements */
   int xSP;            /* removed in V3.6l, see slab.sp instead */
   char name[8];       /* atom name or "mol0", "mol1",.. */
-  double grid;        /* per 1 AA (if n>0) or per Lz (if n<0); all grids are the same */
+  double grid;        /* per 1 AA (if n>0) or per Lz (if n<0); all grids are equal */
   double Vbin;        /* sum of volumes of one bin (to be divided by nmeas) */
   double Lz;          /* sum of Lz (to be divided by nmeas) */
   double mass_charge; /* molecular mass (or charge - not used) */
@@ -57,9 +57,9 @@ void initdpr(double grid,double zmax,char *fn) /************* initdpr */
   rallocarray(sumihist,nsites);
 
   loop (sp,0,2*nspec+nsites) {
-    int elemsize=
-      sp<2*nspec ? sizeof(dpr[sp]->hist.dhist[0])
-                 : sizeof(dpr[sp]->hist.ihist[0]);
+    int elemsize=sp<2*nspec ? sizeof(dpr[sp]->hist.dhist[0])
+                            : sizeof(dpr[sp]->hist.ihist[0]);
+    
     sdsralloczero(dpr[sp],sizeof(dpr[sp][0])+elemsize*(abs(n)-1));
     dpr[sp]->n=n; /* must be the same for all density profiles */
     dpr[sp]->grid=grid; /* must be the same for all density profiles */
@@ -80,6 +80,7 @@ void initdpr(double grid,double zmax,char *fn) /************* initdpr */
       q += si->chargepol; /* bug fixed by T.Trnka */
 #endif /*# POLAR */
     }
+
     dpr[sp]->mass_charge=m;
     dpr[sp+nspec]->mass_charge=q; /* not used */
     if (fabs(dpr[sp]->mass_charge-spec[sp]->mass)>1e-8) ERROR(("mass of molecule has changed"))
@@ -141,7 +142,7 @@ void measuredpr(int slabmode) /********************************** measuredpr */
   /* autocenter for slab.sp=big but not 0x7fffffff, default if no measuredpr */
   VO(box.center,=0)
 
-    if (check)
+  if (check)
     switch (geom3) {
       case 2: // slab
         if (box.L[2]<=box.L[0] || box.L[2]<=box.L[1] || fabs(log(box.L[1]/box.L[0]))>0.01) {
@@ -426,7 +427,7 @@ void printdpr(int slabmode,int slabprt,double dV,char *PdVname) /* printdpr */
       fprintf(f,"#    z   ");
       loop (sp,nspec*2,nspec*2+nsites)
         fprintf(f,"  %c=%-7s",sp-2*nspec+'B',dpr[sp]->name);
-      fprintf(f,"  SUM(all) SUM(atoms)\n");
+      fprintf(f," SUM(all)  SUM(atoms)\n");
 
       loop (sp,0,nsites) {
         sumihist[sp][ext]=0;

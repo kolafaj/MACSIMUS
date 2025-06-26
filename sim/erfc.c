@@ -8,13 +8,13 @@ Fast (but memory/cache consuming) method to calculate the following functions:
 where
 
   e(y) = erfc(y)/y
-  e'(y)=de(y)/dy
+  e'(y) = de(y)/dy
 
                          infinity
   erfc(y) = 2/sqrt(PI) * integral exp(-t**2) dt,
                             y
 
-  alpha = Ewald separation parameter
+  alpha = Ewald separation parameter (el.alphar)
 
 Method:
   hyperbolic spline (functions A+B/(x+C), no jumps in the derivative)
@@ -26,18 +26,21 @@ Interface:
   #define FLOAT: DEPRECATED
 
 Initialization:
-  initerfc(int Grid, double minr, double maxr, double cutoff, double alpha, int shift)
+  initerfc(int grid, double minr, double maxr, double cutoff, double alpha, int shift, double kappa, real *alphar)
 where:
-  Grid is a number of grid points per unity; negative Grid = less verbose
+  grid is a number of grid points per 1 AA^2 unity; negative grid = less verbose
   [minr,maxr) defines the range of r, the range of the argument x of eru, erd,
     and erud is then [minr^2,maxr^2)
+    r < minr leads to low-accuracy results
+    r > maxr is out of table (not checked, the simulation will likely crash)
   cutoff and shift:
     shift&1: eru is shifted to avoid jump at r=cutoff
     shift&2: erd is shifted to avoid jump at r=cutoff
-    shift&4: table of eru,erd is printed to SIMNAME.erfcs (for debugging/testing)
-  cutoff<=rmax required
-  r < minr leads to low-accuracy results
-  r > maxr is out of table (not checked, the simulation will likely crash)
+    shift&4: Hammonds-Heyes method
+  cutoff<=rmax required; typically, maxr=box.cutoff+el.rplus
+  alpha = separation parameter
+  kappa = Ewald k-space parameter
+  *alphar = alpha' if shift&4 (Hammonds-Heyes method ) returned (for r-space)
 
 optimization of hyperbolic splines as well as TWODIM (2D Ewald support)
 were removed, see cook V2.7l and older or sim/old+misc/erfc-eropt.c
@@ -45,7 +48,8 @@ were removed, see cook V2.7l and older or sim/old+misc/erfc-eropt.c
 *****************************************************************************/
 
 /*
-  1 = use library function erfc() for calculations (recommended, needed C99)
+#define SUBGRID
+  1 = use library function erfc() for calculations (recommended, C99 needed)
   >1 = use NUMERICAL INTEGRATION with SUBGRID division points in one spline 
        interval (minimum 2, recommended 4)
   Use SUBGRID>1 if erfc() is not in the math library or it is imprecise:
@@ -55,9 +59,9 @@ were removed, see cook V2.7l and older or sim/old+misc/erfc-eropt.c
 
 #define SQRTPI 1.772453850905516
 
-#if COULOMB>=0
-#  error "COULOMB<0 expected"
-#endif /*# COULOMB>=0 */
+#if !(COULOMB==-1 || COULOMB==-2) 
+#  error "COULOMB=-1 or -2 expected"
+#endif /*# !(COULOMB==-1 || COULOMB==-2)  */
 
 struct Erfc_s Erfc;
 
@@ -76,12 +80,14 @@ static void erfcs(int to,double *e,double *z) /********************** erfcs */
   else
     *e=*z=9e9;
 #else /*# SUBGRID==1 */
-/*LEGACY: Numerical integration used (used to be also for TWODIM)
+/*
+  LEGACY: Numerical integration and asymptotic formula used to calculate erfc.
+  (used to be also for TWODIM).
   Must be called with decreasing sequence of parameters  to , starting
   with a sufficiently high value because the integral is for this  to
-  approximated by the asymptotic formula
+  approximated by the asymptotic formula.
 */
-#    define f(X) (sqrt(X)*exp(X))
+#  define f(X) (sqrt(X)*exp(X))
   static long t= -1;
   static double sum;
   double
@@ -110,36 +116,44 @@ static void erfcs(int to,double *e,double *z) /********************** erfcs */
 
 #include "splines.c"
 
-void initerfc(int Grid, double minr, double maxr, double cutoff, double Alpha, int shift)
-/* NEW: Grid<0 means suppressed info */
+void initerfc(int grid, double minr, double maxr, double cutoff, double alpha,
+              int shift, double kappa, erreal *alphar)           /* initerfc */
 {
-  double alpha=fabs(Alpha); /* refreshed meaning: -v4 verbose passed here */
+  int dump=alpha<0;
+  int verbose=grid>0;
   long ifrom,ito;
-  int grid=abs(Grid),verbose=Grid>0;
-  double x,z;
+  double x,z,ar;
   ermacrodcl
 
-  if (Grid==0) ERROR(("spline grid=0"))
-
-  ifrom=(int)(Sqr(minr*alpha)*grid); ito=(int)(Sqr(maxr*alpha)*grid)+1;
-  /* ifrom,ito are in units of 1/grid */
-
+  grid=abs(grid);
+  if (grid==0) ERROR(("spline grid=0"))
+  ar=alpha=fabs(alpha);
+                 
+  if (shift&4) ar=alpha*erf(PI*kappa/alpha);
+                 
   if (Erfc.grid==grid && Erfc.shift==shift
-      && Erfc.minr==minr && Erfc.maxr>=maxr
-      && Erfc.alpha==alpha) {
-    //    Erfc.to=Erfc.tab+ito;
+      && Erfc.minr==minr && Erfc.maxr==maxr
+      && Erfc.alpha==ar) {
     prt(":::::: erfc already initialized ::::::");
     return; }
 
+  if (shift&4) 
+    prt("Hammonds-Heyes: alpha=%g -> alphar=%g (EXPERIMENTAL FEATURE)",alpha,*alphar);
+  *alphar=ar;
+  
   Erfc.shift=shift;
   Erfc.sgrid=(erreal)grid; /* scaled as for alpha=1 - will be rescaled below */
   Erfc.grid=grid;
   Erfc.minr=minr; Erfc.maxr=maxr;
-  Erfc.alpha=alpha;
+  Erfc.alpha=*alphar;
   
+  /* ifrom,ito are in units of 1/grid */
+  ifrom=(int)(Sqr(minr*Erfc.alpha)*grid);
+  ito=(int)(Sqr(maxr*Erfc.alpha)*grid)+1;
+
 #ifdef erexact_eps
-  Erfc.A=alpha*(-2/SQRTPI);
-  Erfc.alphaq=Sqr(alpha);
+  Erfc.A=*alphar*(-2/SQRTPI);
+  Erfc.alphaq=Sqr(Erfc.alpha);
   Erfc.B=Erfc.A*Erfc.alphaq*2;
 #endif /*# erexact_eps */
 
@@ -154,11 +168,11 @@ void initerfc(int Grid, double minr, double maxr, double cutoff, double Alpha, i
 #else /*# SUBGRID==1  */
     prt("splines based on numerical integration (SUBGRID=%d)",SUBGRID);
 #endif /*#!SUBGRID==1  */
-    prt("alpha=%g  range=[%g,%g)  cutoff=%g  1st interval=[0,%g]",
-        alpha,minr,maxr,cutoff,sqrt(1/Erfc.sgrid)); }
+    prt("alphar=%g  range=[%g,%g)  cutoff=%g  1st interval=[0,%g]",
+        *alphar,minr,maxr,cutoff,sqrt(1/Erfc.sgrid)); }
 
   /* spline calculation */
-  makesplines(ito,alpha);
+  makesplines(ito,Erfc.alpha);
 
   z=Sqr(cutoff);
   
@@ -172,7 +186,6 @@ void initerfc(int Grid, double minr, double maxr, double cutoff, double Alpha, i
     loop (er_p,Erfc.tab,Erfc.tab+ito) er_p->Ad -= x;
     prt("erd(r) shifted by %g to avoid jump in elst forces",x); }
   
-  if (shift&4 || Alpha<0)
 #include "ertest.c"
 
 } /* initerfc */

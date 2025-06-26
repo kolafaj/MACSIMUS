@@ -90,7 +90,7 @@ double E=0;          /* total energy in Eunit to be kept constant */
 double T_tr_in=1;    /* ratio T_tr/T_in for thermostat=13 */
 int thermostat=0;    /* see simglob.h */
 tau_t tau;           /* thermostat, volume change,... */
-
+int corr=3+16;       /* corrections (made global in V3.6v) */
 int measure;         /* 0: only forces required
                         1: also energy etc.
                         2: special for calculating # of pairs (DEBUG only) */

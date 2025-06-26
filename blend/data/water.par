@@ -47,8 +47,8 @@ atoms
  14 H5    0 0   4.50385  1 H  TIP5P water model hydrogen !! not real mass
  15 O5    0 0    0       8 O  TIP5P water model oxygen   !! not real mass
  16 E5    0 0   4.50385  0 Z  TIP5P water model e-site   !! not real mass
- 17 OX    0 0 15.99940   8 O  flexible
- 18 HX    0 0 1.00800    1 H  flexible
+ 17 OX    0 0 15.99940   8 O  flexible, see also gases.par
+ 18 HX    0 0 1.00800    1 H  flexible, see also gases.par
  19 S     0 0   32      16 S  yellow large atom
  20 H4EW  0 0   1.00800  1 H  TIP4P-Ew water model hydrogen
  21 M4EW  0 0   0        0 M  TIP4P-Ew auxiliary site
@@ -129,7 +129,7 @@ OF       0.84    -0.1848       1.7766
 O5      0.84     -0.16         1.7510408
 H5      0.044      0          0.8 ! no LJ
 E5      0.044      0          0.4 ! no LJ
-! flexible
+! flexible (parameter differs from SPC)
 OX      0.84     -0.15046643  1.7861838
 HX      0.044     0           0.4 ! no LJ
 S   1    -0.05 7.5 ! auxiliary large atom
@@ -170,7 +170,7 @@ bonds
 HT   OW     450.0       0.9572
 LP   OH2    450.0       0.80
 H    OH2    450.0       1.00
-HX OX 547.5 1 ! cubic term omitted
+HX OX 552.229 1 ! JK flexible SPC
 !
 H4   O4     450         0.9572
 M4   O4     800         0.15
@@ -230,7 +230,7 @@ H5   O5   H5     55        104.52
 E5   O5   E5     55        109.47
 E5   O5   H5     55        110.694771
 !
-HX OX HX 49.9 109.5
+HX OX HX 50.3284 109.47122063449 ! JK flexible SEE ALSO gases.par
 S S S 30 108 ! pentagonal
 !
 H6NE O6NE H6NE 55 108

@@ -8,7 +8,7 @@
   input:  p[i]     = force on atom i at time t
           r[i]     = position of atom i at time t
           r1[i]    = r[i](t)-r[i](t-h) = h*v(t-h/2)
-          v[i]     = predicted velocity_i at time t
+          v[i]     = predicted velocity_i at time t = rof(mn,vpred)
           Vpred[0] = h*d logs(t)/dt, predicted
           vpred[i] = h*velocity of atom i, predicted
           Vfactor  = v_f (diagonal tensor or scalar)
@@ -31,7 +31,7 @@
         VVV(p[i],+=r[i],+r1[i]) } }
     else {
       /* plain Nose or isotropic MTK thermostat+barostat */
-      loop (i,0,ns) {
+      loop (i,0,ns) { // @6
         VVV(p[i],=hh*si[i].imass*p[i],-Vfactor*v[i])
         VVV(p[i],+=r[i],+r1[i]) } } }
 

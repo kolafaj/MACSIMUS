@@ -16,6 +16,7 @@
 #include "units.h"
 #include "forces.h"
 #include "interpot.h"
+#include "setss.h" // WIDOM only
 
 #ifndef SS_MEASURE_rep
 #  define SS_MEASURE_rep /**/
@@ -109,19 +110,21 @@ static struct CPItab_s {
   {"U",   "Internal energy = Epot + Ekin, with cutoff corrections [J/mol]",&En.U},
   {"Unc", "Internal energy = Epot + Ekin, without cutoff corrections [J/mol]",&En.Unc},
   {"H",   "Enthalpy = Epot + Ekin + pV, with cutoff corrections [J/mol]",&En.H},
-  {"Hnc", "Enthalpy = Epot + Ekin + pV, without cutoff corrections [J/mol]",&En.Hnc},
+  //REMOVED  {"Hnc", "Enthalpy = Epot + Ekin + pV, without cutoff corrections [J/mol]",&En.Hnc},
   {"fix", "potential energy of forces fixing sites in place (-k) [J/mol]",&En.fix},
 
 #ifdef ECC
+#error TO BE UPDATED  
   {"Pvir","virial pressure except epsf(V) dependence [Pa]",&En.ECC_Pvir},
   {"PECC","ECC pressure, the same as ECC P [Pa]",&En.P},
   {"Psc","conventional pressure w/o any epsf-based ECC terms [Pa]",&En.ECC_Pscaled},
   {"Pcor","ECC correction (to be added to Pvir) [Pa]",&En.ECC_Pcorr},
 #else /*# ECC   */
-  {"Pcfg","pressure as defined by variable virial (usu automatically) [Pa]",&En.P},
+  {"Pref","pressure as defined by variables virial, corr [Pa]",&En.Pref},
 #endif   /*#!ECC   */
-  {"PdV", "pressure by virtual volume change (also PdVm or PdVa) [Pa]",&En.PdV},
-  {"Pnc", "pressure (based on virial) without cutoff corrections [Pa]",&En.Pnc},
+  {"PdV","pressure by virtual volume change (also PdVm/PdVa) w. cutoff corr. [Pa]",&En.PdV.c},
+  {"Pevc","pressure (based on el. virial) w. LJ cutoff corr. [Pa]",&En.Pelvir.c},
+  {"Pevn","pressure (based on el. virial) w/o LJ cutoff corr. [Pa]",&En.Pelvir.n},
   {"V"   ,"volume [p.u.=AA^3]",&box.V},
 
 #ifdef LOG
@@ -202,7 +205,8 @@ static struct CPItab_s {
   {"Ptxx","pressure tensor w/o LJ cutoff corrections [Pa]",En.Ptens},
   {"Ptyy","pressure tensor w/o LJ cutoff corrections [Pa]",En.Ptens+1},
   {"Ptzz","pressure tensor w/o LJ cutoff corrections [Pa]",En.Ptens+2},
-  {"trPt","corrected P from pressure tensor: tr(Pt)/3+corr [Pa]",&En.trPt},
+  {"Ptrc","corrected P from pressure tensor: tr(Pt)/3+corr [Pa]",&En.Ptr.c},
+  {"Ptrc","uncorrected P from pressure tensor: tr(Pt)/3 [Pa]",&En.Ptr.n},
 #  if PRESSURETENSOR&PT_OFF
   {"Ptyz","pressure tensor w/o LJ cutoff corrections [Pa]",En.Ptens+3},
   {"Ptzx","pressure tensor w/o LJ cutoff corrections [Pa]",En.Ptens+4},
@@ -372,7 +376,7 @@ void initCP(int no,int nbit,char *col4, char *col5,int corr) /******* initCP */
       else if (!memcmp("PdVm",c,4)) prt("pressure by CM-based virtual volume change %s[Pa]",corrinfo);
       else if (!memcmp("PdVa",c,4)) prt("pressure by atom-based virtual volume change %s[Pa]",corrinfo);
       else if (!memcmp("P   ",c,4)) prt("pressure (from virial and kin. energy) %s[Pa]",corrinfo);
-      else if (!memcmp("Pcfg",c,4)) prt("pressure (as selected by variable virial) %s[Pa]",corrinfo);
+      else if (!memcmp("Pref",c,4)) prt("pressure (as selected by variable virial) %s[Pa]",corrinfo);
       else if (!memcmp("|M| ",c,4)) prt("sqrt(<M^2>), simulation cell dipole moment [p.u.]; cf. lag.M");
       else if (!memcmp("Mx  ",c,4)) prt("<Mx>, simulation cell dipole moment in x [p.u.]");
       else if (!memcmp("My  ",c,4)) prt("<My>, simulation cell dipole moment in y [p.u.]");
@@ -1787,10 +1791,10 @@ void ssdistance(void) /*************************************** distancecheck */
 
 #ifdef WIDOM
 /*
-  WIDOM insertion and scaled particle (grow molecule, or identity change)
-  note that the LINKCELL method calculates the insertiona and grow
-  energies on the configurateion BEFORE the current integraion step os
-  performed while the standard version AFTER
+  WIDOM insertion and scaled particle (growing molecule or identity change).
+  Note that the LINKCELL method calculates the insertion a and growth
+  energies using the configuration BEFORE the current integration step is
+  performed while the standard version AFTER it.
 */
 
 #  ifdef POLAR
@@ -1807,14 +1811,14 @@ extern vector **initsites;
 double mol_wall(vector f[],molecule_t *m,vector *rp);
 
 double Widom(int sp,int ncyc,double z0,double z1,double dz,int mode)
-/*
+/*                                                                   * Widom *
    mode&1: incl. symmetrization
    mode&2: total chem.pot.
    mode&4: residual (without wall potential)
    mode&8: wall potential (angle-averaged)
 */
 #  else /*# SLAB */
-double Widom(int sp,int ncyc,double corr)
+double Widom(int sp,int ncyc,double corr) /*************************** Widom */
 #  endif /*#!SLAB */
 {
   En_t En0=En;
@@ -1839,7 +1843,7 @@ double Widom(int sp,int ncyc,double corr)
 #  else /*# SLAB */
   /* cutoff correction - multiplication factor
      it is V-dependent, thus NPT is allowed though not recommended */
-  double qcorr=exp(-corr/(L[0]*L[1]*L[2]*T));
+  double qcorr=exp(-corr/(box.V*T));
 
   if (ncyc<=0) return 0;
 #  endif /*#!SLAB */
@@ -1877,7 +1881,7 @@ double Widom(int sp,int ncyc,double corr)
       dr[2]=z;
 #  else /*# SLAB */
     loop (icyc,0,ncyc) {
-      VV(dr,=rnd()*L)
+      VV(dr,=rnd()*box.L)
 #  endif /*#!SLAB */
 
       loop (i,0,ns) VV(c[i],=initsites[sp][i])
@@ -1899,7 +1903,7 @@ double Widom(int sp,int ncyc,double corr)
         loop (i,1,ns) loop (k,0,DIM)
           if (c[i][k]<rmin[k]) rmin[k]=c[i][k];
         loop (k,0,DIM)
-          if (rmin[k]<0) loop (i,0,ns) c[i][k]+=L[k]; }
+          if (rmin[k]<0) loop (i,0,ns) c[i][k]+=box.L[k]; }
 #  endif /*# LINKCELL */
 
 #  ifdef SLAB
@@ -1947,7 +1951,8 @@ double Widom(int sp,int ncyc,double corr)
 #  endif /*# SLAB */
 
   En=En0;
-  rdf=rdf0; widomrdf(1);
+  rdf=rdf0;
+  widomrdf(1);
 
   return ret;
 }
@@ -1975,9 +1980,9 @@ double XWidom(int sp,int spvirt) /********************************** XWidom */
   memcpy(rp,cfg[0]->rp,No.s*sizeof(vector));
 #  endif /*# LINKCELL */
 
-  loop (n,0,No.N) if (cfg[n].sp==sp) {
+  loop (n,0,No.N) if (molec[n].sp==sp) {
     nscale++;
-    Eidchange(spvirt,&cfg[n],rpf,rp);
+    Eidchange(spvirt,&molec[n],rpf,rp);
     En.pot/=-T; /* WARNING: Widom requires thermostat! */
     e=0; if (En.pot>-700) e=exp(En.pot);
 #  ifdef SLAB
@@ -1991,7 +1996,8 @@ double XWidom(int sp,int spvirt) /********************************** XWidom */
 #  endif /*# SLAB */
 
   En=En0;
-  rdf=rdf0; widomrdf(1);
+  rdf=rdf0;
+  widomrdf(1);
 
   return ret;
 }

@@ -32,14 +32,15 @@
           loop (ii,0,DIM) {
             double Ploc=En.Ptens[ii]+((corr&2)==2)*En.corr/Sqr(box.V);
 #ifdef SLAB
-          if (abs(wall.n)==3 && (constrd.mode&7)==4)
-            Ploc=(En.Pwall[0]+En.Pwall[1])/2;
+            if (abs(wall.n)==3 && (constrd.mode&7)==4) Ploc=(En.Pwall[0]+En.Pwall[1])/2;
 #endif
             Pscale[ii]=scaling(tau.P,noint,h*beta_T*(No.P-Ploc),maxscale); }
 /*  Pscale=exp((tau.P+tau.R<0?noint:-1)*h*box.V/No.f/En.T/(tau.P+tau.R)*(No.P-locP)); */
 
+
           if (rescale & RESCALE_XisY) Pscale[0]=Pscale[1]=sqrt(Pscale[0]*Pscale[1]);
           if (rescale & RESCALE_XisYisZ) Pscale[0]=Pscale[1]=Pscale[2]=cbrt(PROD(Pscale));
+
 
 #    ifdef SLAB
 #      if SLAB & 1
@@ -81,21 +82,21 @@ rescale & RESCALE_PT (%d) was specified but this version\n\
           double beta_T; /* compressibility */
 
           if (No.bulkmodulus) beta_T=1/(3*No.bulkmodulus);
-          else beta_T=box.V/(No.f*En.T); 
+          else beta_T=box.V/(No.f*En.T);
 
           if (tau.sig) tauloc=tau.sig;
-          if (corr&2) {
-            /* with cutoff correction */
-            if (dV) Ploc=En.PdV; else Ploc=En.P; }
-          else {
-            /* without cutoff correction (if these are determined) */
-            if (dV) Ploc=En.PdVnc; else Ploc=En.Pnc; }
+
+          if (dV) Ploc=corr&2?En.PdV.c:En.PdV.n;
+          else Ploc=En.Pref; /* corr&2 already taken into account */
+
 #ifdef SLAB
           if (abs(wall.n)==3 && (constrd.mode&7)==4)
             Ploc=(En.Pwall[0]+En.Pwall[1])/2;
 #endif
           Pscale[0]=Pscale[1]=Pscale[2]=scaling(tauloc,noint,h*beta_T*(No.P-Ploc),maxscale);
           if (rescale & RESCALE_CLEAVE) ERROR(("cleaving rescaling incompatible with virial-based pressure"))
+
+          fprintf(stderr,"DEBUG t=%g No.P=%g Ploc=%g En.Ptr=%g En.Pvir=%g\n", t,No.P,Ploc,En.Ptr.c,En.Pelvir.c);
 
           if (tau.P<0) /* rescale now (otherwise every step) */
             rescalecfg(cfg[0],rescale|RESCALE_L,0,Pscale);

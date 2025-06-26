@@ -18,7 +18,8 @@ int main(int narg,char **arg)
   int i,ns,molN;
 
   if (narg<2) {
-    fprintf(stderr,"Convert Gromacs .gro configuration to .atm. Call by:\n\
+    fprintf(stderr,"\
+Convert Gromacs .gro configuration to .atm. Call by:\n\
   gro2atm MOLNUMBER < FILE.gro > FILE.atm\n\
 MOLNUMBER >=1 : extract only given molecule (as given in columns 0--4)\n\
 MOLNUMBER ==0 : extract whole configuration\n");
@@ -27,9 +28,7 @@ MOLNUMBER ==0 : extract whole configuration\n");
   molN=atoi(arg[1]);
 
   gets(line);
-  if (!strstr(line,"Groningen Machine for Chemical Simulation")) {
-    fprintf(stderr,"WARNING: 1st line not standard \"Groningen Machine for Chemical Simulation\"\n");
-    sleep(3); }
+  fprintf(stderr,"%s\n",line);
 
   gets(line);
   N=atoi(line);
@@ -43,6 +42,7 @@ Groningen Machine for Chemical Simulation
 31910
     1MOL     O1    1   0.162   5.065  10.775  0.2239  0.1997  0.1681
     1MOL     C1    2   0.057   5.017  10.815  0.6393 -0.7165  0.1863
+    1pXY     C1    1   0.234   4.000   0.561
 nnnnnMMMMMaaaaaIIIIIxxxxxxxxyyyyyyyy
 012345678901234567890123456789012345678901234567890123456789
 */

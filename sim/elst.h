@@ -1,17 +1,23 @@
 #ifndef ELST_H
 #  define ELST_H
 
-/*  J.Kolafa 1991, 1992(2D)                                                erfc
+/*
+Interface for r-space COULOMB energy and force calculations in
+the periodic boundary conditions.
+Macros eru,erd,erud are defined here.
 
-General interface for COULOMB approximation, specifically:
-
-COULOMB = -1,-2: erfc functions for r-space part of Ewald summation
-COULOMB = 0: MACSIMUS cut-off electrostatics (directly - no splines).
-COULOMB = 1: (reserved)
-COULOMB = 2: MACSIMUS cut-off electrostatics by quadratic splines
-COULOMB = 3: Fennell and Gezelter [JCP 124, 234104 (2006)] cut-and-shift
-      potential by quadratic splines.
-
+Compile-time switch COULOMB
+-3 Gaussian charges Ewald summation, r-space terms are splined
+   for all charge-charge terms separately.
+-2 The same as -1 except that splines are not used for charges close together.
+-1 Point charges Ewald summation, one set of hyperbolic splines for r-space
+   energy and one for r-space forces. Splines are used for all charge pairs.
+   Bad if charges close together are present.
+ 0 MACSIMUS cut-off electrostatics (directly - no splines).
+ 1 (reserved)
+ 2: MACSIMUS cut-off electrostatics by quadratic splines (not recommended).
+ 3: Fennell and Gezelter [JCP 124, 234104 (2006)] cut-and-shift
+    potential by quadratic splines.
 */
 
 #  include "simopt.h"
@@ -36,9 +42,6 @@ COULOMB = 3: Fennell and Gezelter [JCP 124, 234104 (2006)] cut-and-shift
 #    define ERFC Erfc
 #  endif /*#!QQTAB */
 
-#  ifndef SUBGRID
-#    define SUBGRID 1
-#  endif /*# SUBGRID */
 #  ifdef FLOAT
 typedef float erreal;
 #  else /*# FLOAT */
@@ -65,25 +68,34 @@ typedef struct ertab_s {
 } ertab_t,*ertab_p;
 #  endif  /*# COULOMB!=0 */
 
+#  ifndef SUBGRID
+#    define SUBGRID 1
+#  endif /*# SUBGRID */
+
 extern struct Erfc_s {
-  int grid;         /* d(r^2)=1/grid */
-  erreal h;         /* 1/grid/SUBGRID */
+  /* data for calculating Ewald r-space sums. Not used in k-space (sim/ewald.c) */
+  int grid;          /* d(r^2)=1/grid */
+  erreal h;          /* 1/grid/SUBGRID */
 #  ifdef erexact_eps
-  erreal alphaq,A,B;
+  erreal alphaq,A,B; /* derived from alphar */
 #  endif /*# erexact_eps */
-  erreal minr,maxr,alpha;
-#  if COULOMB==0
-  erreal shift,A,B,A3,B3,r0; /* direct quadratic formula (MACSIMUS style) */
-#  else /*# COULOMB==0 */
-  ertab_p tab;      /* spline table; #ifdef QQTAB only passed */
-  erreal sgrid;     /* spline scaling */
-  int shift;        /* splines: 1 = shifted to be continuous (tiny error) */
-#  endif /*#!COULOMB==0 */
+  erreal minr,maxr,alpha; /* alpha=alphar for the Hammonds-Heyes method */
+#  if COULOMB>=0
+  erreal shift,A,B,A3,B3,r0,r1; /* MACSIMUS short-range */
+#    if COULOMB>=2
+  ertab_p tab;       /* spline table; #ifdef QQTAB only passed */
+  erreal sgrid;      /* spline scaling */
+#    endif /*# COULOMB>=2 */
+#  else /*? COULOMB>=2 */ /*# COULOMB>=0 */
+  ertab_p tab;       /* spline table; #ifdef QQTAB only passed */
+  erreal sgrid;      /* spline scaling */
+  int shift;         /* splines: 1 = shifted to be continuous (tiny error) */
+#  endif /*?!COULOMB==0 || COULOMB==2 */ /*?!COULOMB>=2 */ /*#!COULOMB>=0 */
 } Erfc;
 
 #  if COULOMB==0
-
 /* cut-and-smooth 1/r directly (no splines) */
+
 #    define ermacrodcl erreal byerd,er_x;
 #    define eru(x) (er_x=sqrt(x), \
   er_x<ERFC.r0 ? \
@@ -99,11 +111,12 @@ extern struct Erfc_s {
   (byerd=Sqr(er_x-box.cutoff)*(ERFC.A3+ERFC.B3*er_x-(er_x-box.cutoff)*ERFC.B)/er_x,\
     Cub(er_x-box.cutoff)*(ERFC.A+ERFC.B*er_x)))
 
-void initerfc(int Grid, double minr, double maxr, double cutoff, double alpha, int shifted);
+/* initerfc() defined in cutelstd.c */
+void initerfc(int grid, double minr, double maxr, double cutoff, double alpha);
 
 #  else /*# COULOMB==0 */
 
-/* splines */
+/* splines for Ewald r-space terms and Fennell-Gezelter */
 #    define ermacrodcl ertab_p er_p; erreal byerd;
 
 #    if SPLINE==-2
@@ -138,21 +151,37 @@ void initerfc(int Grid, double minr, double maxr, double cutoff, double alpha, i
 #    endif /*#!SPLINE==-2!SPLINE==2!SPLINE==3 */
 
 #    ifdef QQTAB
-/* WARNING - not implemented (tables prepared ... to be finished) */
+/*
+   separate tables for all QQ pairs: Gaussian charges only (to be extended?)
+   1-4 forces not implemented
+*/
 #      define erud14(x) 0
 #      define erd14(x) 0
 #      if COULOMB<-2
 #        ifndef GAUSSIANCHARGES
 #          error GAUSSIANCHARGES expected
 #        endif /*# GAUSSIANCHARGES */
+/* Gaussian charges: initerfc() defined in gcelst.c */
 double initerfc(ertab_p *tab, double qq,
                 double sigma1, double sigma2,
-                double factor14, int Grid, double maxr, double cutoff, double Alpha, int shift);
+                double factor14,
+                int grid, double maxr, double cutoff,
+                double alpha, int shift, double kappa, erreal *alphar);
 #      else /*# COULOMB<-2 */
-double initerfc(ertab_p *tab,double qq,double factor14, int Grid, double minr, double maxr, double cutoff, double alpha, int shift);
+/* initerfc() defined in erfcqq.c -- NOT TESTED */
+double initerfc(ertab_p *tab, double qq,
+                double factor14,
+                int grid, double minr, double maxr, double cutoff,
+                double alpha, int shift, double kappa, erreal *alphar);
 #      endif /*#!COULOMB<-2 */
 #    else /*# QQTAB */
-void initerfc(int Grid, double minr, double maxr, double cutoff, double alpha, int shift);
+#      if COULOMB>=0
+/* initerfc() for no-Ewald (and no QQTAB) */
+void initerfc(int Grid, double minr, double maxr, double cutoff, double alpha);
+#      else /*# COULOMB>=0 */
+/* initerfc() for Ewald (no QQTAB) */
+void initerfc(int Grid, double minr, double maxr, double cutoff, double alpha, int shift,double kappa,erreal *alphar);
+#      endif /*#!COULOMB>=0 */
 #    endif /*#!QQTAB */
 
 #  endif /*#!COULOMB==0 */
@@ -162,4 +191,4 @@ double exacterud_sqrt(double xx,erreal *erd);
 double exacterud_sqrt_1(double xx,erreal *erd);
 #  endif /*# erexact_eps */
 
-#endif  /*# ELST_H */
+#endif  /*? ELST_H */ /*? COULOMB>=0 */ /*# ELST_H */

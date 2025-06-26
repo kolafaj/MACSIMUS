@@ -51,8 +51,8 @@
 #endif /*# SHEAR */
 
 #ifdef ANCHOR
-#    define FORCEUNIT (massunit*lengthunit/Sqr(timeunit))
-#    define TORQUEUNIT (massunit*Sqr(lengthunit/timeunit))
+#  define FORCEUNIT (massunit*lengthunit/Sqr(timeunit))
+#  define TORQUEUNIT (massunit*Sqr(lengthunit/timeunit))
 
 static void printanchor(double unit,double *var,int mask) /***** printanchor */
 /*
@@ -203,10 +203,11 @@ static void measurePconstraints(void) /***************** measurePconstraints */
     StaSet(0,2,2,lag.n);
 
     /* pressure based on the trace of the pressure tensor */
-    En.trPt=SUM(En.Ptens)/DIM+En.corr/Sqr(box.V)
-#ifdef ECC
+    En.Ptr.n=SUM(En.Ptens)/DIM;
+    En.Ptr.c=En.Ptr.n+En.corr/Sqr(box.V)
+#  ifdef ECC
       + En.ECC_Pcorr
-#endif
+#  endif /*# ECC */
       ;
 
 #endif /*# PRESSURETENSOR&PT_VIR */
@@ -241,19 +242,20 @@ static void measurePconstraints(void) /***************** measurePconstraints */
   else En.T_tr=0;
 
 /* presure based on elst_virial = -elst_energy */
-  En.P=(En.kin*No.Pkinq+En.vir)/DIM/box.V + En.corr/Sqr(box.V)
+  En.Pelvir.n=(En.kin*No.Pkinq+En.vir)/DIM/box.V;
+  En.Pelvir.c=En.Pelvir.n+En.corr/Sqr(box.V)
 #ifdef ECC
       + En.ECC_Pcorr
-#endif
+#endif /*# ECC */
     ;
 
   /* @91  (NB: No.Pkinq=1 assumed for NPT/MTK) */
   switch (virial) {
-    case 1: En.Pcfg=En.P; break;
-    case 2: En.Pcfg=En.PdV; break;
+    case 1: En.Pref = corr&2 ? En.Pelvir.c : En.Pelvir.n; break;
+    case 2: En.Pref = corr&2 ? En.PdV.c    : En.PdV.n; break;
 #if PRESSURETENSOR&PT_VIR
-    case 3: En.Pcfg=En.trPt; break;
-#endif
+    case 3: En.Pref = corr&2 ? En.Ptr.c    : En.Ptr.n; break;
+#endif /*# PRESSURETENSOR&PT_VIR */
     default: ERROR(("pressure type virial=%d not supported",virial))
   }
 } /* measurePconstraints */
@@ -538,14 +540,17 @@ void constraintdynamics(ToIntPtr B, ToIntPtr A, ToIntPtr V)
   box.V=PROD(box.L);
   if (measure==1) measurePconstraints();
 
+#if 0
+ WARNING: calculating P whene every cycle (NPT) should be here (with Gear)
   /* NB: No.Pkinq=1 assumed for NPT/MTK */
-  /* this En.Pcfg not needed anyway since Gear+NPT/MTK not implemented (yet);
+  /* En.Pcfg not needed anyway since Gear+NPT/MTK not implemented (yet);
      cf. thermo.c */
   En.Pcfg = ((En.kin*No.Pkinq+En.vir)/DIM+En.corr/box.V)/box.V
-#ifdef ECC
+#  ifdef ECC
         +En.ECC_Pcorr
-#endif /*# ECC */
+#  endif /*# ECC */
         ;
+#endif /*# 0 */
 
   En.T=En.kin/No.f; /* NB: En.kin still doubled here ! */
 
@@ -961,7 +966,7 @@ void Shake(double eps, double prob) /********************************* Shake */
 #undef V1
   } /* ANCHOR: end of 2nd n-loop, not ANCHOR: of the Shake n-loop */
 
-#     include "anchork0.c"
+#include "anchork0.c"
 
   //prt("%d %g %g %g",n,VARG(rof(molec+1,rp)[0]));
   cfg[0]->dep=0;
@@ -1040,7 +1045,7 @@ void Shake(double eps, double prob) /********************************* Shake */
 
   if (tau.CM) {
     /* patch to thermostat the center of mass */
-#  include "thermocm.c"
+#include "thermocm.c"
   }
 
   En.kin /= 2;
@@ -1206,7 +1211,7 @@ void measureP(int pass) /***************************************** measureP */
 /*
   Virtual volume/area method.
 
-  A selected combination of diagonal components of the pressure tensor are
+  A selected combination of diagonal components of the pressure tensor is
   calculated using the virtual change of volume or shape of a rectangular
   simulation box.  These include: total pressure, pressures in x,y,z (see
   variable `rescale').
@@ -1222,9 +1227,9 @@ void measureP(int pass) /***************************************** measureP */
     the pressure tensor at once).
   - Cannot calculate off-diagonal elements.
   POLAR:
-    polar precision epspx must be small because of numerical derivative
+  - polar precision epspx must be small because of numerical derivative
   NOTES:
-  - constrd.dV is in units of V (relative change)
+  - constrd.dV is in units of V (relative change, exp is used to scale)
   - uses two evaluations of forces (sparing one would mean to include this
     code to the place where the forces are normally calculated or exporting
     them which would be mess)
@@ -1235,8 +1240,8 @@ void measureP(int pass) /***************************************** measureP */
 {
 #ifndef FREEBC
   static int warn;
-  static double Pkin;
-  double Ekin,Ep,Em,vir=0;
+  static double Pkin,vir;
+  double Ekin,Ep,Em;
   vector L0,QM0={0,0,0}; /* initialized to suppress compiler warning */
   En_t En0;
 #  ifdef ECC
@@ -1263,16 +1268,16 @@ void measureP(int pass) /***************************************** measureP */
 *** - for small molecules use CM-based rescaling: rescale=8|(more options)\n\
 *** - for large molecules use -u9999 (vibrating bonds) and check the thermostat",No.c))
 
+    /* save trajectory state */
     En0=En;
     VV(L0,=box.L)
     if (Q) VV(QM0,=Q->M)
 
     if (!locA) sdsalloc(locA,cfg[0]->size);
     if (!locB) sdsalloc(locB,cfg[0]->size);
-
     sdscopy(locA,cfg[0]);
 
-    /* enlarged box/area */
+    /* enlarge box/area */
     box.V=rescalecfg(locA,constrd.mode,exp(constrd.dV/No.ncoord),NULL);
     if (!(constrd.mode&RESCALE_CM)) depend_r(locA,1); /* meaningfull for Rowlinson only */
 #  ifdef POLAR
@@ -1290,11 +1295,12 @@ void measureP(int pass) /***************************************** measureP */
 #    endif /*# ECC */
     Ep=En.pot+En.el;
 #  endif /*#!POLAR */
+
 #  ifdef DEBUG
     Enp=En;
 #  endif /*# DEBUG */
 
-    /* shrunk box/area */
+    /* shrink box/area */
     box.V=rescalecfg(locA,constrd.mode,exp(-2*constrd.dV/No.ncoord),NULL);
     if (!(constrd.mode&RESCALE_CM)) depend_r(locA,1); /* meaningfull for Rowlinson only */
 #  ifdef POLAR
@@ -1315,7 +1321,7 @@ void measureP(int pass) /***************************************** measureP */
 
 #  include "constrddebug1.c"
 
-    /* restore previous state obtained while integration */
+    /* restore the previous state (trajectory) */
     En=En0;
     if (Q) VV(Q->M,=QM0)
     VV(box.L,=L0)
@@ -1327,6 +1333,8 @@ void measureP(int pass) /***************************************** measureP */
     StaAdd("ECC P2fulldV [Pa]",(U2m-U2p)/(2*box.V*constrd.dV)*Punit);
     StaAdd("ECC P3fulldV [Pa]",(U3m-U3p)/(2*box.V*constrd.dV)*Punit);
 #  endif /*# ECC */
+
+    put3(Ep,Em,vir)
   } /* pass=1 */
 
   else if (pass==2) {
@@ -1345,18 +1353,18 @@ void measureP(int pass) /***************************************** measureP */
     /* UNFINISHED - probably not important */
 #  endif /*# PRESSURETENSOR & PT_KIN && PRESSURETENSOR & PT_MOL */
 
-    En.PdVnc=Pkin+vir/box.V;
-    En.PdV=Pkin+(vir/box.V+En.corr/Sqr(box.V));
+    En.PdV.n=Pkin+vir/box.V;
+    En.PdV.c=Pkin+(vir/box.V+En.corr/Sqr(box.V));
     // StaSet(0,lag.ierr,2,lag.in); ?
     StaSet(0,lag.err,2,lag.n);
-    StaAdd(constrd.PdVname, En.PdV*Punit);
+    StaAdd(constrd.PdVname, En.PdV.c*Punit);
     StaSet(0,lag.err,2,2);
     StaAdd("PdVkin [Pa]",Pkin*Punit);
     StaAdd("dVvir",vir);
     StaAdd("PdVvir [Pa]",vir/box.V*Punit);
 
 #  include "constrddebug2.c"
-  }
+  } // pass==2
   else
     ERROR(("measureP: bad pass=%d",pass))
 #endif /*# FREEBC */

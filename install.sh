@@ -365,7 +365,9 @@ while [ "$KEY" != "" ] ; do
 done
 
 if [ "$FAILED" == "" ] ; then
-   echo "=== All cook* have been successfully compiled ==="
+   echo
+   echo "=== All cook* versions have been successfully compiled ==="
+   echo
 else
   echo "=== THE FOLLOWING COMPILATIONS HAVE FAILED:"
   echo "===$FAILED"
@@ -378,9 +380,13 @@ cat <<EOF
 
 ----------------------------------------------------------------------------
 MACSIMUS offers the following commands:
-  ev    - command-line-oriented calculator: ev "exp(-1.1*kcal/298/R)"
-  evu   - as above with units: evu "exp(-1.1[kcal/mol]/298[K]/R)"
-  start - extension-based start (MACSIMUS files and more): start simul.plb
+  ev    - command-line-oriented calculator, e.g.:
+          ev "exp(-1.1*kcal/298/R)"
+  evu   - as above with units, e.g.:
+          evu "exp(-1.1[kcal/mol]/298[K]/R)"
+  start - extension-based start (MACSIMUS files and more), e.g.:
+          start simul.plb
+NB: render option in show requires start installed
 Get help by running them without parameters.
 * Installation will copy the executables to ~/bin/
   and initialization .files to ~/.
@@ -458,6 +464,7 @@ if [ -d ~/.mc ] ; then
   esac
 fi
 
+echo "MACSIMUS directory: ${PWD}"
 cat sys/FINISHINST.txt
 
 if [ "$RUNTEST" == "1" ]; then
@@ -491,5 +498,6 @@ and double click a molecule.
 If minimized, press button [finish] or hotkey .
 EOF
   popd
+  echo "MACSIMUS directory: ${PWD}"
   cat sys/FINISHINST.txt
 fi

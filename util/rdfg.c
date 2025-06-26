@@ -1,4 +1,5 @@
 /* make rdfg
+   05/2025 option -z added
    02/2024 option -v added
    10/2022 bug (write to closed file) fixed
    05/2020 options -s, -l added
@@ -76,7 +77,7 @@ int main(int narg, char **arg) /*************************************** main */
 {
   rdf_t *rdf;
   double q,g,r,coord=-1,rmin=9e99,V,Vref=0;
-  int ir,iarg,plot=0,bin=0;
+  int ir,iarg,plot=0,bin=0,zero=1;
   enum outtype_e { G,HIST,CN,KB } iout;
   char *rfmt="%6.3f";
   char site0[8],site1[8];
@@ -99,6 +100,9 @@ int main(int narg, char **arg) /*************************************** main */
 Calculate and plot radial distribution functions, coordination numbers, and\n\
 Kirkwood-Buff integrals from cook binary files SIMNAME.rdf. Call by:\n\
   rdfg [OPTIONs] SIMNAME[.rdf] [OPTIONs]\n\
+WARNING:\n\
+  The RDFs and related functions are normalized so that g_ij(r)=1 for ideal gas\n\
+  even for i=j where the strict NVT definition demands g_ii(r)=1-1/N_i.\n\
 Options:\n\
   -c[FMT] calculate running coordination numbers SIMNAME.SITE1.SITE2.cn [%s]\n\
   -g[FMT] calculate RDFs SIMNAME.SITE1.SITE2.g [set output format, df.=%s]\n\
@@ -117,9 +121,8 @@ Options:\n\
   -sSITE[,SITE..]              select only functions with SITEs present\n\
   -s-SITE[,SITE..]             exclude SITEs\n\
   -vV     set <V> (only if <V>=0, as after free b.c. calculations)\n\
-\n\
-\n\
-Environment Variable:\n\
+  -z      do not print lines with g(r)=0\n\
+Environment:\n\
   RDFGGEOMETRY = size of window exported to plot in the form XxY [720x480]\n\
 Example:\n\
   RDFGGEOMETRY=600x300 rdfg simul.rdf -l-H4-H5,H4-H6 -r%%7.4f -g -p\n\
@@ -171,6 +174,9 @@ See also:\n\
         break;
       case 'v':
         Vref=atof(arg[iarg]+2);
+        break;
+      case 'z':
+        zero=0;
         break;
       default:
         ERROR(("%s is unknown option",arg[iarg])) }
@@ -332,11 +338,12 @@ See also:\n\
               if (iout==G) g=rdf->hist[ir]*q/(ir*(ir+1.0)+1.0/3);
               else g=rdf->hist[ir]/rdf->nmeas; }
 
-            prt_(rfmt,r);
-            prt_(" ",r);
-            prt_(outtype[iout].fmt,g);
-            if (iout==CN) prt_(outtype[iout].fmt,coord);
-            _n }
+            if (zero || g!=0) {
+              prt_(rfmt,r);
+              prt_(" ",r);
+              prt_(outtype[iout].fmt,g);
+              if (iout==CN) prt_(outtype[iout].fmt,coord);
+              _n } }
           fclose(out);
           out=stdout; }
 

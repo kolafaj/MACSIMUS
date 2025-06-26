@@ -8,7 +8,7 @@
     /* @Eb scale[] set in trvpscale */
     box.V=rescalecfg(cfg[0],(rescale&RESCALE_XYZ)|RESCALE_L,0,scale);
 
-  if (thermostat>=T_NPT) {
+  if (thermostat>=T_NPT) { /* MTTK and Hoover barostats */
     vector oldlambda,ddlambda={0,0,0};
     real ldlogs=cfg[1]->logs;
 
@@ -69,7 +69,9 @@
       En.kinT=No.M_Th/hh*Sqr(Vpred[0]);
       En.kinP=No.M_Ph/hh*Sqr(Vpred[1]);
 
-      /* Verlet (=leap-frog here) for logs; NB: En.kin is doubled */
+      /* Verlet (=leap-frog here) for logs
+         NB: En.kin is doubled, En.kinT En.kinP are true kin. energies */
+      // BUG? should be 3*En.kinP (rescaling of M_P)
       cfg[1]->logs += hh*(En.kin + 6*En.kinP - No.fx*T)/No.M_T; // @A1
       cfg[0]->logs += cfg[1]->logs; /* @B1, only good for the total Hamiltonian */
 
@@ -85,7 +87,7 @@
       // @C1
       cfg[1]->lambda[1]=
       cfg[1]->lambda[2]=
-      cfg[1]->lambda[0] += hh*(box.V*(En.Pcfg-No.P)+En.kin*No.invf)/No.M_P - Vpred[0]*Vpred[1];
+      cfg[1]->lambda[0] += hh*(box.V*(En.Pref-No.P)+En.kin*No.invf)/No.M_P - Vpred[0]*Vpred[1];
 
       // @D1
       cfg[0]->lambda[1]=

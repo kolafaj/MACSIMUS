@@ -30,7 +30,8 @@ typedef struct sitesite_s {
   real C1q,C2q;  /* squares of cutoffs */
   real A,A4;     /* for smooth cutoff */
   pairaux_t a;   /* former SS_DECLARE */
-  real corr;     /* homogeneous cutoff correction term (sometimes not necessary) */
+  real corr;     /* homogeneous cutoff correction term (if neeeded) */
+  real C;        /* reconstucted C/r^6, to calculate the Hamaker constant */
 #ifdef SLAB
   struct Skk_s { real E,D; } *Skk;    
                  /* [slab.K] for slab cutoff correction, E and deriv: k-component */

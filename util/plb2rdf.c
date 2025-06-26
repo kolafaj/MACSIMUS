@@ -8,7 +8,7 @@ typedef float fvector[3];
 
 int OFF1=-1,NS1=-1,NM1=-1;
 int OFF2=-1,NS2=-1,NM2=-1;
-char *key1=NULL,*key2=NULL;
+char *key1="i0",*key2="i0";
 char KEY1,KEY2;         // =key[0]
 #define NI 1024   // max. # of atom indices in the key or atoms in a molecule
 int indx1[NI],indx2[NI];
@@ -63,13 +63,13 @@ Options:\n\
   -fFIRST  first frame in NAME.plb analyzed [default=1]\n\
   -gGRID   r-grid, in histogram bins per 1A [default=1]\n\
   -kKEY    defines the vector for analysis of angular correlations, KEY:\n\
-    iA1,A2,... list of sites to make average\n\
+    iA1,A2,... list of sites to make average [default=i0]\n\
                A1,A2,... are atom numbers taken from the mol-file\n\
     mM0,M1,..,MNS  weighed average; CM if M are masses\n\
   -mM      number of molecules of given kind in a configuration (frame)\n\
   -nNS     number of sites in the molecule measured\n\
   -oOFFSET where given block of M molecules start (in # of sites) [0]\n\
-  (options -k,-m,-n,-o may repeat to denote the second molecule)\n\
+           (options -k,-m,-n,-o may repeat to denote the second molecule)\n\
   -rRANGE  max distance [%g]\n\
   -tLAST   last  frame in NAME.plb analyzed [default=EOF]\n\
   -vVERBOSE print also zero values of RDF (good in scripts)\n\
@@ -126,7 +126,7 @@ See also:\n\
   KEY1=key1[0];
   KEY2=key2[0];
  
-  fread(hdr,4,2,plb);
+  if (fread(hdr,4,2,plb)!=2) Error("file too short (no header)");
   ns=hdr[0];
   if (hdr[1]!=-3) Error("only new (L3) format of plb-files is accepted");
   fseek(plb,(ns+1)*(from-1)*sizeof(fvector),SEEK_CUR);

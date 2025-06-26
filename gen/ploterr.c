@@ -2,9 +2,8 @@
   2017: slowdraw+key added, also non-key or comment interrupts line
   2009: x error bars added (PLOTERRBAR)
   2006: bug fixed (asymmetric error bars)
-  This module draws a file, using formula, 2004.
-  Error bars supported.
-  Used by plot.
+  2004: This module draws a file using a formula, error bars supported.
+        Used by plot.
 */
 #include "ground.h" /* #define CALC 3 required */
 #include "ploterr.h"
@@ -84,8 +83,6 @@ int drawerrbar(char *fn,
     char *e,*tok;
     int n; /* number of columns found in the line +1 */
 
-    //    fprintf(stderr,"DEBUG line=%s",line);
-
     /* not KEY -> blank line (even if comment) */
     if (plotopt.key && !strstr(line,plotopt.key)) tok=NULL;
     else tok=strtok(line,SEP);
@@ -112,33 +109,30 @@ int drawerrbar(char *fn,
       /* _Id.head->val = count, _Id.head->next->val = 1st number, etc. */
       n=1;
       id=_Id.head->next;
-      // fprintf(stderr,"  %g %d %s",_Id.head->val,_Id.head->used,_Id.head->id);
+
       do {
         id->val=strtod(tok,&e);
         if (e==tok) id->val=FP_NAN;
-        //        fprintf(stderr,"  %g %d %s",id->val,id->used,id->id);
         id=id->next;
         n++;
         tok=strtok(NULL,SEP);
       } while (tok && id);
 
-      //      fprintf(stderr," more: %g %d %s",id->val,id->used,id->id);
-
       OK=1;
       loop (i,0,errstyle?4:2) {
-        double z;
+        double z=0;
         char *expr =
           i==0 ? colx :
           i==1 ? coly :
           i==2 ? coldy1 : coldy2;
         e=expr; /* err */
+
         if (maxcol<n) z=Calc(expr,&e); else OK=0;
         
         if (e==expr) OK=0;
-        //        fprintf(stderr,"\n  expr=\"%s\"=%g maxcol=%d n=%d OK=%d",expr,z,maxcol,n,OK);
         if (OK) xy[i]=z; }
       
-      //      fprintf(stderr,"\n");
+      // fprintf(stderr,"\n");
 
       *count+=1.0;
 
@@ -211,14 +205,15 @@ int minmaxfile(char *fn,char *colx,char *coly,int maxcol,
         tok=strtok(NULL,SEP);
       } while (tok && id);
 
-
       OK=1;
       loop (i,0,2) {
         double z;
         char *expr=i?coly:colx;
 
         e=expr; /* err */
+        
         if (maxcol<n) z=Calc(expr,&e); else OK=0;
+        
         if (e==expr) OK=0;
         if (OK) xy[i]=z; }
 

@@ -394,11 +394,15 @@ static void readdependants(int ndependants,depend_t **head)
       /* one extra parm d->wz==LO length (w.sign) */
       d->wz=atof(tok(__LINE__)); }
     else if (deptype==DEP_L) {
-      loop (k,0,3) d->x[k]=atof(tok(__LINE__)); zerofix(d->x,"x");
-      loop (k,0,3) d->y[k]=atof(tok(__LINE__)); zerofix(d->y,"y");
+      loop (k,0,3) d->x[k]=atof(tok(__LINE__));
+      zerofix(d->x,"x");
+      loop (k,0,3) d->y[k]=atof(tok(__LINE__));
+      zerofix(d->y,"y");
       d->wz=atof(tok(__LINE__));
-      loop (k,0,3) d->tx[k]=atof(tok(__LINE__)); zerofix(d->tx,"tx");
-      loop (k,0,3) d->ty[k]=atof(tok(__LINE__)); zerofix(d->ty,"ty"); }
+      loop (k,0,3) d->tx[k]=atof(tok(__LINE__));
+      zerofix(d->tx,"tx");
+      loop (k,0,3) d->ty[k]=atof(tok(__LINE__));
+      zerofix(d->ty,"ty"); }
 
     key=strtok(NULL," \n\r\t");
     if (!key || key[0]!='e')
@@ -889,10 +893,10 @@ You are using the TIP3P (or HOH = nickname for TIP3P) water model with\n\
 
 #ifdef WATER
     if (option('x')&1) {
-#  ifdef WATERPLUS
-      /* special potentials (not water...) - special project only */
-#    include "xxxdef.c"
-#  endif       /*# WATERPLUS  */
+      //#  ifdef WATERPLUS
+      //      /* special potentials (not water...) - special project only */
+      //#    include "xxxdef.c"
+      //#  endif       /*# WATERPLUS  */
       if (checkmodel("TIP3P") || checkmodel("SPC") || checkmodel("SPCE") || checkmodel("HOH")) {
         specsp->pot=3;
         waterchk.sites="HHO";
@@ -968,7 +972,7 @@ You are using the TIP3P (or HOH = nickname for TIP3P) water model with\n\
 #if COULOMB<-2 && defined(SLAB)
       /* sqrt(2)*sigma, for charge density profile of GAUSSIANCHARGES */
       si->esig=sqrt(2.0)*sitedef[si->st].LJ[0].parm[SS_PARMS-1];
-#endif
+#endif /*# COULOMB<-2 && defined(SLAB) */
 
 #ifdef POLAR
       {
@@ -1091,9 +1095,9 @@ You are using the TIP3P (or HOH = nickname for TIP3P) water model with\n\
             { 5,"TIP5P",.241, -80.515, 1.7510408}, */
             { 0,NULL,0,0,0 } };
 
-#ifdef SLAB
+#  ifdef SLAB
         dummy.Skk=NULL;
-#endif
+#  endif /*# SLAB */
         setss(&dummy,si[waters.iO].st,si[waters.iO].st,15.0,2); /* dummy call, C2 is arbitrary */
         /* WARNING: this requires LJ (guaranteed by #define WATER) */
         if (fabs(Emin-dummy.a.E4/-4)+fabs(RvdW-sqrt(dummy.a.Sq)*0.5612310241546865)>1e-10) {
@@ -1204,10 +1208,10 @@ NOTE: water Oxygen parameters changed by nbfixes\n\
       real a;
       if (7!=sscanf(line, "%d%s%d%s" realfmt realfmt realfmt,
                     &i,name[0],&j,name[1],&K,&length,&a))
-#else /*# missing #if */
+#else /*? missing #if */ /*# MORSE */
       if (6!=sscanf(line, "%d%s%d%s" realfmt realfmt,
                     &i,name[0],&j,name[1],&K,&length))
-#endif /*#!missing #if */
+#endif /*?!missing #if */ /*#!MORSE */
         ERROR(("bonds: missing or bad format"))
 
       checkatomn(name[0],i); checkatomn(name[1],j);
@@ -1332,7 +1336,7 @@ NOTE: water Oxygen parameters changed by nbfixes\n\
 *** Kinetic properties will be affected!",depmassmoved,sp))
 
     /* molecule-based equalization */
-    if (equalize.mol && (sp==equalize.sp || equalize.sp<0 && sp<=-equalize.sp) && ns>1) {
+      if (equalize.mol && (sp==equalize.sp || (equalize.sp<0 && sp<=-equalize.sp)) && ns>1) {
       /* equalize.mol masses */
       double M=0;
       int nm=0;
@@ -1601,10 +1605,8 @@ double setqq(ertab_p *tab,double qq, /******************************** setqq */
 #  ifndef GAUSSIANCHARGES
                   el.minqq,
 #  endif /*# GAUSSIANCHARGES */
-                  box.cutoff+el.rplus,
-                  box.cutoff,
-                  option('v')&4?-el.alpha:el.alpha,
-                  el.rshift);
+                  box.cutoff+el.rplus, box.cutoff,
+                  option('v')&4?-el.alpha:el.alpha, el.rshift, el.kappa, &el.alphar);
 }
 
 #  if COULOMB<-2
@@ -1700,16 +1702,21 @@ void initrspace(void) /****************************************** initrspace */
 #else /*# QQTAB */
 
 /* one spline all r-space terms */
-void initrspace(void)
+void initrspace(void) /****************************************** initrspace */
 {
 #  if defined(COULOMB)
   initerfc(option('v')&1 ? el.grid : -el.grid,
            el.minqq,
            box.cutoff+el.rplus,
            box.cutoff,
-           option('v')&4?-el.alpha:el.alpha,
-           el.rshift);
-#  endif /*# defined(COULOMB) && COULOMB!=0 */
+           option('v')&4?-el.alpha:el.alpha
+#    if COULOMB<0
+           ,el.rshift
+           ,el.kappa
+           ,&el.alphar
+#    endif  /*# COULOMB<0 */
+           );
+#  endif /*# defined(COULOMB) */
 }
 #endif /*#!QQTAB */
 

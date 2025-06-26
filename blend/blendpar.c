@@ -856,6 +856,15 @@ void readPAR(char *fn) /******************************************* readPAR */
     mygetline(); }
 
   ndihedrals=readtorsions("dihedrals",&dihedral0);
+
+  if (0) {// DEBUG
+    torsion_t *d;
+    looplist (d,dihedral0)
+      prt("%d-%d-%d-%d %d %g",
+          d->indx[0],d->indx[1],d->indx[2],d->indx[3],
+          d->parm.n,d->parm.K[0]);
+  }
+  
   nimpropers=readtorsions("impropers",&improper0);
   ncisdihedrals=readtorsions("cisdihedrals",&cisdihedral0);
 

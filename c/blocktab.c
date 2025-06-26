@@ -22,7 +22,7 @@ int nextline(void) /*********************************************** nextline */
       data[i]=atof(c);
       c=strtok(NULL," \t\n"); }
     else {
-      fprintf(stderr,"not enough data in line\n");
+      fprintf(stderr,"blocktab: not enough data in line\n");
       exit(1); }
   
   return 1;
@@ -49,7 +49,7 @@ See also:\n\
   block=atoi(arg[1]);
   if (block<0) makesubav=0,block=-block;
   if (block<1) {
-    fprintf(stderr,"invalid block size\n");
+    fprintf(stderr,"blocktab: invalid block size\n");
     exit(1); }
   
   ncol=atoi(arg[2]);
@@ -72,7 +72,8 @@ See also:\n\
       j=0; } }
   
   if (j)
-    fprintf(stderr,"WARNING: incomplete block (%d line%s) ignored\n",j,"s"+(j==1));
+    fprintf(stderr,"blocktab: incomplete last block (%d line%s) ignored\n",
+            j,"s"+(j==1));
   
   return 0;
 }

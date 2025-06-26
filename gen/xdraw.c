@@ -778,13 +778,10 @@ int startgraph(int mode) /*************************************** startgraph */
 #ifndef min
 #  define min(A,B) ((A)<(B)?(A):(B))
 #endif /*# min */
-  /* increase from 640x480? */
-  //  x_xsize=min(800,display_width*2/3);
-  //  x_ysize=min(600,display_height*2/3);
 
   /* the default if no xwindowhints.geometry */
-  x_xsize=min(824,display_width*2/3);
-  x_ysize=min(480,display_height*2/3);
+  x_xsize=min(800,display_width*2/3);
+  x_ysize=min(600,display_height*2/3);
 
   //  fprintf(stderr,"MIN %d %d %s\n",x_xsize,x_ysize,xwindowhints.geometry);
 

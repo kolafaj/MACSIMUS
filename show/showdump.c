@@ -9,7 +9,7 @@ struct animated_s {
 
 void preparedump(int sel) /************************************ preparedump */
 {
-  if (dumpmode==NONE) ERROR((""))
+  if (dumpmode==NONE) ERROR(("internal"))
   if (!dumpname) {
     if (strchr(plbname,'%'))
 /*.....      ERROR(("output not supported for a series of plb files"))*/
@@ -44,31 +44,20 @@ void opendump(void) /********************************************** opendump */
       return; }
 
     switch (dumpmode) {
-      case BONDPS:
-        fprintf(dump,"%%!PS-Adobe-2.0\n\
-90 rotate 54 -550 translate\n\
-0 setgray 1 setlinejoin 1 setlinewidth\n");
-        break;
-
-      case PS:
-      case COLORPS:
-        fprintf(dump,"%%!PS-Adobe-2.0\n\
-90 rotate 54 -550 translate\n\
-/DS %d string def\n",
-                maxxn*(dumpmode==COLORPS?3:1));
-        break;
-
+      case BONDEPS:
       case EPS: {
         time_t t;
         time(&t);
 
-        fprintf(dump,"%%!PS-Adobe-3.0 EPSF-3.0\n\
+        fprintf(dump,"\
+%%!PS-Adobe-3.0 EPSF-3.0\n\
 %%%%BoundingBox: 0 0 %d %d\n\
 %%%%Creator: MACSIMUS/show\n\
 %%%%Title: %s\n\
 %%%%CreationDate: %s\
 %%%%Pages: 1\n\
 %%%%LanguageLevel: 1\n\
+0 setgray 1 setlinejoin 1 setlinewidth\n\
 /DS %d string def\n",maxxn,maxyn,molname,ctime(&t),maxxn*3); }
         break;
 
@@ -80,15 +69,15 @@ void opendump(void) /********************************************** opendump */
 
       case ATM:
         fprintf(dump,"%d\n",NS);
-        if (hdr[1]==-3) fprintf(dump," %lf %lf %lf\n",L[0],L[1],L[2]);
-        else fprintf(dump,"\n");
         break;
 
       case POV:
       case NFF: {
         fvector l[2],up={0,1,0};
         int i,ibg;
-        vector bg={0,0,0}; /* default??? - should be more elaborated!!! */
+        vector bg={0,0,0}; // default if !ballbackground
+
+        if (ballbackground)
 
 # if 0
         if (xwindowhints.background && xwindowhints.background[0]) {
@@ -103,6 +92,8 @@ void opendump(void) /********************************************** opendump */
           bg[1]=(ibg&0xff00)/(double)0xff00;
           bg[2]=(ibg&0xff)/(double)0xff; }
 # endif
+
+        if (option('w')) bg[0]=bg[1]=bg[2]=1;
 
         NFFfloor=3e33;
         switch (option('t')) {
@@ -149,7 +140,7 @@ camera {location <%f,%f,%f> look_at <%f,%f,0> angle %f}\n\
 light_source {<%f,%f,%f> color rgb 0.3}\n\
 light_source {<%f,%f,%f> color rgb .9}\n\
 light_source {<%f,%f,%f> color rgb .9}\n\
-background {color rgb <1,1,1>}\n\
+background {color rgb <%f,%f,%f>}\n\
 ",
                          molname,pos,
                          Scale[0],Scale[1],
@@ -159,7 +150,8 @@ background {color rgb <1,1,1>}\n\
                          (360/PI)*atan(maxxn/Scale[0]/eye[2]/2),
                          iVEC(eye) /* =camera (attempt to improve poor ambient light) */,
                          iVEC(l[0]),
-                         iVEC(l[1])); }
+                         iVEC(l[1]),
+                         VEC(bg)); }
         } } /* NFF */
     default:; }
     if (dumpstat==START) dumpstat=CONT;
@@ -225,8 +217,7 @@ atoms\n\
 void closedump(int closeseries) /********************************* closedump */
 {
   if (dump) {
-    if (dumpmode>=PS) fputs("\nshowpage\n",dump);
-    if (dumpmode==EPS) fputs("\n%%EOF\n",dump);
+    if (dumpmode>=EPS) fputs("\nshowpage\n%%EOF\n",dump);
     if (dumpmode==POV) if (NFFfloor>-2.999e33) fprintf(dump,"plane {y,%f texture{FLOOR}}\n",NFFfloor);
     if (dumpmode==NFF) {
       int i;
@@ -258,7 +249,6 @@ VEC(p[3]));
     */
     if (closeseries && dumpstat==SERIES) WARNING(("series closed in unexpected way"))
 
-
     if (dumpstat!=SERIES && render) {
       if (system(string("start %s &",dumpname)))
         fprintf(stderr,"start %s failed\n",dumpname); }
@@ -268,13 +258,13 @@ VEC(p[3]));
   else {
     fprintf(stderr,"(merged) series closed\n");
     if (closeseries && animated.gif) {
-      if (dumpstat==SERIES && dumpmode==PPM) {
+      if (dumpstat==SERIES && dumpmode==PIC) {
         char *s=string("convert %s %s.????.%s %s.gif",
                        animated.options,
                        percentfn,dumpext[dumpmode],
                        percentfn);
         int retcode;
-        
+
         fprintf(stderr,"Making animated gif by command:\n%s\nplease wait...",s);
         if (option('_')) ERROR(("option -_ not allowed for making animated GIFS"))
         retcode=system(string("convert %s %s.????.%s %s.gif",
@@ -295,13 +285,13 @@ void calcNFFfloor(double r) /********************************** calcNFFfloor */
   if (NFFfloor>r) NFFfloor=r;
 }
 
-void dumpnffcol(int c) /***************************************** dumpnffcol */
+void dumpNFFcol(int c) /***************************************** dumpNFFcol */
 {
   int i;
   unsigned char *rgb=colortab[c/=COLLEN].rgb;
 
   fprintf(dump,"f");
-  loop (i,0,3) fprintf(dump," %.3f",1-(1-rgb[i]/255.)*wscale100/100);
+  loop (i,0,3) fprintf(dump," %.3f",NFFq.opaque*rgb[i]/255.);
 
   fprintf(dump," %s\n",colortab[c].NFFcol);
 }

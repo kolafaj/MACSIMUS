@@ -565,7 +565,18 @@ and does not count here.\n\
   if (drift&DRIFT_AUTO) {
     drift = (drift & 0x7ffffe00) | locdrift;
     prt("Automatically set drift = %d = %s:",drift,int2sumbin(drift));
-    prtdrift(drift); }
+    prtdrift(drift);
+    /* NB: Eext.isE and Eext.isB not set yet */
+#ifdef FREEBC
+    if (SQR(el.E)+SQR(el.B)>0) ERROR(("\
+Implementation limitation: I cannot set the drift if electric or magnetic\n\
+*** field is present, do it manually!"))
+#else
+    if (SQR(el.E)+SQR(el.B)>0) WARNING(("\
+Implementation limitation: Electric or magnetic field is present,\n\
+*** double check the value of drift!"))
+#endif
+    }
   else {
     prt("Requested drift=%d:",drift);
     prtdrift(drift);
@@ -936,6 +947,13 @@ double rescalecfg(ToIntPtr A,int mode, double q1,double *q)
   real M;
   double qx,qy,qz;
 
+#if 0
+  if (q)
+    fprintf(stderr,"DEBUG t=%g rescaling cfg q=%.12g %.12g %.12g-times\n", t,VARG(q));
+  else
+    fprintf(stderr,"DEBUG t=%g rescaling cfg q1=%.12g-times\n", t,q1);
+#endif
+
 #if defined(SLAB) && SLAB & 2
   if (mode & RESCALE_CLEAVE) return cleaverescale(A,mode,qx,qy);
 #endif /*# defined(SLAB) && SLAB & 2 */
@@ -1111,102 +1129,6 @@ loop (i,0,No.s) {
   loop (i,0,No.s) Min(rr,r[i][2])
     prt("GOLD min z=%g",rr);
 #endif /*# GOLD */
-}
-
-int debugcfg(int quit) /******************************************* debugcfg */
-/*
-  interactive debugging tool
-  called by:
-    quit=-1 debug pairs
-    quit=-2 paste cfg and leave debugcfg
-    quit=-3 both
-    quit=1  exit cook
-    quit=0  only leave debugcfg
-*/
-{
-  static struct sitelist_s {
-    struct sitelist_s *next;
-    int n,i; } *head,*sl,*sl2;
-
-  int i=0,n=0;
-  vector *r,*r2,dr;
-  double rr;
-
-  prt("\n*** DEBUG *** n=mol# i=site, create list until quit, paste mol cfg: quit=-1");
-
-  for (;;) {
-
-    getdata get(n) get(i) get(quit) checkdata enddata
-
-    if (quit==0) return quit;
-    if (quit==1) exit(1);
-
-    if (quit<=-2) {
-      char line[128];
-      double R[3];
-      int j;
-
-      prt("*** enter %d lines of x y z ***",molec[n].ns);
-      /* to read after ; */
-      if (!fgets(line,128,in)) ERROR(("norm: debugcfg: no data after ;"))
-      r=rof(molec+n,cfg[0]->rp);
-      loop (j,0,molec[n].ns) {
-        if (!fgets(line,128,in)) ERROR(("norm: debugcfg: not enough data after ;"))
-        sscanf(line,"%lf%lf%lf",R,R+1,R+2);
-        VV(r[j],=R) } }
-
-    if (quit==-2) return 0;
-
-    if (n>=0) {
-      if (n>=No.N) WARNING(("n=%d >= No.N=%d",n,No.N))
-      else if (i>=molec[n].ns) WARNING(("i=%d >= ns=%d",i,molec[n].ns))
-      else {
-        for (sl=head; sl; sl=sl->next)
-          if (sl->n==n && sl->i==i) {
-            WARNING(("already in the list"))
-            n=-1;
-            goto skip; }
-        alloc(sl,sizeof(struct sitelist_s));
-        sl->next=head;
-        head=sl;
-        sl->n=n;
-        sl->i=i;
-        prt("%d[%d] added",n,i); } }
-
-  skip:
-    putv(box.L) putv(box.Lh)
-
-    for (sl=head; sl; sl=sl->next) {
-      r=rof(molec+sl->n,cfg[0]->rp);
-#ifdef POLAR
-      r2=polarrof(molec+sl->n,cfg[0]->rp);
-      prt("%3d[%d] %8.5f %8.5f %8.5f  %9.6f %9.6f %9.6f",
-          sl->n,sl->i,
-          r[sl->i][0],r[sl->i][1],r[sl->i][2],
-          r2[sl->i][0],r2[sl->i][1],r2[sl->i][2]);
-#else /*# POLAR */
-      prt("%3d[%d] %8.5f %8.5f %8.5f",
-          sl->n,sl->i,
-          r[sl->i][0],r[sl->i][1],r[sl->i][2]);
-#endif /*#!POLAR */
-    }
-
-    for (sl=head; sl; sl=sl->next) {
-      r=rof(molec+sl->n,cfg[0]->rp);
-      for (sl2=head; sl2!=sl; sl2=sl2->next) {
-        r2=rof(molec+sl2->n,cfg[0]->rp);
-        VVV(dr,=r[sl->i],-r2[sl2->i])
-#ifndef FREEBC
-          {
-            int k;
-            loop (k,0,3) {
-              while (dr[k]>box.Lh[k]) dr[k]-=box.L[k];
-              while (dr[k]<-box.Lh[k]) dr[k]+=box.L[k]; }
-          }
-#endif /*# FREEBC */
-        rr=SQR(dr);
-        prt("%3d[%d] %3d[%d] %f",sl->n,sl->i,sl2->n,sl2->i,sqrt(rr)); } }
-    }
 }
 
 void zeroEn(void) /************************************************* zeroEn */

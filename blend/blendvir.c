@@ -11,7 +11,7 @@ void virial(species_t *spec1,species_t *spec2,species_t *spec) /**** virial */
   double maxexpE=0,corecheck;
 #define EPS 1e-4 /* energy imprecise (with weight R^4) for r>1/EPS => 1/EPS is the distance limit */
   
-  RT=0.0019872065*spec->Xopt.T; /* R=0.0019872065 kcal/mol/K */
+  RT=0.00198720425864083164*spec->Xopt.T; /* R=0.0019872.. kcal/mol/K */
   prt("\n*** Second virial coefficient by random shooting integration ***");
   if (spec->Xopt.V<0) {
     nv=-spec->Xopt.V; 
@@ -73,14 +73,14 @@ void virial(species_t *spec1,species_t *spec2,species_t *spec) /**** virial */
     VO(c1,/=m1)
     VO(c2,/=m2) }
 
-  putv(c1)
-  putv(c2)
+  // putv(c1)
+  // putv(c2)
     
   loop (i,0,hns)  VVV(r[i],=r0[i],-=c1)
   loop (i,hns,ns) VVV(r[i],=r0[i],-=c2)
 
   /* minimized molecules (may overlap) are in r0 */
-//  loop (i,0,ns) prt("%f %f %f",VARG(r0[i])); exit(0);
+  //  loop (i,0,ns) prt("%f %f %f",VARG(r0[i]));
   
   sum=sumq=0;
   corecheck=spec->Xopt.core*1.003;
@@ -132,6 +132,9 @@ void virial(species_t *spec1,species_t *spec2,species_t *spec) /**** virial */
     else {
       sumq+=E*E; } }
 
+  //  put2(hns,ns)
+  //  loop (i,0,ns) prt("%.7g %.7g %.7g",VARG(r[i]));
+  
   if (spec->Xopt.V<0) sum/=2,sumq/=4;
   sum*=xrg/nv;
   sumq*=Sqr(xrg)/nv;
@@ -143,7 +146,7 @@ void virial(species_t *spec1,species_t *spec2,species_t *spec) /**** virial */
   sumq*=2*PI;
   
   prt("B2(%g) = %g +- %g AA^3 (core=%g, -C%d)",spec->Xopt.T,sum,sumq,spec->Xopt.core,spec->Xopt.C);
-  prt("B2(%g) = %g +- %g cm3/mol (core=%g, -C%d)",spec->Xopt.T,sum*0.60221418,sumq*0.60221418,spec->Xopt.core,spec->Xopt.C);
+  prt("B2(%g) = %g +- %g cm3/mol (core=%g, -C%d)",spec->Xopt.T,sum*0.602214076,sumq*0.602214076,spec->Xopt.core,spec->Xopt.C);
 
   free(f);
   free(r);

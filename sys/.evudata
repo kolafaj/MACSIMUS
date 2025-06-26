@@ -17,7 +17,6 @@ me=9.1093837015e-31[kg]     ! (28)
 Me=me*NA
 mp=1.67262192369e-27[kg]    ! (51)
 Mp=mp*NA
-Rinf=alpha^2*me*c/(2*h)
 F=e*NA
 G=6.67430e-11[m3 kg-1 s-2]  ! (15)
 a0=hbar/(me*c*alpha)        ! Bohr radius, atomic unit of length
@@ -31,8 +30,8 @@ au_f=Eh/a0                  ! atomic unit of force
 au_T=Eh/k                   ! atomic unit of temperature
 au_E=Eh/(e*a0)              ! atomic unit of electric field
 Hartree=Eh*NA               ! Hartree per mol
-A=1.17618[L0.5 mol-0.5]     ! at 25 deg, per concentration
-B=1[L0.5 mol-0.5]           ! at 25 deg, per concentration
+A=1.17618[L0.5 mol-0.5]     ! at 25 oC, per concentration
+B=1[L0.5 mol-0.5]           ! at 25 oC, per concentration
 sigma=2*pi^5*k^4/(15*h^3*c^2)
 to W
 to N
@@ -52,7 +51,8 @@ to C/mol
 to C/m2
 to J/mol
 to J/mol K
-to J/K
+to J.K-1
+to J.K-1.kg-1
 to V/m
 to g/mol
 to mol/L
@@ -61,11 +61,12 @@ to J s
 to N/m
 to L0.5 mol-0.5
 to J
+to kg m-3
 ! Celsius to Kelvin; e.g., 25 oC -> 298.15 [K]
 def oC *1[K]+TC
 ! Fahrenheit to Kelvin; e.g., 0 oF -> 255.37222 [K]
 def oF *5[K]/9+2298.35[K]/9
-! BUG: cannot use def X=EXPR in this file, use def X (EXPR)
+! BUG: cannot use def X=EXPR in this file, use equivalent def X (EXPR) instead
 ! Student's distribution t_nu(x)
 def Student (exp(lgamma(nu/2+.5)-lgamma(nu/2))/(1+x^2/nu)^(nu/2+.5)/sqrt(nu*pi))
 ! integrated Student's distribution function

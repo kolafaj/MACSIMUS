@@ -667,11 +667,12 @@ double cutcorr(double LJcutoff,int corr) /************************** cutcorr */
     Standard bulk fluid cutoff correction of pair Lennard-Jones-like
     forces over all intermolecular pairs is calculated.
     Intramolecular pairs are not included!
-    The result should be divided by V to obtain cutoff correction of Epot
-    The result should be divided by V^2 to obtain cutoff correction of P
+    The result should be divided by V to obtain the cutoff correction of Epot.
+    The result should be divided by V^2 to obtain cutoff correction of P.
     In addition, # of pairs for rdf histograms are calculated
     (incl. intramolecular pairs more distant than 1--4)
     (elst forces not included)
+    NB: sstab[][].corr is calculated by sstab() in sstab.c
 ***/
 {
   int n,m,i,j,si,sj;
@@ -718,34 +719,44 @@ double cutcorr(double LJcutoff,int corr) /************************** cutcorr */
     }
   } /* n */
 
-#ifdef DEBUG
-  {
-    int n,m,sp;
-    molecule_t *mn,*mm;
-    double debugcorr=0;
-    vector *auxf;
-
-    measure=2;
-
-    loop (n,0,No.N) {
-      mn=molec+n;
-      sp=mn->sp;
-
-      allocarrayzero(auxf,mn->ns);
-
-      loop (m,0,n) {
-	mm=molec+m;
-	debugcorr += (*pot[sp][mm->sp]) (auxf,auxf,mn,mm,cfg[0]->rp); }
-
-      (*pot[sp][mn->sp]) (auxf,auxf,mn,mn,cfg[0]->rp); /* ugly, but it works */
-      free(auxf); }
-
-    put2(fcorr,debugcorr)
-    if (fabs(fcorr/debugcorr-1)>1e-10) Error("");
-  }
-#endif /*# DEBUG */
   return fcorr;
 } /* cutcorr */
+
+void Hamaker(void) /************************************************ Hamaker */
+/***
+    The (averaged) Hamaker constant of the bulk is calculated.
+    The box is assumed to be homogeneous.
+    Constant C in the potential is calculated using distance r.
+***/
+{
+  int sp1,N1,ns1,i1,st1;
+  int sp2,N2,ns2,i2,st2;
+  double Asq=0,A=0;
+
+  loop (sp1,0,nspec) {
+    ns1=spec[sp1]->ns;
+    loop (i1,0,ns1) {
+      N1=spec[sp1]->N;
+      st1=spec[sp1]->si[i1].st;
+      Asq+=sqrt(-sstab[st1][st1].C)*N1;
+      loop (sp2,0,nspec) {
+        ns2=spec[sp2]->ns;
+        loop (i2,0,ns2) {
+          N2=spec[sp2]->N;
+          st2=spec[sp2]->si[i2].st;
+          A-=sstab[st1][st2].C*N1*N2; } } } }
+  Asq*=PI;
+  Asq*=Asq;
+  A*=Sqr(PI);
+
+  underline("Hamaker constant");
+  prt("Calculated from all C_{ij}/r^6 terms assuming homogeneous system:");
+  prt("  A = %.9g/V^2 [p.u.] = %.9g [J m6]/V^2 = %.9g [J]",
+      A, A*energyunit*Pow6(lengthunit), A/Sqr(box.V)*energyunit);
+  prt("Simplified formula based on C_i and sqrt-rule for C_{ij}:");
+  prt("  A = %.9g/V^2 [p.u.] = %.9g [J m6]/V^2 = %.9g [J]",
+      Asq, Asq*energyunit*Pow6(lengthunit), Asq/Sqr(box.V)*energyunit);
+} /* Hamaker */
 
 #ifdef WIDOM
 double Widomcutcorr(int spreal,int spvirt,double LJcutoff) /****************** Widomcutcorr */
@@ -789,9 +800,9 @@ double Widomcutcorr(int spreal,int spvirt,double LJcutoff) /****************** W
 
   prt("corr = %g/V = %g\n\
 Widom correcting Boltzmann factor = %g\n\
-(the latter two values will change if the box size changes)\n",
-      corr,corr/(L[0]*L[1]*L[2]),
-      exp(-corr/(L[0]*L[1]*L[2]*T)));
+(the latter two values will change if the box size changes)",
+      corr,corr/box.V,
+      exp(-corr/(box.V*T)));
 
   return corr;
 } /* Widomcutcorr */
@@ -914,7 +925,7 @@ int initfix(char *fn) /********************************************* initfix */
 
   if (FROM)
     ERROR(("combination of option -j and file %s not supported",lastFn))
-      
+
   while (fgets(line,128,fs)) if (!strchr("!#",line[0])) {
     s=strtok(line," \t\n"); if (!s) continue;
     if (!isdigit(s[0])) ERROR(("%s: %s not a number",lastFn,s))
@@ -929,7 +940,7 @@ int initfix(char *fn) /********************************************* initfix */
     f->from=from;
     to++; /* last not incl. */
     f->to=to;
-    
+
     while ( (s=strtok(NULL," \t\n")) && f->isr<3)
       f->r[f->isr++]=atof(s);
     if (f->isr%DIM)
@@ -938,7 +949,7 @@ int initfix(char *fn) /********************************************* initfix */
     loop (i,from,to) {
       if (isfixed(i)) prt("%s: %d multiply listed",lastFn,i);
       else isum++; }
-    
+
     f->next=fixsites0; fixsites0=f; }
 
   fclose(fs);
@@ -946,7 +957,7 @@ int initfix(char *fn) /********************************************* initfix */
     WARNING(("%s: no site kept fixed",lastFn))
     from=-1;
     return 0; }
-  prt("%s: %d sites kept fixed",lastFn,isum); 
+  prt("%s: %d sites kept fixed",lastFn,isum);
 
   return from;
 }
@@ -1270,7 +1281,7 @@ void initanchor(char *fn,int init,double drmax) /**************** initanchor */
     if (mn->anchor & ANCHOR_pos) keep[0]++;
     if (mn->anchor & ANCHOR_axis) keep[1]++; }
 
-  
+
   prt("ANCHOR: %d points (sites, molecular centers of mass) anchored",keep[0]);
   prt("ANCHOR: %d axes anchored",keep[1]);
   if (anchor.xyz) prt("ANCHOR: CM of remaining molecules anchored");

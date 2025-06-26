@@ -1,5 +1,6 @@
 ! https://doi.org/10.1080/00268978400101351
 ! NB: https://cccbdb.nist.gov/exp2x.asp?casno=7727379 N2=1.0977
+! flexible - correct vibrations
 
 all_dihedrals=1  ! all dihedrals
 ar_dih_limit=1   ! inclusion limit for dihedrals in aromatic rings
@@ -21,8 +22,8 @@ atoms
 ! col : color type (differing from chem. are M=metal, X=halogen, Z=rare gas)
 !
 !i name  X A    mass  Z col description
-1  O    0 0  15.9994  8 O  SPCE water oxygen
-2  H    0 0   1.008   1 H  SPCE water hydrogen
+1  O    0 0  15.9994  8 O  SPC(E) water oxygen
+2  H    0 0   1.008   1 H  SPC(E) water hydrogen
 3  N    1 0  14.00670 7 N  Nitrogen
 
 Lennard-Jones
@@ -36,13 +37,15 @@ O     0.840 -0.15539426 3.16555780
 H     0.044  0.000000   1.7
 N     1     -0.072876717 3.3078
 
+! water experiment 3657.1, 1594.7, 3755.9 cm-1
+
 bonds
-H	O		555  1.00	! K only for blend
+H    O   552.229 1 ! JK flexible SPC
 !N       N               1000 1.0889278
-N       N               1000 1.0977 ! newer value
+N       N               1651.9386 1.0977 !  2358.6/cm 2359 NIST harmonic
 
 angles
-H	O	H	55   109.47122  ! K only for blend
+H  O  H  50.3284 109.47122063449 ! JK flexible
 
 dihedrals
 
@@ -56,13 +59,13 @@ SPCE  3 H .4238 H .4238 O -.8476
 SPC   3 H .41   H .41   O -.82  
 ! recommended SPCE.che:
 ! water SPC/E water model
-! parameter_set = sealb
+! parameter_set = gases
 ! Hp0.4238 Hp0.4238
 !     \    /
 !      On.8476
 
 ! water SPC water model
-! parameter_set = sealb
+! parameter_set = gases
 ! Hp0.41   Hp0.41
 !     \    /
 !      On.82

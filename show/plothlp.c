@@ -61,7 +61,7 @@ OPTIONs must precede any other argument. No space in OPTION (-d1, NOT -d 1).\n\
   -NPLOTNAME  Overrides environment variable PLOTNAME\n\
   -p# PID of the parent: used by button [kill all] = hotkey K\n\
   -t  In fitting: do not recompile, function and precision (tT^T) must match\n\
-  -v  Verbose: print ranges and parameters at exit (=`v' in GUI, also hotkey v)\n\
+  -v  Verbose: print ranges and parameters at exit (also hotkey v)\n\
   -z# Seed for random numbers [default=0=use time]\n\
 ";
 
@@ -85,7 +85,6 @@ Example:\n\
 
 static char Pfiles[]="\n\
 FILE arguments (see (i)ntro):\n\
-\n\
   FILENAME : File to plot\n\
   - : stdin (pipe) instead of file. Example:\n\
         tail -n1000 file.dat | plot -:A:C\n\
@@ -100,11 +99,12 @@ FILE arguments (see (i)ntro):\n\
         plot '[-1:1][-1:1]' '[6:0:360]:sin(PI/180*x):cos(PI/180*x)'\n\
   @ : dummy (useful to set column and plot style)\n\
   @RESPONSEFILE : read arguments (except OPTIONs) from RESPONSEFILE\n\
-\n\
-FILEs to plot are text files composed of white-separated columns\n\
+FILEs to plot are text files, separators=\" \\n\\t\\r,;\".\n\
+Valid numbers in files: 1.2 3e1 -2d-2\n\
+Invalid data in files: 1,2 (comma is separator), 2/7 (formulas not accepted)\n\
+Items in \"\" (as in CSV) are not recognized\n\
 #! denotes comment: line is interrupted (points are not connected)\n\
-Empty line: a line is interrupted and counter (n = #0) is reset to 0.\n\
-";
+Empty line: a line is interrupted and counter (n = #0) is reset to 0.";
 
 static char Pcolumns[]="\n\
 COLUMNS arguments (see (i)ntro):\n\
@@ -131,7 +131,7 @@ Missing columns are copied from previous argument, default = 1:2\n\
 
 static char Pexpr[]="\n\
 EXPRESSIONS use the common precedence rules. Notable features:\n\
-  1/2 evaluates to 0.5 (real)\n\
+  1/2 evaluates to 0.5 (real)   NB: 0,5 IS NOT 1/2\n\
   ^ = ** = power, % = modulo, & = bitwise-and, | = bitwise-or, $ = bitwise-xor\n\
   comparisons < > <= >= == <> return 1=true, 0=false; Heaviside(x)=(x>0)\n\
 Functions:\n\

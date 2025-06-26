@@ -8,6 +8,7 @@ BUG AND TO-DO LIST
 KEY is priority or severity (0=unimportant, 9=important, X=critical)
 
 cook:
+  X @A1 doubled EkinP term ? (M_P scaled?)
   9 Langevin thermostat not sufficiently implemented, Gear only:
     with -m4 gives *** Too low virial pressure vs. tensor accuracy
     consider DOI: 10.1080/00268976.2012.760055
@@ -107,8 +108,55 @@ HISTORY
   * feature changed
   - feature removed
 
+cook 3.7a:
+  ! wrong pressure in Berendsen barostat (for GC, cutelst) fixed
+  ! virtual volume change fixed
+  ! Gaussian charges r-space splines rewritten to be numerically
+    more stable
+  * long double used in spline table calculation
+    (better, but not necessary)
+  * pressure output and control improved
+
+show 2.2l:
+  ! wrong plb file exported after editing (missing L) fixed
+  + 'a' added as alias for Tab (standard orientation)
+
+evu:
+  ! bug buffer overflow found by J. Janek fixed 2024-08-27
+
+blend 2.4f:
+  ! eigenvalues of gyration and inertia and tensors also sorted
+
+sumerr 08/2024:
+  ! confusing help (of example) fixed
+
+cook 3.6w:
+  + Hamaker constant
+  ! missing shake4.c, shake30.c, xxxdef.c fixed
+
+cook 3.6v:
+  ! Widom fixed
+
+ev,evu:
+  ! character '!' now accepted (! in '' is not comment)
+
+show 2.2k:
+  + white background for NFF,POW is now default, can be turned off by button [bg] or hot key w
+
+cook 3.6s:
+  ! cutoff electrostics (COULOMB=2) now (again) available in the spline version:
+    A bit faster, but also slightly less accurate than the direct (COULOMB=0) version
+  ! Fennell-Gezelter (COULOMB=3) now (again) available
+  + Hammonds-Heyes alpha' correction implemented: https://doi.org/10.1063/5.0101450
 
 ********** Posted to GitHub **********
+
+cook V3.6r:
+  ! enthalpy in NVT/NVE
+  ! el. background in FREEBC control
+ 
+cppak:
+  ! bug in the linked-list used inernally fixed
 
 examples/*/ added.
 
@@ -141,7 +189,7 @@ plot 2.0s:
   ! missing column 2 filled by the prev value in plot file (w/o :)
 
 ev,evu:
-  * modulo is now @, not ` (in tabproc, modulo is %)
+  * modulo is now @, not ` (in tabproc, modulo is %) -- later returned back
 
 showcp V2.0e:
   *- option -z extended, -e removed, lin.regr. of Etot removed
@@ -170,9 +218,10 @@ cook 3.6l:
   + Pcfg (see variable virial) reported in convergence profile
   ! structure slab_s shifted frame (=> slab-thermostat turned wrogly on)
   ! CP record bugs fixed (FREEBC shifted frame, bad size determined)
-  ! measurement of integrals of motion rehacked,
-    drift correction and measurements separated
-  ! P unit in protocol (by dt.prt), other instances were OK
+  * measurement of integrals of motion rehacked
+  * drift correction and measurements separated
+  ! P unit in protocol (by dt.prt) fixed, other instances were OK
+  ! bug (slab structure, thermostat by mistake) from 3.6k fixed
 
 cook 3.6k:
   + magnetic field implemented for moving charges
@@ -1817,4 +1866,3 @@ Poly(ethylen oxide)
 >>>>> 10/1991
 Constraint dynamics (Lagrangian and Hamiltonian formalism)
 * Dept.Chem. * Northwestern University * Evanston * Illinois * USA
-

@@ -32,6 +32,10 @@
     {"cn",7},
     {"shell",8},
     {"quit",9},{"exit",9},
+    //    {"debug",??}, 
+    {"rv",97},
+    {"v",98},
+    {"r",99},
     {NULL,0}};
   static struct keys_s pinskey[]={
     {"auto",0},
@@ -144,8 +148,8 @@ BASIC OPTIONS\n\
 \n\
 -m# mode of operation (read and calculate / simulate and calculate):\n\
   -m0=read configurations SIMNAME.1, SIMNAME.2.. (recorded by -r) and process\n\
-      see variables reread.from, reread.to, reread.by\n\
   -m1=read configurations from SIMNAME.plb (as recorded by -y) and process\n\
+      see variables reread.from, reread.to, reread.by for -m0,-m1\n\
   -m2=simulate using the Verlet/SHAKE family of integrators\n\
   -m#, #>2 simulate using the GEAR/Lagrangian family of integrators\n\
 \n\
@@ -199,8 +203,9 @@ CONTROL OPTIONS\n\
       -b<=0 off  -b1 when finished  -b2 after ; in the data\n\
       -b3 as above and SIGINT, SIGTERM\n\
       -b>3: as above and print progress indicator to stderr after every step\n\
--d# check pair distances 1: when ; 2: every cycle+load 3: every step+load\n\
+-d# check pair distances 1: load ; 2: every cycle+load 3: every step+load\n\
 -d-# FREEBC: stop simulation if any atom farther than # from (0,0,0)\n\
+     PERIODIC not SLAB: #-1 = initial slab.geom\n\
 -i# SIGINT (Ctrl-C) and SIGTERM is:\n\
     -i-1 kill (default signal handler)\n\
     -i0  ask what to do [SERIAL version interactive default]\n\
@@ -341,15 +346,15 @@ PARAMETERS\n\
 static char Pscale[]="\
 SCALING FORCE FIELD\n\
 \n\
-Scaling factor is |#|/SCALE, where # is the option (integer).\n\
+The scaling factor is #/SCALE, where # is the option (integer).\n\
 The default scalings are 1.\n\
 \n\
 -_SCALE set the denominator [default=100=scalings are in %]\n\
 \n\
 -a# POLAR: scale polarizabilities\n\
 \n\
--j#  scale potential energy minima (Lennard-Jones epsilon)\n\
--j-# scale atom radii (Lennard-Jones sigma); BUG: cannot scale both\n\
+-j#  (#>=0) scale potential energy minima (Lennard-Jones epsilon)\n\
+-j-# (#>0) scale atom radii (Lennard-Jones sigma); BUG: cannot scale both\n\
 \n\
 -q#  scale charges (not Drude), #<0 allowed\n\
 \n\

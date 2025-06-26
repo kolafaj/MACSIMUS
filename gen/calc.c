@@ -4,7 +4,7 @@
 * USAGE without ground: see c/ev.C, c/rk.c, c/cutbin.c
 * SIMPLIFIED:
   - the richest version is the default
-  - the CALC swith has only two values (see below)
+  - the CALC switch has only two values (see below)
   - MACSIMUS rndgen (Ziff register-shift) used
 
 #define CALC:
@@ -25,28 +25,31 @@ Parsing:
 
 Syntax:
   Numbers are in the usual format, also FORTRAN-like supported (1d1=1e1)
-  Binary operators: + - * / % ^
-    (% or @ is modulo, ^ is power)
-  Unary operators and functions: + - \ sin cos tan asin acos atan exp
-                                 ln log lb sqrt abs int fac
-    ( \ is sqrt, fac or is factorial [fac 3=1*2*3, fac 2.5=0.5*1.5*2.5],
+  Binary operators: 
+    + - * / ` ^ $
+    (` is modulo, ^ is power, $ is xor)
+  Unary operators and functions: 
+    + - \ sin cos tan asin acos atan exp 
+    not(bitwise) `(logical not)
+    ln log lb sqrt abs int fac
+    (\ is sqrt, fac or is factorial [fac 3=1*2*3, fac 2.5=0.5*1.5*2.5],
     ln=natural log, log=decadic log)
   Parentheses: ( )
   PI or pi: 3.14159265358979323846
   Time format: [DD::]hh[:mm[:ss]]
     (the result is on hours, e.g., 2::1=49, 11:45=11.75, 0:0:36=0.01)
 
-Priorities:
+Precedence:
   numbers and characters (incl. : or :: in time format)
   ()
-  functions and unary \
-  ^ ** (=power; associative from left as * or /)
-  + - (unary)
-  * / % @  (% and @ is modulo)
+  functions and unary \ (\=sqrt)
+  ^ ** (power, associative from left as * or /)
+  + - ` (unary, `=logical not)
+  * / `  (`=modulo, % removed)
   + - (binary)
-  < <= > >= <> == (binary relation operators)
-  & $ (=xor)
-  | (=or)
+  < <= > >= <> == (relation operators)
+  & $ ($=xor)
+  | (|=or)
 
 Units (CALC&1):
   units are given after number in [], e.g.: 3[m3.mol-1]
@@ -71,6 +74,8 @@ Bugs:
     parentheses if you are in doubt
 
 History:
+  2025: modulo changed back to `, % removed (NB: unary ` = logical not)
+        note that @ in plot and tabproc is line number
   2023: ` changed to @ (modulo), % still valid (not in ev)
   2021: sign() changed to sgn(), H() added
   2018: cbrt added; nul, null removed (replacement: (x==0))
@@ -106,7 +111,7 @@ History:
 
 #include "loop.h"
 
-static int precedence(char op)
+static int precedence(char op) /********************************* precedence */
 {
  switch (op&127) {
    case 0: return 0; /* evaluation operator */
@@ -114,10 +119,14 @@ static int precedence(char op)
    case ')': return 2;
    case '(': return 3;
    case '|': return 5;
+     /* or        xor */
    case '&': case '$': return 6;
+     /*                     ==        >=        <=        <> */
    case '<': case '>': case 037: case 036: case 035: case 034: return 7;
+     /*                     not */  
    case '+': case '-': return op&128 ? 12 : 8; /* distinguish binary/unary */
-   case '*': case '/': case '%': case '@': return 10;
+   case '`': return op&128 ? 10 : 8; /* distinguish binary/unary */
+   case '*': case '/': return 10;
    case '^': return 14;
    default: return 127; /* unary operator */ }
 } /* precedence */
@@ -128,7 +137,7 @@ static int precedence(char op)
 CALC_t retzero;
 #endif /*#!CALC&1 */
 
-CALC_t Calc(char *buf,char **endscan)
+CALC_t Calc(char *buf,char **endscan) /******************************** Calc */
 {
   unsigned char *b,*end;
   unsigned char *op,Op[OPSTACKLEN]; /* operation stack, bit 7 set means unary operator */
@@ -165,7 +174,7 @@ NRSCAN: /*** number, '(' or unary operator expected ***/
 		      "sinh","cosh","tanh","sh","ch","th",
 		      "asinh","acosh","atanh","ash","ach","ath",
 		      "erf","erfc","gamma","lgamma",
-		      "not","bit",
+		      "not","bit", /* bitwise not, sum of bits */
 		      "ln","log","lb",
 		      "exp", "sqrt", "cbrt",
                       "fac","fact","rnd",
@@ -219,7 +228,7 @@ NRSCAN: /*** number, '(' or unary operator expected ***/
     b+=2;
     goto OPSCAN; }
 
-  /* parses a number */
+  /* parse a number */
   if (isdigit(*b) || *b=='.') {
     nr++; if (nr>=Nr+NRSTACKLEN) goto reterror;
 #if 1
@@ -322,7 +331,6 @@ plus:             end++; }
     if (*b=='c' && b[1]=='b') *op='u'; /* cbrt */
     if (*b=='s' && b[1]=='g') *op='I'; /* sgn */
     if (*b=='s' && b[1]=='t') *op='H'; /* Heaviside function step */
-//    if (*b=='n' && b[1]=='u') *op='u'; /* nul,null */ REMOVED, use (x==0)
     /* logarithms: */
     if (*b=='l') switch (b[1]) {
       case 'g': *op='G'; break; /* lgamma */
@@ -366,7 +374,8 @@ OPSCAN: /*** binary operator or ')' or end expected ***/
   if (*op=='<' && *b=='=') *op=035,b++;
   if (*op=='<' && *b=='>') *op=034,b++;
 
-  if (!strchr(")+-*/%@^|$&<>\037\036\035\034",*op)) *op=0;
+  /* check operators */
+  if (!strchr(")+-*/`^|$&<>\037\036\035\034",*op)) *op=0;
 
 EVALSTACK: /*** stacked operations are tried to evaluate ***/
 

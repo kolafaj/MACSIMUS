@@ -317,10 +317,10 @@ int selffield(ToIntPtr B,ToIntPtr A, /**************************** selffield */
    not_yet:
     scf.maxerr=maxerr;
     if (scf.nit>scf.maxit) {
-      scf.maxit*=2;
-      WARNING(("selffield max. precision (eps=%g):\n\
-*** %d iterations, limit increased to %d",epsp,scf.nit,scf.maxit))
-      if (scf.maxit>scfmaxit0*10) ERROR(("too bad...")) }
+      scf.maxit=scf.maxit*8/5+1;
+      WARNING(("selffield max. precision algorithm (epsp=%g):\n\
+*** %d iterations > limit => limit increased to %d",epsp,scf.nit,scf.maxit))
+      if (scf.maxit>scfmaxit0*4) ERROR(("too bad...")) }
     iret=0;
     goto ret; }
 

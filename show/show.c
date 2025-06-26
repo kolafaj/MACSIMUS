@@ -1,7 +1,7 @@
 /* make show
  */
 
-#define VERSION "2.2j"
+#define VERSION "2.2l"
 
 /* Notes on raytracing:
 
@@ -72,6 +72,9 @@
 
 #define ASPECT 1
 #define CONVERT "-loop 0 -delay 5 -limit memory 4GiB -limit map 4GiB -limit disk 8GiB"
+
+// returns pixel or WHITE if this is background AND option -w
+#define BGPIXEL(SCRBUFPIX,k) ((option('w')&&SCRBUFPIX==MODE-1) ? 255 : pal[SCRBUFPIX][k])
 
 #ifndef XIMAGE
 #  define XIMAGE 2
@@ -260,7 +263,6 @@ int MODE=31*NOCOL+2; /* # of palette entries, max. 256
                         background=MODE-1 (for bar and ball modes, as set by -bg)
                         for byte-deep displays minus some for other applications */
 int COLLEN; /* length of palette for one ball colors */
-int wscale100=100;
 
 /*
   available atom colors
@@ -281,10 +283,6 @@ struct colortab_s {
 /*8*/ {""        ,{0,0,0,0},        'X',0,NULL} /* omit atom */
 };
 
-/* color->gray conversion for postscript hardcopy */
-unsigned char *psgray;
-float col2gray[3]={0.3,0.59,0.11};
-
 /* Turbo color -> palette color (offset in the palette table) */
 /* AVAILABLE COLORS
    0..8 not available
@@ -304,6 +302,12 @@ struct collist_s {
   char *pattern;
 } *collisthead=NULL;
 
+struct NFFq_s {
+  double opaque0;
+  double opaque;
+  double q;
+} NFFq = {1,1,0};
+
 static char aminoacids[]="GLY ALA VAL LEU ILE PRO SER THR ASP GLU ASN GLN LYS ARG HIS PHE TYR TRP MET CYS";
 
 static unsigned char (*pal)[3]; /* the palette: RGB */
@@ -314,14 +318,12 @@ void setmypalette(void) /*************************************** setmypalette */
 {
   int c,i,p,ci;
   unsigned char pa;
-  float psg;
   int COLOFF;
 
   if (pal) return; /* palette already set */
 
   COLOFF=COLLEN/2;
 
-  allocarrayzero(psgray,MODE);
   allocarrayzero(pal,MODE);
 
   /* pal[0]=background, set by xwindowhints.background */
@@ -329,14 +331,9 @@ void setmypalette(void) /*************************************** setmypalette */
   loop (c,0,NOCOL) {
     turbo2pal[(int)colortab[c].turbocolor]=1+COLLEN*c;
     loop (i,0,COLLEN) {
-      psg=0;
       loop (p,0,3) {
         pa=colortab[c].rgb[p]*(i+COLOFF)/(COLOFF+COLLEN-1);
-        pal[ci][p]=pa;
-        psg+=pa*col2gray[p]; }
-      psg=255.0f-(255.0f-psg)*wscale100/100; /* bit more white */
-      if (psg>255.0f) psg=255.0f;
-      psgray[ci]=psg;
+        pal[ci][p]=pa; }
       ci++; } }
 
   if (xwindowhints.background) {
@@ -346,13 +343,7 @@ void setmypalette(void) /*************************************** setmypalette */
 
     if (*c=='#') c++;
     sscanf(c,"%2x%2x%2x",x,x+1,x+2);
-    psg=0;
-    loop (p,0,3) {
-      pa=pal[0][p]=x[p];
-      psg+=pa*col2gray[p]; }
-    psg=255.0f-(255.0f-psg)*wscale100/100; /* bit more white */
-    if (psg>255.0f) psg=255.0f;
-    psgray[0]=psg; }
+    loop (p,0,3) pa=pal[0][p]=x[p];  }
 
   /* background for ball and bond modes, as defined by -bg */
   if (ballbackground) {
@@ -361,17 +352,10 @@ void setmypalette(void) /*************************************** setmypalette */
 
     if (*c=='#') c++;
     sscanf(c,"%2x%2x%2x",x,x+1,x+2);
-    psg=0;
-    loop (p,0,3) {
-      pa=pal[MODE-1][p]=x[p];
-      psg+=pa*col2gray[p]; }
-    psg=255.0f-(255.0f-psg)*wscale100/100; /* bit more white */
-    if (psg>255.0f) psg=255.0f;
-    psgray[MODE-1]=psg; }
+    loop (p,0,3) pa=pal[MODE-1][p]=x[p]; }
   else {
-    pal[MODE-1][0]=0; pal[MODE-1][1]=0; pal[MODE-1][2]=1;
+    pal[MODE-1][0]=0; pal[MODE-1][1]=0; pal[MODE-1][2]=1; }
     /* true black 0,0,0 will become background */
-    psgray[MODE-1]=255; }
 
   //  loop (i,0,MODE) printf("%d  %d %d %d\n",i,pal[i][0],pal[i][1],pal[i][2]);
   loop (i,0,MODE) setpal(i,pal[i][0],pal[i][1],pal[i][2],256);
@@ -387,11 +371,12 @@ char shiftinL[3];
 int isshift;
 
 FILE *dump,*file,*plb;
-enum { NONE,PLB,PPM,ZBUF,NFF,ATM,POV,PS,COLORPS,EPS,BONDPS } dumpmode;
-char *dumpinfo[]={"none","PLB","PPM","ZBUF","NFF","ATM","POV","PS","color PS","EPS","bond PS"};
+enum { NONE,PLB,PIC,ZBUF,NFF,ATM,POV,EPS,BONDEPS } dumpmode;
+#define ISMERGED (dumpmode==BONDEPS || dumpmode==NFF || dumpmode==POV || dumpmode==ATM || dumpmode==PLB)
+char *dumpinfo[]={"none","PLB","PPM","ZBUF","NFF","ATM","POV","raster EPS","vector EPS"};
 /* NFF must be the 1st TEXT output file */
 enum { ONE,SERIES,START,CONT } dumpstat;
-char *dumpext[]={"???","plb","ppm","zbuf","nff","atm","pov","ps","ps","eps","ps"};
+char *dumpext[]={"???","plb","ppm","zbuf","nff","atm","pov","eps","eps"};
 char *dumpname=NULL;
 int dumpindex;
 float hdr[2];
@@ -597,14 +582,15 @@ void showsphere(struct forclick_s *fci,
   R[1]=rot[1][0]*cr[0]+rot[1][1]*cr[1]+rot[1][2]*cr[2];
   R[2]=rot[2][0]*cr[0]+rot[2][1]*cr[1]+rot[2][2]*cr[2];
 
-  if (dumpmode==PLB) {
-    opendump();
-    fwrite(R,sizeof(fvector),1,dump); }
-
   if (dumpmode==NFF) {
-    dumpnffcol(c);
+    dumpNFFcol(c);
     calcNFFfloor(R[1]-rad);
     fprintf(dump,"s %.4f %.4f %.4f %.4f\n",VEC(R),rad); }
+
+  /* should never happen - solved elsewhere
+  if (dumpmode==PLB) {
+    opendump();
+    fwrite(R,sizeof(fvector),1,dump); } */
 
   if (dumpmode==ATM) {
     int ic=(float (*)[3])r-cfg;
@@ -726,7 +712,7 @@ void showsphere(struct forclick_s *fci,
 
 void voidsphere(struct forclick_s *fci,
                 fvector r,float rad,int c) /********************* voidsphere */
-/* the same as showsphere without showing (just eturn fci) */
+/* the same as showsphere without showing (just return fci) */
 {
   fvector cr,R;
   float q;
@@ -775,7 +761,7 @@ void showbar(fvector r0,fvector r1,int c) /************************* showbar */
     R[k][2]=rot[2][0]*cr[k][0]+rot[2][1]*cr[k][1]+rot[2][2]*cr[k][2]; }
 
   if (dumpmode==NFF) {
-    dumpnffcol(c);
+    dumpNFFcol(c);
     fputc('c',dump);
     loop (k,0,2) {
       fprintf(dump," %.4f %.4f %.4f %.4f",VEC(R[k]),rad);
@@ -1115,6 +1101,15 @@ int readcfg(void) /************************************************* readcfg */
 #include "showhelp.c"
 #include "showhlp.c"
 
+int atbg;
+static void printbg(void) /***************************************** printbg */
+{
+  setcolor(palcolor(LIGHTGRAY));
+  outtextxy(getmaxx()-xfont.width*5,atbg,option('w')?"real":"white");
+  setcolor(palcolor(option('w')?WHITE:BLACK));
+  outtextxy(getmaxx()-xfont.width*5,atbg,option('w')?"white":"real ");
+}
+
 #include "showmenu.c"
 
 int main(int narg,char **arg) /**************************************** main */
@@ -1156,13 +1151,10 @@ int main(int narg,char **arg) /**************************************** main */
   dosmouse.button[3]=palcolor(WHITE);
   dosmouse.button[4]=palcolor(LIGHTCYAN);
 
-  {
-    char *name;
-    /* extended ... */
-    if ((name=getenv("SHOWGEOMETRY"))) xwindowhints.geometry=name;
-    if ((name=getenv("SHOWINIT"))) addkbdstring((unsigned char*)name);
-  }
-
+  xwindowhints.geometry="836x505"; /* default changed in 2.2l, also in xdraw */
+  if ((ext=getenv("SHOWGEOMETRY"))) xwindowhints.geometry=ext;
+  if ((ext=getenv("SHOWINIT"))) addkbdstring((unsigned char*)ext);
+  
   /*** option analysis ***/
   loop (i,1,narg)
     if (arg[i][0]=='-') {
@@ -1199,6 +1191,10 @@ int main(int narg,char **arg) /**************************************** main */
             if (comma) {
               eye[2]=atof(comma+1); } } }
         else presenter++; }
+      else if (arg[i][1]=='Q') {
+        char *comma=strchr(arg[i],',');
+        NFFq.opaque0=atof(arg[i]+2);
+        if (comma) NFFq.q=atof(comma+1); }
       else if (arg[i][1]=='K')
         colortab[5].rgb[0]=colortab[5].rgb[1]=colortab[5].rgb[2]=128;
       else if (arg[i][1]=='J')
@@ -1225,15 +1221,6 @@ int main(int narg,char **arg) /**************************************** main */
             cl->next=collisthead; collisthead=cl;
             goto OK; }
         ERROR(("%s is unknown color: use one of {W,Y,R,G,B,C,M,O,X} (X=omit)",arg[i])) }
-      else if (arg[i][1]=='r') {
-        /* option -r%g%b% */
-        char c[64];
-
-        /*.....prt("%s",arg[i]); delay(2000);*/
-        sprintf(c,"%s%s",arg[i]+2,"g59b11");
-        col2gray[0]=(float)atoi(c)*0.01f;
-        col2gray[1]=(float)atoi(strchr(c,'g'))*0.01f;
-        col2gray[2]=(float)atoi(strchr(c,'b'))*0.01f; }
       else if (arg[i][1]=='b' && arg[i][2]=='g') {
         if (arg[i][3]) ballbackground=arg[i]+3;
         else if (++i>=narg) {
@@ -1277,7 +1264,6 @@ int main(int narg,char **arg) /**************************************** main */
       else ERROR(("%s: superfluous file argument",arg[i])) }
 
   an=(PI/8)/option('a');
-  wscale100=100+option('w')*(option('w')<0);
 
   /* show box and wall setup */
   loop (j,0,NOCOL) if (boxcolor==colortab[j].key) {
@@ -1492,7 +1478,7 @@ int main(int narg,char **arg) /**************************************** main */
             scrbuf[j]=BLACK;
             zbuf[j]=0; } }
 
-        if (dumpmode==NFF || dumpmode==POV) opendump(); }
+        if (dumpmode==NFF || dumpmode==POV) opendump(); } /* curmode<=BALL */
 
       ftime(&t0);
 
@@ -1502,6 +1488,16 @@ int main(int narg,char **arg) /**************************************** main */
         fvector a,b;
         float grad0=grad;
 
+        if (dump) switch (dumpmode) {
+          case PLB:
+            if (hdr[1]==-3) fwrite(L,sizeof(float),3,dump);
+            break;
+          case ATM:
+            if (hdr[1]==-3) fprintf(dump," %lf %lf %lf\n",L[0],L[1],L[2]);
+            else fprintf(dump,"\n");
+            break;
+          default:; }
+        
         if (gradscale>0) grad=gradscale;
         else grad*=-gradscale;
 
@@ -1715,10 +1711,8 @@ int main(int narg,char **arg) /**************************************** main */
       if (curmode>=BOND) {
 
         setviewport(0,0,maxxn-1,maxyn-1,1);
-        if (dumpmode==BONDPS) {
-          if (!dumpprepared) fprintf(dump,"showpage\n\
-90 rotate 54 -550 translate\n\
-0 setgray 1 setlinejoin 1 setlinewidth\n");
+        if (dumpmode==BONDEPS) {
+          //          if (!dumpprepared) fprintf(dump,"showpage\n0 setgray 1 setlinejoin 1 setlinewidth\n");
           opendump();
           fprintf(dump,"%% frame %d\n",pos); }
 
@@ -1743,7 +1737,7 @@ int main(int narg,char **arg) /**************************************** main */
           if (curmode==BOND) {
             if (!first) myline(xy0,i,j,palcolor(trace?BLUE:bond0[b][2]&15));
             myline(xy,i,j,palcolor(bond[b][2]&15));
-            if (dumpmode==BONDPS)
+            if (dumpmode==BONDEPS)
               fprintf(dump,"newpath %d %d moveto %d %d lineto stroke\n",
                       xy[i][0],xy[i][1],xy[j][0],xy[j][1]); }
           else /* BOND2 */ {
@@ -1764,7 +1758,7 @@ int main(int narg,char **arg) /**************************************** main */
           if (b<nc) {
             i=bond[b][0]; j=bond[b][1];
             myline(xy,i,j,palcolor(bond[b][2]&15));
-            if (dumpmode==BONDPS)
+            if (dumpmode==BONDEPS)
               fprintf(dump,"newpath %d %d moveto %d %d lineto closepath stroke\n",
                       xy[i][0],xy[i][1],xy[j][0],xy[j][1]); } }
 
@@ -1776,20 +1770,19 @@ int main(int narg,char **arg) /**************************************** main */
         bigpoint=0;
 
         if (option('|')) {
-        if (!first) {
-          for (i=0; i<nxygold0; i+=2) {
-            b=palcolor(trace?BLUE:
-                       i==0?LIGHTRED:
+          if (!first) {
+            for (i=0; i<nxygold0; i+=2) {
+              b=palcolor(trace?BLUE:
+                         i==0?LIGHTRED:
+                         i==2?LIGHTGREEN:
+                         i==4?LIGHTBLUE:boxturbocolor);
+              myline(xygold0,i,i+1,b); } }
+
+          for (i=0; i<nxygold; i+=2) {
+            b=palcolor(i==0?LIGHTRED:
                        i==2?LIGHTGREEN:
                        i==4?LIGHTBLUE:boxturbocolor);
-            myline(xygold0,i,i+1,b); } }
-
-        for (i=0; i<nxygold; i+=2) {
-          b=palcolor(i==0?LIGHTRED:
-                     i==2?LIGHTGREEN:
-                     i==4?LIGHTBLUE:boxturbocolor);
-          myline(xygold,i,i+1,b); }
-        }
+            myline(xygold,i,i+1,b); } }
 
         i=nxygold0; nxygold0=nxygold; nxygold=i;
         swap=xygold0; xygold0=xygold; xygold=swap;
@@ -1809,7 +1802,7 @@ int main(int narg,char **arg) /**************************************** main */
           else copyarray(bond0+ncfix,bond+ncfix,nc-ncfix);
           nc0=nc; }
         first=0;
-        setviewport(0,0,maxxn-1,maxyn-1,0); }
+        setviewport(0,0,maxxn-1,maxyn-1,0); } /* curmode>=BOND */
 
       if (curmode<BOND) if (slicez) {
         char sl[12];
@@ -1848,12 +1841,13 @@ int main(int narg,char **arg) /**************************************** main */
 
       if (del) delay(del);
 
-      if (dumpmode==PS || dumpmode==COLORPS || dumpmode==EPS) {
+      if (dumpmode==EPS) {
         unsigned u;
+        int k;
 
         if (!dumpprepared) {
           if (dumpmode==EPS)
-            fprintf(dump,"showpage\n"); /* merging problematic - should be banned */
+            fprintf(dump,"\nshowpage %% merging\n"); /* merging problematic - should be banned */
           else
             fprintf(dump,"showpage\n\
 90 rotate 54 -550 translate %.2f 480 scale\n",
@@ -1863,44 +1857,25 @@ int main(int narg,char **arg) /**************************************** main */
         if (curmode>BALL) ERROR(("internal"))
 
         fprintf(dump,"\
-%% TEST\n\
 %d %d 8 [ 1 0 0 -1 0 %d ]\n\
-{ currentfile DS readhexstring pop } %simage",
-                maxxn,maxyn,maxyn,
-                dumpmode==PS?"":"false 3 color");
+{ currentfile DS readhexstring pop } false 3 colorimage",
+                maxxn,maxyn,maxyn);
 
-        if (dumpmode==PS)
-          loop (u,0,SCRLEN)
-            fprintf(dump,"%c%02x",u%20?' ':'\n',psgray[scrbuf[u]]);
-        else { /* COLORPS */
-          int k;
-          unsigned u;
+        loop (u,0,SCRLEN) {
+          fputc(u%10?' ':'\n',dump);
+          loop (k,0,3) fprintf(dump,"%02x",BGPIXEL(scrbuf[u],k)); } } /* EPS */
 
-          if (option('w')) loop (k,0,3) pal[0][k]=255; /* white background */
-          loop (u,0,SCRLEN) {
-            fputc(u%10?' ':'\n',dump);
-            loop (k,0,3)
-              fprintf(dump,"%02x",
-                      255-(255-pal[scrbuf[u]][k])*wscale100/100); }
-          if (option('w')) loop (k,0,3) pal[0][k]=0; /* back black background */
-        }
-      } /* PS + COLORPS */
-
-      if (dumpmode==PPM) {
+      if (dumpmode==PIC) {
         int k;
         unsigned u;
         char rgb[3];
 
         opendump();
         fprintf(dump,"P6\n%d %d\n255\n", maxxn,maxyn);
-
-        if (option('w')) loop (k,0,3) pal[0][k]=255; /* white background */
+        
         loop (u,0,SCRLEN) {
-          loop (k,0,3)
-            rgb[k]=255-(255-pal[scrbuf[u]][k])*wscale100/100;
-          fwrite(rgb,1,3,dump); }
-        if (option('w')) loop (k,0,3) pal[0][k]=0; /* back black background */
-      } /* PPM */
+          loop (k,0,3) rgb[k] = BGPIXEL(scrbuf[u],k);
+          fwrite(rgb,1,3,dump); } } /* PIC */
 
       if (dumpmode==ZBUF) {
         unsigned char *zzz=(unsigned char *)zbuf;
@@ -1910,9 +1885,10 @@ int main(int narg,char **arg) /**************************************** main */
         loop (i,0,SCRLEN) zzz[i]=zbuf[i]?(zbuf[i]/Scale[2]+(zmin-zbufmin))/(zbufmax-zbufmin)*255.999:0;
         opendump();
         fprintf(dump,"P5\n# %g (multiply by to get height in pixels)\n%d %d\n255\n",zrg, maxxn,maxyn);
-        fwrite(zbuf,SCRLEN,1,dump); }
+        fwrite(zbuf,SCRLEN,1,dump); } /* ZBUF */
 
       if (dumpmode) {
+        NFFq.opaque=(1-NFFq.q)*NFFq.opaque+NFFq.q;
         if (dumpstat==START) dumpstat=CONT;
         if (dumpstat==ONE || dumpstat==SERIES) closedump(0); }
 
@@ -2062,6 +2038,7 @@ int main(int narg,char **arg) /**************************************** main */
           redrawmenu=1;
           break;
 
+        case 'a': /* standard orientation in scripts, normally TAB */
         case 'I'&31: {
           int a,b;
 
@@ -2098,23 +2075,24 @@ int main(int narg,char **arg) /**************************************** main */
           else
             fprintf(stderr,"clickmode=0: one best matching atom marked on click\n");
           goto ctrll;
-
+          
+        case 'G'&31:
+          option('w')=!option('w');
+          printbg();
+          break;
+  
         case 'e':
           closedump(1);
           redrawmenu=1;
           break;
 
-        case 'W':
-          dumpmode=PS;
-          if (curmode==BOND) dumpmode=BONDPS;
-          else goto testball;
-          goto startdump;
-        case 'C':
-          dumpmode=COLORPS;
-          goto testball;
         case 'E':
-          dumpmode=EPS;
-          goto testball;
+          if (curmode>=BOND) {
+            dumpmode=BONDEPS;
+            goto startdump; }
+          else {
+            dumpmode=EPS;
+            goto testball; }
         case 'L':
           dumpmode=PLB;
           goto testball;
@@ -2122,7 +2100,7 @@ int main(int narg,char **arg) /**************************************** main */
           dumpmode=ATM;
           goto testball;
         case 'P':
-          dumpmode=PPM;
+          dumpmode=PIC;
           goto testball;
         case 'B':
           dumpmode=ZBUF;
@@ -2145,8 +2123,8 @@ int main(int narg,char **arg) /**************************************** main */
                   "dumping %s: select in graphic window:\n\
 (o)ne file, (O)ne+render, (s)eries%s%s\n",
                   dumpext[dumpmode],
-                  dumpmode==PPM ? ", erase old pic + (a)nimated GIF" : "",
-                  dumpmode!=PPM && dumpmode!=ZBUF ? ", (m)erge, (M)erge+render" : "");
+                  dumpmode==PIC ? ", erase old pic + (a)nimated GIF" : "",
+                  ISMERGED ? ", (m)erge, (M)erge+render" : "");
           makemenu(2);
           redrawmenu=1;
           render=animated.gif=0;
@@ -2154,13 +2132,16 @@ int main(int narg,char **arg) /**************************************** main */
             case 'O': render++;
             case 'o': dumpstat=ONE; break;
             case 's': dumpstat=SERIES; break;
-            case 'a': dumpstat=SERIES; animated.gif++;
-              system(string("rm %s.????.%s",percentfn,dumpext[dumpmode]));
-              break;
+            case 'a': dumpstat=SERIES;
+                      animated.gif++;
+                      fprintf(stderr,"animated gif retcode=%d\n",system(string("rm %s.????.%s",percentfn,dumpext[dumpmode])));
+                      break;
             case 'M': render++;
             case 'm': dumpstat=START;
-                      if (dumpmode!=PPM && dumpmode!=ZBUF) break;
-            default: dumpmode=NONE; goto badkey; }
+                      NFFq.opaque=NFFq.opaque0;
+                      if (ISMERGED) break;
+            default:  dumpmode=NONE;
+                      goto badkey; }
 
           preparedump(dumpmode==PLB && movesel);
           redraw=1; /* unnecessarily in most cases, but fool proof */

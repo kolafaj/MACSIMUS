@@ -158,6 +158,9 @@
         get(lag.err) get(lag.n)
         get(lag.J) get(lag.M)
         get(lag.CM) get(lag.LM) get(lag.AM)
+#ifdef SPCTCF
+        get(lag.tcf) get(lag.TCF)
+#endif
         /* now always autoset:        getvec(box.center,,DIM) */
 
         get(gear.init)
@@ -198,17 +201,12 @@
 #endif /*# LOG */
         get(No.rotatefrom)
         get(drift) get(conserved)
-        getkey(quit,yesno)
 #ifdef WATERPLUS
         {
 #  include "watercut.h"
           get(cut.from) get(cut.to)
         }
 #endif /*# WATERPLUS */
-        if (quit==-4) {
-          prt("WARNING: quit=\"shell\"=-4 is deprecated, use key=\"shell\"=8 instead");
-          quit=0;
-          key=8; }
 
         getkey(key,keykey)
         if (key) {
@@ -236,10 +234,15 @@
               i=system(getenv("SHELL")?getenv("SHELL"):"bash");
               prt("shell return code=%d",i);
               break;
-            case 9: goto TheEnd;
-          }
-
-          key=0; }
+            case 97:
+            case 98:
+            case 99:
+              if (option('v')&4) fprintf(stderr,"key=97,98,99 postponed after ;\n");
+              break;              
+            case 9:
+              goto TheEnd; }
+          //  97,98,99 postponed to main
+          if (key<97) key=0; }
 
         get(cache)
 #ifdef DIHHIST
@@ -256,7 +259,7 @@
         get(diff.mode)
 
 #ifdef BJERRUM
-          get(bj.mode) get(bj.from) get(bj.to) get(bj.q) get(bj.eps)
+        get(bj.mode) get(bj.from) get(bj.to) get(bj.q) get(bj.eps)
 #endif /*# BJERRUM */
 
 #ifdef CLUSTERS
@@ -291,7 +294,4 @@
       _n
       onefourinrdf=rdf.onefour;
 
-      if (quit>0) {
-        prt("WARNING: quit>0 is deprecated, use key=\"quit\" or key=9 instead");
-        goto TheEnd; }
     } while (pass++==0);

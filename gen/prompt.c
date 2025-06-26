@@ -71,7 +71,7 @@ int prompt_reshow(char *line) /******************************* prompt_reshow */
 char *prompt_getline(char *line) /*************************** prompt_getline */
 {
   int l=strlen(_pr.prompt),h=-1;
-  char *ch,c;
+  char *ch,c=0;
   static int insmode=1,lastc;
 
   memset(line,0,PROMPT_N);

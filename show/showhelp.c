@@ -75,7 +75,7 @@ void help(void)
 
  LVIEW:
   H("=== VIEW CONFIGURATION ===","");
-  H("Tab;proj",    "cycle through standard orientations || axes");
+  H("Tab;proj",    "cycle through standard orientations || axes, also a");
   H("x X y Y z Z","rotate around axes");
   H("cursors","move the configration");
   H("/ *",    "change the angle for the above rotations");

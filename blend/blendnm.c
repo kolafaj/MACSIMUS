@@ -63,6 +63,28 @@ if (R) {
           }
         r[0]=ns; r[1]=0;
         fwrite(r,4,2,plb);
+
+#if 0
+        prt("mode %d:",j); loop (i,0,ns) prt("%20.14g %20.14g %20.14g",R[indx][i*3],R[indx][i*3+1],R[indx][i*3+2]);
+
+        loop (ix,0,abs(spec->Xopt.F)) {
+          double x=ix/(double)(abs(spec->Xopt.F)-1);
+          int ii;
+
+          if (spec->Xopt.F>0) x=m*cos(x*PI);
+          else x=m*(1-2*x);
+          loop (i,0,ns) {
+            loop (ii,0,i) {
+              double rr=0,xx;
+              loop (k,0,3) {
+                xx=(r0[i][k]+R[indx][i*3+k]*x)
+                  -(r0[ii][k]+R[indx][ii*3+k]*x);
+                rr+=xx*xx; }
+              prt_("%.15f ",rr); } }
+          prt("m%d",j);
+        }
+#endif
+
         loop (ix,0,abs(spec->Xopt.F)) {
           double x=ix/(double)(abs(spec->Xopt.F)-1);
 
@@ -150,4 +172,3 @@ fprintf(nmv,"\
   writevibration(spec,R,n,sort,r0,"nm",ns);
   release(A);
 }
-

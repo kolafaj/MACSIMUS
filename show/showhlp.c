@@ -122,11 +122,10 @@ Available colors: W=white, Y=yellow, R=red, G=green, B=blue, C=cyan,\n\
 -Aacceptor (with -H): atom names; wildcards ? * accepted [defaults = -AO* -DH*]\n\
 -Ddonor               acceptor=donor possible\n\
 -K    carbons are black (dark gray) [default=cyan]\n\
+-Qopq,q NFF merge only: multiply color by opq, then opq:=(1-q)*opq+q [-Q1,0]\n\
 \n\
--w    white background for dumps (PPM,[E]PS,NFF,POV) [default=0=off]\n\
--w-#  as above and make colors lighter by # % (sometimes good for print) [0]\n\
 -bgRRGGBB background for ball and bar, also exported to NFF etc [-bg000000]\n\
--r#g#b#  RGB-->gray conversion for PS output, in % [-r30g59b11]\
+-w#   export with white background (also Ctrl-G [w/bg]) [default=0=off]\n\
 ";
 
 static char Pfileopt[]="\n\

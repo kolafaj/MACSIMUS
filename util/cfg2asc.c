@@ -1,5 +1,6 @@
 /* \make cfg2asc
-
+  convert cfg format to asc
+  print selected info from cfg ("cfginfo")
 */
 
 #include "ground.h"
@@ -11,7 +12,7 @@ typedef double vector[3];
 int main(int narg,char **arg) /**************************************** main */
 {
   FILE *asc=NULL;
-  vector L={0,0,0};
+  double L[4]={0,0,0,0}; /* L[3]=volume */
   char *ascfn="-",*cfgfn=NULL;
   struct a_s {
     int  size;    /* whole struct in bytes */
@@ -49,7 +50,8 @@ where\n\
   -d = line of selected info in the format of the def-file\n\
   -E = energy [K]\n\
   -h = timestep [ps]\n\
-  -L = box sizes [AA]\n\
+  -L = box sizes, 3 numbers [AA]\n\
+  -L# = box sizes, @={x,y,z} or {0,1,2} [AA], Q=w=3=volume [AA3]\n\
   -N = print all numbers of molecules in one line\n\
   -n[#] = number of molecules: total (No.N) [of species #]\n\
   -r# = x,y,z coordinates of site # [AA]\n\
@@ -57,8 +59,10 @@ where\n\
   -S = number of species (nspec)\n\
   -t = print time [ps]\n\
   -v# = x,y,z velocities of site # (shifted for Verlet) [AA/ps]\n\
+  -V = volume [AA3], also -L3\n\
 Examples (bash):\n\
-  for n in {1..100} ; do cfg2asc -n; cfg2asc SIM.$n SIM.$n.asc ; done\n\
+  for n in {1..100} ; do cfg2asc SIM.$n -n; cfg2asc SIM.$n SIM.$n.asc ; done\n\
+  Lz=`cfg2asc SIM.cfg -Lx`\n\
 See also:\n\
   asc2cfg cfg2atm plb2cfg cfgconv\n\
 ");
@@ -103,9 +107,12 @@ See also:\n\
 
   while (VarFile.size==sizeof(struct rec_s)) {
     VarRead(&rec,sizeof(rec));
-    if (asc) fprintf(asc,"%d %d %.16g %.16g %.16g key %s\n",
-            rec.key,rec.intval,rec.vecval[0],rec.vecval[1],rec.vecval[2],
-            rec.key==1?"N t h En.tot" : rec.key==2?"ns L[3]" : "intval vecval[3]");
+    if (asc)
+      fprintf(asc,"%d %d %.16g %.16g %.16g key %s\n",
+                   rec.key,
+                      rec.intval,
+                         rec.vecval[0],rec.vecval[1],rec.vecval[2],
+                                               rec.key==1?"N t h En.tot" : rec.key==2?"ns L[3]" : "intval vecval[3]");
 
     switch (rec.key) {
       case 1: N=rec.intval;
@@ -119,7 +126,8 @@ See also:\n\
       case 2:
         ns=rec.intval;
         loop (k,0,3) L[k]=rec.vecval[k];
-        if (asc) prt("Ns=%d L=%g %g %g loaded",ns,L[0],L[1],L[2]);
+        L[3]=L[0]*L[1]*L[2];
+        if (asc) prt("Ns=%d L=%g %g %g loaded V=%g",ns,L[0],L[1],L[2],L[3]);
         break;
     } }
 
@@ -187,7 +195,10 @@ See also:\n\
           prt("%.16g",h);
           break;
         case 'L':
-          prt("%.16g %.16g %.16g",L[0],L[1],L[2]);
+          if (arg[iarg][2])
+            prt("%.16g",L[arg[iarg][2]&3]);
+          else
+            prt("%.16g %.16g %.16g",L[0],L[1],L[2]);
           break;
         case 'n':
           if (!arg[iarg][2]) prt("%d",N);
@@ -205,6 +216,9 @@ See also:\n\
           break;
         case 't':
           prt("%.16g",t);
+          break;
+        case 'V':
+          prt("%.16g",L[3]);
           break;
         case 'r':
           info="positions";

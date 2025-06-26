@@ -426,6 +426,12 @@ typedef struct tau_s {
   int i,j;       /* sites for i-j sigvdW parameter */
 } tau_t;
 
+/* to control different sources of pressure */
+typedef struct P_s {
+  double n;        /* without homogeneous cutoff corrections */
+  double c;        /* with homog. cutoff corrections En.corr/V^2 (if active) */
+} P_t;
+
 /*** En_t: summary of cycle statistics ***/
 typedef struct En_s {
   double pot;      /* potential energy, as sum of bond,LJ,el etc. */
@@ -468,18 +474,12 @@ typedef struct En_s {
   double polnit;   /* = scf.nit, in double */
 #  endif /*# POLAR */
   double vir;      /* virial of force, using formula elstvirial = -elstenergy */
-  double Pcfg;     /* virial or tensor-based (see variable pressure) pressure
-                      in [p.u.], with cutoff correction
-                      for thermostat="MTK" calculated every step */
-  double P;        /* pressure [Pa] using elst virial, with cutoff correction
-                      NB: inaccurate for CUTELST, wrong for Gaussian charges */
-  double Pnc;      /* as above, without cutoff correction */
+                   /* pressures are in 2 versions (see P_t)
+                      all pressures are in [p.u] */
   double U;        /* internal energy = Epot + Ekin + Ecorr (no Nose etc.) [J/mol] */
   double Unc;      /* internal energy = Epot + Ekin (no cutoff corr, Nose etc.) */
-  double H;        /* enthalpy, with cutoff correction */
-  double Hnc;      /* enthalpy, without cutoff correction */
-  double PdV;      /* pressure from virtual V change */
-  double PdVnc;    /* pressure from virtual V change, without cutoff correction */
+  double H;        /* enthalpy, with cutoff correction (if active) */
+  //  REMOVED double Hnc;      /* enthalpy, without cutoff correction */
   double T;        /* kinetic temperature */
   double kinT;     /* kin. energy of the thermostat degree of freedom (sometimes) */
   double kinP;     /* kin. energy of the barostat degree of freedom */
@@ -499,8 +499,16 @@ typedef struct En_s {
 #  if PRESSURETENSOR
   double Ptens[PT_DIM];  /* xx yy zz [yz zx xy] total [Pa] */
 #  endif /*# PRESSURETENSOR */
+  double Pref;     /* reference pressure [p.u.] monitored in col 5 of .cp
+                      pressure used in a barostat (if active)
+                      for thermostat="MTK" calculated every step */
+  P_t Pelvir;      /* pressure [p.u.] using elst virial (En.vir); virial=1
+                      NB: inaccurate for CUTELST, wrong for Gaussian charges */
+  P_t PdV;         /* pressure from virtual V change; virial=2 */
+
 #  if (PRESSURETENSOR&PT_ANY) == PT_ANY
-  double trPt;     /* SUM(En.Ptens)/3+En.corr/V/V
+  P_t Ptr;         /* from pressure tensor = SUM(En.Ptens)/3; virial=3 */
+  /*  double trPt;    SUM(En.Ptens)/3+En.corr/V/V
                       =P with correction, to put to .cp
                       NB: for cutoff electrostatics, the standard pressure uses Eelst=virial  */
   double Hz;       /* uncorrected enthalpy with uncorrected Pzz */
@@ -739,6 +747,10 @@ extern struct lag_s {
 #  if PRESSURETENSOR&PT_OFF
   int Pt;            /* lag for Ptxy,... time autocorr.f. (viscosity) */
 #  endif /*# PRESSURETENSOR&PT_OFF */
+#  ifdef SPCTCF
+  int tcf;           /* for special project SPC time correlation functions: individual */
+  int TCF;           /* for special project SPC time correlation functions: sums */
+#  endif
 } lag;
 
 extern double E;     /* total energy in [J/mol] (=Eunit) to be kept constant */
@@ -766,78 +778,90 @@ extern int measure;  /* 0: only forces required
                         1: also energy etc.
                         2: special for calculating # of pairs (DEBUG only) */
 
+extern int corr; /* made global in V3.6v */
+/* 1=cutoff corrections included in final results, not in P for the barostat
+   2=cutoff corrections included (also in barostat)
+   4=kinetic pressure finite size correction (atom-based)
+   8=kinetic pressure finite size correction (molecule-based)
+  16=4+8 used if not NPT/MTK
+  32=# of pairs is N^2/2, not N(N-1)/2
+  64=subtract 1 from degrees of freedom for NVE,Berendsen
+     (reversed in V3.1m, default in older versions)
+ 128=suppress warning */
+
 extern int onefourinrdf; /* 1 if 1-4 pairs are included in RDFs */
 
 /*** Ewald related global variables - see  comments in ewald.c and erfc.c ***/
 /* they are used also for not-Ewald sums, so they are here... */
 /* WARNING: change initialization as well! */
 extern struct el_s {
-  real alpha;      /* Ewald separation parameter in units of 1/AA;
-                      also cutoff electrostatic parameter */
-  real kappa;      /* k-space cutoff in form kappa=K[i]/L[i] */
-  real epsr,epsk;  /* expected r- and k-space errors in forces, in K/AA */
-  real minqq;      /* minimum expected charge-charge separation
-                      (to test Drude and to report error of the erfc approximation) */
-  real epsinf;     /* dielectric constant at infinity
-                      (must be very big if free charges are present */
-  real diff;       /* max rel.change of L before a warning about "unchanged K" */
-  real Perr;       /* pressure tensor threshold (basic; WARNING for 10*Perr) */
-  real rplus;      /* additional range to erfc splines (former ERFCPLUS)
-                      needed for optimized water models,
-                      does not hurt if unnecessarily large */
-  real sat;        /* target saturation (see tau.sat) */
-  int rshift;      /* &1: eru(r)=erfc(r)/r spline shifted to avoid jump at cutoff
-                      &2: as above for the derivative, erd(r)
-                      &4: prints eru(r), erd(r), d eru(r)/dr verbosely on init */
-  int grid;        /* # of grid points per unity of squared distance */
-  int test;        /* test module switch (former etest) */
-  int diag;        /* whether to include diagonal correction */
-  int centroid;    /* 1=dipole moments (of ions) are w.r.t charge centroid */
-  int bg;          /* 0: charged system is error
-                      1: charged system is OK, Ewald: background, cut.elst=OK
-                      2: charged system is OK, periodic b.c.: redistribution */
-                   /* end of initialization in simglob.c */
-  int sf;          /* structure factor switch:
-                      0 = standard k-space Ewald sum
-                      1 = sphericalized (cube only)
-                      3 = 3D */
-  int corr;        /* extended Yeh-Berkowitz correction, former el.slab:
-                      full slab correction: corr=4
-                      pressure and energy correction only: corr=4+8
-                      [In-Chul Yeh and Max L. Berkowitz, JCP 111, 3155 (1999)] */
-  vector E;        /* elst. field [V/m], was Eelst[] in main.c before V3.4g */
-  vector phase;    /* phase: E(t)=E*cos(2*PI*(f*t-phase)), x,y,z separately */
-  real f;          /* frequency [Hz]; f=0 is static field */
-  vector B;        /* static magnetic field [T] */
+  real alpha;     /* Ewald: r-space separation parameter in units of 1/AA;
+                     cutoff electrostatics: sew point parameter */
+  real kappa;     /* k-space cutoff in form kappa=K[i]/L[i] */
+  real epsr,epsk; /* expected r- and k-space errors in forces, in K/AA */
+  real minqq;     /* minimum expected charge-charge separation
+                     (to test Drude and to report error of the erfc approximation) */
+  real epsinf;    /* dielectric constant at infinity
+                     (must be very big if free charges are present */
+  real diff;      /* max rel.change of L before a warning about "unchanged K" */
+  real Perr;      /* pressure tensor threshold (basic; WARNING for 10*Perr) */
+  real rplus;     /* additional range to erfc splines (former ERFCPLUS)
+                     needed for optimized water models,
+                     does not hurt if unnecessarily large */
+  real sat;       /* target saturation (see tau.sat) */
+  int rshift;     /* &1: eru(r)=erfc(r)/r spline shifted to avoid jump at cutoff
+                     &2: as above for the derivative, erd(r)
+                     &4: Hammonds-Heyes method (normally with 1 and 2) */
+  int grid;       /* # of grid points per unity of squared distance */
+  int test;       /* test module switch (former etest) */
+  int diag;       /* whether to include diagonal correction */
+  int centroid;   /* 1=dipole moments (of ions) are w.r.t charge centroid */
+  int bg;         /* 0: charged system is error
+                     1: charged system is OK, Ewald: background, cut.elst=OK
+                     2: charged system is OK, periodic b.c.: redistribution */
+                  /* ---------- end of initialization in simglob.c ---------- */
+  real alphar;    /* normally =alpha; may differ for the Hammonds-Heyes method */
+  int sf;         /* structure factor switch:
+                     0 = standard k-space Ewald sum
+                     1 = sphericalized (cube only)
+                     3 = 3D */
+  int corr;       /* extended Yeh-Berkowitz correction, former el.slab:
+                     full slab correction: corr=4
+                     pressure and energy correction only: corr=4+8
+                     [In-Chul Yeh and Max L. Berkowitz, JCP 111, 3155 (1999)] */
+  vector E;       /* elst. field [V/m], was Eelst[] in main.c before V3.4g */
+  vector phase;   /* phase: E(t)=E*cos(2*PI*(f*t-phase)), x,y,z separately */
+  real f;         /* frequency [Hz]; f=0 is static field */
+  vector B;       /* static magnetic field [T] */
   struct m_t {
-    double m;        /* magnetic charge value */
-    int sp;          /* species containing the magnetic dipole moment */
-    int plus;        /* site number of positive monopole */
-    int minus;       /* site number of negative monopole */
+    double m;       /* magnetic charge value */
+    int sp;         /* species containing the magnetic dipole moment */
+    int plus;       /* site number of positive monopole */
+    int minus;      /* site number of negative monopole */
   } m;
 #  ifdef ECC
-  int ecc;         /* EXPERIMENTAL: Electronic Continuum Correction (ECC)
-                      (aka Fast Dielectric Approximation)
-                      0=no ECC, 1=ions, 2=dipoles -1,-2 = use ble charges*/
-  double epsf;     /* for reference V */
+  int ecc;        /* EXPERIMENTAL: Electronic Continuum Correction (ECC)
+                     (aka Fast Dielectric Approximation)
+                     0=no ECC, 1=ions, 2=dipoles -1,-2 = use ble charges*/
+  double epsf;    /* for reference V */
 #    if defined(POLAR) || defined(FREEBC)
 #      error ECC with POLAR or FREEBC
 #    endif /*# defined(POLAR) || defined(FREEBC) */
 #  endif /*# ECC */
-  int sfsize;      /* to check overflow */
-  struct sfr_s {   /* for sphericalized (radial) structure factor */
-    int nk;           /* # of independent vectors */
-    real q;           /* squared structure factor */
+  int sfsize;     /* to check overflow */
+  struct sfr_s {  /* for sphericalized (radial) structure factor */
+    int nk;          /* # of independent vectors */
+    real q;          /* squared structure factor */
   } *sfr;
-  struct sf3d_s {  /* for 3D structure factor */
-    int k[DIM];       /* k-vector */
-    real q;           /* squared structure factor */
+  struct sf3d_s { /* for 3D structure factor */
+    int k[DIM];      /* k-vector */
+    real q;          /* squared structure factor */
   } *sf3d;
-  double sumM;     /* sum of molecule dipole moments = max.cell moment
-                      for saturation autoset, one cfg value (cf. Eext.sumM)
-                      POLAR: includes induced moments */
-  double xinf;     /* 1/(el.epsinf*2+1) */
-  double epsq;     /* for neutrality test if automatic setup does not work */
+  double sumM;    /* sum of molecule dipole moments = max.cell moment
+                     for saturation autoset, one cfg value (cf. Eext.sumM)
+                     POLAR: includes induced moments */
+  double xinf;    /* 1/(el.epsinf*2+1) */
+  double epsq;    /* for neutrality test if automatic setup does not work */
 } el;
 
 extern struct box_s {

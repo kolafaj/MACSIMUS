@@ -1,24 +1,22 @@
-
 =============================================================================
-TO FINISH INSTALLATION:
+TO FINISH INSTALLATION: (MACSIMUS/ denotes the MACSIMUS directory)
+
 * If you are using sh or bash, append the following lines to your ~/.bashrc:
-    export BLENDPATH="${PWD}/blend/data"
-    export PATH="${PWD}/bin:\$PATH"
+    export BLENDPATH="MACSIMUS/blend/data"
+    export PATH="MACSIMUS/bin:$PATH"
   If you are using another shell, use the syntax of your shell.
 
 * You may customize and compile your own cook* version(s) as follows:
-    cd "${PWD}/cook"
+    cd "MACSIMUS/cook"
     ./configure.sh
-  Alternatively, customize files "${PWD}/generic/metamake.mmk" and
-  "${PWD}/generic/simopt.h", then run
+  Alternatively, customize files "MACSIMUS/generic/metamake.mmk" and
+  "MACSIMUS/generic/simopt.h", then run
      makemake "$CC"
      make cook*
 
-* The basic Lennard-Jones version of blend was compiled.
-  To customize other versions, follow the instructions in
-  "${PWD}/blend/metamake.mmk".
+* The basic Lennard-Jones version of blend was compiled. To customize other
+  versions, follow the instructions in "MACSIMUS/blend/metamake.mmk".
 
 Most utilities print help if run without any option, sometimes -h is needed.
 If a utility mentioned after "See also:" is not present, please let me know.
 =============================================================================
-

@@ -1,9 +1,10 @@
 /* #included twice: CALC=0,1 */
+/* NB: OP is opunits or empty */
 
   if (*op & 128) switch (*op & 127) {
     /* unary operators (functions) */
     case '+': break;
-    case '-': NR0=-NR0; break;
+    case '-': NR0=-NR0; break; /* no OP because unit not checked */
     case '\\': OP(nr,'\\'); NR0=sqrt(NR0); break;
     case 'u': OP(nr,'u'); NR0=cbrt(NR0); break;
     case 's': OP(nr,'f'); NR0=sin(NR0*_Id.degrad); break;
@@ -12,7 +13,8 @@
     case 'S': OP(nr,'f'); NR0=asin(NR0)/_Id.degrad; break;
     case 'C': OP(nr,'f'); NR0=acos(NR0)/_Id.degrad; break;
     case 'T': OP(nr,'f'); NR0=atan(NR0)/_Id.degrad; break;
-    case 'n': OP(nr,'f'); NR0= ~((unsigned)NR0); break; /* logical not */
+    case 'n': OP(nr,'f'); NR0= ~((unsigned)NR0); break; /* bitwise not */
+    case '`': OP(nr,'f'); NR0=!NR0; break; /* logical not */
     case 'b': {
       /* bit count */
       unsigned i=0,u=(unsigned)NR0;
@@ -118,9 +120,8 @@
       OP(nr+1,'/');
       NR0/=NR1;
       break;
-    case '@': /* because of ev.c - % is in format */
-      //    case '`':  before 12/2023
-    case '%':
+    /* @ and % removed, modulo is now only ` */
+    case '`':
       OP(nr+1,'f');
       NR0=NR0-((int)(NR0/NR1))*NR1;
       break;

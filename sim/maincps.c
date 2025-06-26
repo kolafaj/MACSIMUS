@@ -143,13 +143,13 @@ loop (i,0,anchor.col) {
 #endif /*#!LOG */
               }
             else /* dV!=0 */
-              recordCP(En.PdV*Punit) /* col 4 */
-            recordCP(En.Pcfg*Punit) /* col 5, En.P prior 3.6l, see variable virial */ }
+              recordCP(En.PdV.c*Punit) /* col 4 */
+            recordCP(En.Pref*Punit) /* col 5, En.P prior 3.6l, see variable virial */ }
           else {
             if (tau.sig) recordCP(*sigvdWptr) /* col 4 */
             else recordCP(rhounit*No.free_mass/box.V); /* col 4 */
-            if (dV==0) recordCP(En.Pcfg*Punit) /* col 5, En.P prior 3.6l, see variable virial */
-            else recordCP(En.PdV*Punit) /* col 5 */ }
+            if (dV==0) recordCP(En.Pref*Punit) /* col 5, En.P prior 3.6l, see variable virial */
+            else recordCP(En.PdV.c*Punit) /* col 5 */ }
 
           /*6*/ recordCP(En.T_in)
           /*7*/ recordCP(En.T_tr)
@@ -193,8 +193,8 @@ loop (i,0,anchor.col) {
              V3.6r: bad units forgotten from previous change (P real, En.P p.u.)
              V3.4l: cutoff correction was added twice; use P for NPT 
              V2.7f: was En.pot instead of En.U */
-          En.Hnc=En.Unc+(tau.P?P/Punit:En.Pnc)*box.V;
-          En.H=En.U+(tau.P?P/Punit:En.P)*box.V;
+            // REMOVED: En.Hnc=En.Unc+(tau.P?P/Punit:En.Pelvir.n)*box.V;
+          En.H=En.U+(tau.P?P/Punit:En.Pref)*box.V;
 
 #if (PRESSURETENSOR&PT_ANY) == PT_ANY
           En.Hz=En.U+(tau.P?P/Punit:En.Ptens[2])*box.V;
@@ -219,10 +219,11 @@ loop (i,0,anchor.col) {
         StaSet(DT,2,2,0);
         StaAdd("virial",En.vir);
 #ifdef ECC
+#error TO BE CHECKED
         StaAdd("ECC Pvir [Pa]",En.ECC_Pvir*Punit); /* "virial pressure" via Uel, former P (new in V3.4a) */
         StaAdd("ECC Pnel [Pa]",((En.kin*2*No.Pkinq+En.ECC_virnel)/DIM+En.corr/box.V)/box.V*Punit);
         StaSet(DT,lag.err,2,lag.n);
-        StaAdd("ECC P [Pa]",En.P*Punit); /* ECC pressure (new in V3.4a) */
+        StaAdd("ECC P [Pa]",En.P?*Punit); /* ECC pressure (new in V3.4a) */
         StaAdd("ECC Pscaled [Pa]",En.ECC_Pscaled*Punit); /* conventional pressure (ef=const, new in V3.4a) */
         StaAdd("ECC Uscaled [J/mol]",Epot-En.ECC_U3*Eunit);
         StaAdd("ECC Epot [J/mol]",Epot);
@@ -230,21 +231,22 @@ loop (i,0,anchor.col) {
         StaSet(DT,lag.err,2,lag.n);
         StaAdd("Epot [J/mol]",Epot); /* Epot is in J/mol */
         StaSet(DT,lag.err,2,lag.n);
-        StaAdd("Pcfg [Pa]",En.Pcfg*Punit);
-        StaAdd("P(vir) [Pa]",En.P*Punit);
+        StaAdd("Pref [Pa]",En.Pref*Punit);
+        StaAdd("P(vir) [Pa]",En.Pelvir.c*Punit);
 #endif /*#!ECC */
         if (dV)
-          StaAdd("Pcfg-P(dV) [Pa]",(En.Pcfg-En.PdV)*Punit);
+          StaAdd("Pref-P(dV) [Pa]",(En.Pref-En.PdV.c)*Punit);
         if (tau.P) {
           StaAdd("V",box.V);
-          StaAdd("(Pcfg-P)*V",(En.Pcfg-P/Punit)*box.V); /* in K */
+          StaAdd("(Pref-P)*V",(En.Pref-P/Punit)*box.V); /* in K */
           if (rescale&RESCALE_PT) {
             if (rescale&RESCALE_X) StaAdd("Lx",box.L[0]);
             if (rescale&RESCALE_Y) StaAdd("Ly",box.L[1]);
             if (rescale&RESCALE_Z) StaAdd("Lz",box.L[2]); }
-          StaSet(DT,2,2,0);
-          StaAdd("Ecorr [J/mol]",En.corr/box.V*Eunit);
-          StaAdd("Pcorr [Pa]",En.corr/Sqr(box.V)*Punit); }
+          if (En.corr) {
+            StaSet(DT,2,2,0);
+            StaAdd("Ecorr [J/mol]",En.corr/box.V*Eunit);
+            StaAdd("Pcorr [Pa]",En.corr/Sqr(box.V)*Punit); } }
         StaSet(DT,lag.err,2,lag.n);
         if (tau.sig)
           StaAdd("sigvdW",*sigvdWptr);
@@ -262,9 +264,9 @@ loop (i,0,anchor.col) {
           StaAdd("Ptzx [Pa]",En.Ptens[4]*Punit);
           StaAdd("Ptxy [Pa]",En.Ptens[5]*Punit);
           /* Daivis, Evans: JCP 100 541 (1994) */
-          StaAdd("Ptxx-tr [Pa]",(En.Ptens[0]-En.trPt)*Punit);
-          StaAdd("Ptyy-tr [Pa]",(En.Ptens[1]-En.trPt)*Punit);
-          StaAdd("Ptzz-tr [Pa]",(En.Ptens[2]-En.trPt)*Punit); }
+          StaAdd("Ptxx-tr [Pa]",(En.Ptens[0]-En.Ptr.n)*Punit);
+          StaAdd("Ptyy-tr [Pa]",(En.Ptens[1]-En.Ptr.n)*Punit);
+          StaAdd("Ptzz-tr [Pa]",(En.Ptens[2]-En.Ptr.n)*Punit); }
 #endif /*# PRESSURETENSOR&PT_OFF */
 
         StaSet(DT,lag.err,2,lag.n);
@@ -280,13 +282,25 @@ loop (i,0,anchor.col) {
           StaAdd("dEtot^2",lastEtot*lastEtot); }
 #if (PRESSURETENSOR&PT_ANY) == PT_ANY
         StaSet(DT,lag.err,2,lag.n);
-        En.trPt=SUM(En.Ptens)/3+En.corr/(box.V*box.V);
-        StaAdd("P(tens) [Pa]",En.trPt*Punit);
+        // ?        En.trPt=SUM(En.Ptens)/3+En.corr/(box.V*box.V);
+
+#if 1
+        {
+          double x=SUM(En.Ptens)/3+En.corr/(box.V*box.V)-En.Ptr.c;
+          if (fabs(x)>1e-10) ERROR(("DEBUG INTERNAL P(tens)-En.Ptr.c = %g (=! 0)\n",x))
+        }
+#endif
+        StaAdd("P(tens) [Pa]",En.Ptr.c*Punit);
         StaSet(DT,2,2,0);
-        StaAdd("P(tens)-P(vir) [Pa]",(En.trPt-En.P)*Punit);
-        if (dV) StaAdd("P(tens)-P(dV) [Pa]",(En.trPt-En.PdV)*Punit);
+        if (En.corr) StaAdd("P(tens) no corr [Pa]",En.Ptr.n*Punit);
+        StaAdd("P(vir)-P(tens) [Pa]",(En.Pelvir.n-En.Ptr.n)*Punit);
+        if (dV) StaAdd("P(dV)-P(tens) [Pa]",(En.PdV.n-En.Ptr.n)*Punit);
 #endif /*# (PRESSURETENSOR&PT_ANY) == PT_ANY */
 
+#ifdef SPCTCF
+        if (lag.tcf || lag.TCF) spctcf(cfg[0]);
+#endif
+        
         StaSet(DT,lag.err,2,lag.n);
         looplist (ssd,ssd0) if (ssd->stat) {
           if (ssd->indx[0]==-1) StaAdd(string("%s [J/mol]",ssd->name),*ssd->u.q*Eunit);

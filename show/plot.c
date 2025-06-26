@@ -397,9 +397,9 @@ int main(int narg,char **arg) /**************************************** main */
     int lsty;      /* linestyle */
     int psty;      /* pointstyle */
     int fix;       /* fixed style (SPACE inactive) */
-    char *colon[5];/* pos of : in fn (or NULL) */
+    char *colon[5];/* pos of : in fn (or NULL) ??? OUT OF ORDER BECAUSE OF strdup */
     char *colydup; /* original value of column y */
-    char fn[3];    /* filename [variable length]; [3] because can grow  */
+    char fn[3];    /* filename [variable length]: strlen(fn) added */
   } *head=NULL,*f,*last=NULL;
   char *tok1,*tok2,*tok3,*toks;
   char *tok4,*tok5;
@@ -577,7 +577,7 @@ int main(int narg,char **arg) /**************************************** main */
     I+=advI;
 
     if (iarg==Iopt && A[0]=='[' && *strend1(A)==']') {
-      /* (optional) range: must be 1st arg and must be of form [...] */
+      /* (optional) initial range: must be 1st arg and must be of form [...] */
       I0=iarg+1;
       toks=A+1;
       if (*toks!=':') rgset.x=atof(toks);
@@ -596,7 +596,7 @@ int main(int narg,char **arg) /**************************************** main */
     else {
       /* arg starts by a filename, @:, :, or a file of consecutive numbers [###] */
       if (A[0]=='[') {
-        /* [###] (# of interfals and optional further parameters) */
+        /* [###] (# of intervals and optional further parameters) */
         static int n=1000;
         static double r=DBL_MAX,R=-DBL_MAX;
         FILE *rgf;
@@ -656,8 +656,6 @@ int main(int narg,char **arg) /**************************************** main */
         alloczero(f,i);
         strcpy(f->fn,fn); }
 
-      //      fprintf(stderr,"f->fn=%s\n",f->fn);
-
       if (f->fn[0]=='-' && (f->fn[1]==0 || f->fn[1]==':') && !isstdin) {
         /* pipe: file '-' created */
         FILE *ff;
@@ -673,15 +671,17 @@ int main(int narg,char **arg) /**************************************** main */
 
       /* dirty hack: change FILE:Y into FILE::Y (NB: f->fn by 1 byte longer) */
       tok1=strchr(f->fn,':');
-      if (tok1 && !strchr(tok1+1,':')) {
-        memmove(tok1+1,tok1,strlen(tok1)+1); }
+      // max_column  should have been set
+      // this is wrong for plot :0:1 file.dat:
+      // if (!tok1) max_column=2; else max_column=-1;
+      if (tok1 && !strchr(tok1+1,':')) memmove(tok1+1,tok1,strlen(tok1)+1);
 
       tok1=coltok(f->fn); /* filename or [###], thrown away here */
       tok2=tok3=tok4=tok5=NULL;
       tok1=coltok(NULL);
 
-      max_column=-1;
-      
+      max_column=0; /* ??? -1 was here */
+
       if (tok1) {
         f->colon[0]=tok1-1;
         tok2=coltok(NULL);
@@ -697,12 +697,12 @@ int main(int narg,char **arg) /**************************************** main */
 
       if (tok1 && *tok1) {
         smartcol(&tok1);
-        to_colon(tok1);
+        to_colon(tok1); // max_column set here
         colx=tok1; }
 
       if (tok2 && *tok2) {
         fixcoly=smartcol(&tok2);
-        to_colon(tok2); /* may reallocate the string */
+        to_colon(tok2); // max_column set here, may reallocate the string */
         coly=tok2;
         f->colydup=dupstr(tok2); /* memory leak + dirty patch */
       }
@@ -740,7 +740,7 @@ int main(int narg,char **arg) /**************************************** main */
       if (tok4) {
         if (*tok4) {
           smartcol(&tok4);
-          to_colon(tok4);
+          to_colon(tok4); // max_column set here
           coldy1=tok4; }
 
         /* FILE:A:B:-: removes previous setting */
@@ -749,16 +749,15 @@ int main(int narg,char **arg) /**************************************** main */
       if (tok5) {
         if (*tok5) {
           smartcol(&tok5);
-          to_colon(tok5);
+          to_colon(tok5); // max_column set here
           coldy2=tok5; }
 
         /* FILE:A:B:-:C: removes previous setting */
-        else coldy2=NULL;
-      }
+        else coldy2=NULL; }
 
-      /* missing : means :1:2 */
-      if (max_column<0) max_column=2;
-      
+      /* missing : means :1:2 -- solved above
+         if (max_column<0) max_column=2; */
+
       if (f->fn[0]!='@') {
         f->colx=colx;
         f->coly=coly;
@@ -774,7 +773,6 @@ int main(int narg,char **arg) /**************************************** main */
         f->lsty=lsty;
         f->fix=fix;
         f->col=color[(I-I0)%14];
-
         f->maxcol=max_column;
 
         if (!minmaxfile(numberedfile(f->fn),colx,coly,f->maxcol, &rg.x,&rg.X,&rg.y,&rg.Y)) {
@@ -789,6 +787,11 @@ int main(int narg,char **arg) /**************************************** main */
   } /* iarg & @resp-file */
 
   looplist (f,head) f->colydup=dupstr(f->coly);
+  
+  if (0) looplist (f,head) {
+      fprintf(stderr,"DEBUG LIST1 %s x=%s y=%s max=%d :%p:%p\n",
+              f->fn,f->colx,f->coly,f->maxcol,f->colon[0],f->colon[1]);
+    }
 
 #ifdef DEBUG
   fprintf(stderr,"plot: rgx=%.9g %.9g  rgy=%.9g %.9g\n",rg.x,rg.X,rg.y,rg.Y);
@@ -805,6 +808,7 @@ int main(int narg,char **arg) /**************************************** main */
   lsty=1;
   repeatprefix('`');
 
+  
  notify:
 
   if (display) {
@@ -865,6 +869,9 @@ int main(int narg,char **arg) /**************************************** main */
 #endif /*# PARM */
 
     looplist (f,head) if (f->fn[0]!='@') {
+
+      if (0) fprintf(stderr,"DEBUG LIST2 %s x=%s y=%s max=%d :%p:%p\n",
+                     f->fn,f->colx,f->coly,f->maxcol,f->colon[0],f->colon[1]);
 
       if (f->errbar && iserrbar)
         drawerrbar(numberedfile(f->fn),
@@ -936,7 +943,6 @@ int main(int narg,char **arg) /**************************************** main */
         int i;
         loop (i,0,5) if (f->colon[i]) *(f->colon[i])=':';
         mysetcolor(f->col);
-        //          fprintf(stderr,"f->colon=%s f->coly=%s\n",f->colon,f->coly);
         aty=outbgtextxy(lblx,aty,font,f->col,BLACK,numberedfile(f->fn));
         if (my_style.ps)
           fprintf(my_style.ps,"%.2f %.2f moveto (%s) show\n",

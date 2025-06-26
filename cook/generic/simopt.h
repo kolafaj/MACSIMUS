@@ -224,16 +224,20 @@
 
 #define SHAKE 1
 /*
-  enable/disable Shake which appears as method with order=2 (-m2 option) in
+  Enable/disable SHAKE which appears as method with order=2 (-m2 option) in
   the Lagrangian formalism; Gear+constraint dynamics is still available.
+  Disabling SHAKE is not recommended because -mě is the default and most
+  methods are bound to it.
 
-  undefined: Shake not implemented
-  1: simple update in sweeps
-  2: info on moved sites kept - only bonds of sites that have moved in
-     previous step are updated
-  negative: as above and a more complicated algorithm taking into account
-     the angle between the old and new constraint is used - and some
-     tests are added
+  Undefined: SHAKE not available.
+  1: Simple update in sweeps, recommended.
+  2: Info on moved sites is kept and only bonds of sites that have moved in
+     the previous step are updated.  This may be more efficient for a mixture
+     of hard-to-shake and easy-to-shake molecules.
+  Negative: As above and a more complicated algorithm taking into account
+     the angle between the old and new constraint is used; also, some
+     tests are added.
+  Note that the superrelaxation parameter is optimized per species.
 */
 
 #define VERLET 3

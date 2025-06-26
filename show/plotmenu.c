@@ -108,7 +108,7 @@ void makemenu(int which) /***************************************** makemenu */
   i=atx+=outtextxy(atx,aty,"zoom:")+3;
   atx+=makebutton(atx,aty,'X'&31,"cx", "Center around x=0\nhotkey=[Ctrl-X]\nUse keys [x] and [X] to zoom in/out,\nkeeping x=0 at center");
   makebutton(atx,aty,'Y'&31,"cy", "Center around y=0\nhotkey=[Ctrl-Y]\nUse mouse wheel or keys [y] and [Y]\nto zoom in/out, keeping y=0 at center");
-  makebutton(getmaxx()-4*xfont.width-5,aty,'u',"undo","Undo the last zoom\nhotkey=[u] or [Ctrl-Z]");
+  makebutton(getmaxx()-4*xfont.width-5,aty,'u',"undo","Undo the last zoom,\ncan repeat\nthere is no redo\nhotkey=[u] or [Ctrl-Z]");
 
   atx=i; aty+=dybutt;
   makebutton(atx,aty,'U'&31,"recalc","Recalculate scaling\nhotkey=[F9] or [Ctrl-U]");

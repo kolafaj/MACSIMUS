@@ -3,9 +3,6 @@
 !define x11
 !include "../home.mmk"
 
-# O = -DSCR
-!include "../compile.mmk"
-
 !dir = gen sim show
 
 #############################################################################

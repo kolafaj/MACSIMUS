@@ -79,6 +79,9 @@ atoms
 37 CAM    1 0  40.080   20  M  Ca++ [M]
 38 SRM    1 0  87.62    38  M  Sr++ [M]
 39 BAM    1 0  137.327  56  M  Ba++ [M]
+40 H405  0 0   1.00800  1 H  TIP4P/2005 water model hydrogen
+41 M405  0 0   0        0 M  TIP4P/2005 auxiliary site
+42 O405  0 0  15.99940  8 O  TIP4P/2005 oxygen
 
 Lennard-Jones
 !       alpha     EMIN        LJsigma   These columns used for
@@ -89,6 +92,10 @@ Lennard-Jones
 ! sigma_vdw=3.5532185935 eps=0.6501695808 kJ/mol = 0.155394259 kcal_th/mol
 O     0.840  -0.1553942593 1.7766092967 ! SPC/E
 H     0.044  -0.000000   1.500000       ! SPC/E
+! TIP4P/2005:
+H405       0.044   0             0.800    ! no LJ
+O405       0.44    -0.18520765   1.7728727 ! eps=93.2K sig=3.1589A
+M405       1       0             1
 LI    0.4    -0.3367344  0.791          ! JC
 NA    0.7    -0.3526418  1.212          ! JC
 K     1      -0.4297054  1.593          ! JC
@@ -132,10 +139,14 @@ bonds
 !arom atom         K[kcal/mol/A^2] r0
 H       O          555             1.00     ! K only for blend
 CR56    CR56       450.0           1.48
+H405   O405     450         0.9572
+M405   O405     800         0.1546
 
 angles
 H       O       H       55    109.47122  ! K only for blend
 CR56    CR56    CR56    70.0  108.0
+H405   O405   H405      55.0     104.52
+H405   O405   M405      55.0      52.26
 
 dihedrals
 X    CR56  CR56   X        3.1  2  180.0
@@ -166,6 +177,7 @@ waters
 ! must be in standard order recognized by cook
 SPCE  3 H .4238 H .4238 O -.8476
 SPC   3 H .41   H .41   O -.82
+
 ! recommended SPCE.che:
 ! water SPC/E water model
 ! parameter_set = JC+SPCE
@@ -178,3 +190,12 @@ SPC   3 H .41   H .41   O -.82
 ! Hp0.41   Hp0.41
 !     \    /
 !      On.82
+
+! tip4p/2005 water model
+! parameter_set = JC+SPCE
+! 
+!       H405p.55640
+!      /
+!    O405-M405n1.1128
+!      \
+!       H405p.55640

@@ -2,15 +2,9 @@
  */
 #include "../gen/include.h"
 
-#ifdef DOS
-#define N 32 /* max # of files, max # of columns in one file */
-#define LINE 512 /* max line length */
-typedef signed char shortint;
-#else
 #define N 512 /* max # of files, max # of columns in one file */
 #define LINE 8192 /* max line length */
 typedef short int shortint;
-#endif
 
 char *fn;
 FILE *f[N];
@@ -210,7 +204,7 @@ See also:\n\
 
       loop (j,0,ncol[i])
         if (valid && toks[i][col[i][j]]) printf(FMT,toks[i][col[i][j]]);
-        else printf("n.a.    "); }
+        else printf(FMT,"n.a."); }
     printf("\n"); }
 
   return 0;

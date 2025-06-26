@@ -174,6 +174,7 @@ void setss(sitesite_t *ss, int i,int j, double C2,int onefour) /****** setss */
   int n,isfixed=0;
   double C1, oldC1,r,h,corr0,corr1,x;
   siteparm_t *lj0,*lj1;
+  char name0[16]="?",name1[16]="?";
   pairparm_t pp;
   nbfix_t *fix;
   int nerr=0,ninconsis=0;
@@ -185,7 +186,9 @@ void setss(sitesite_t *ss, int i,int j, double C2,int onefour) /****** setss */
   onefour=onefour&1;
 
   lj0=&sitedef[i].LJ[onefour];
+  sprintf(name0,"%s[%d]",sitedef[i].name,i);
   lj1=&sitedef[j].LJ[onefour];
+  sprintf(name1,"%s[%d]",sitedef[j].name,j);
   /* try NBFIX first */
   looplist (fix,nbfix0)
     if ( (fix->indx[0]==i && fix->indx[1]==j)
@@ -198,7 +201,7 @@ void setss(sitesite_t *ss, int i,int j, double C2,int onefour) /****** setss */
  fixed:;
   /* verbose level changed 4->2; NEW: lj0==NULL just prints info */
   combrule(&pp,lj0,lj1,
-           option('v')&2 ? string("%s%s %s-%s",lj0?"comb":"fix",onefour?"14":"",sitedef[i].name,sitedef[j].name) : NULL);
+           option('v')&2 ? string("%s-%s %s%s",name0,name1,lj0?"comb":"fix",onefour?"14":"  ") : NULL);
 
   /* site-site specific support incl. equivalent wall-atom potential */
   initssaux(&ss->a,&pp);
@@ -220,8 +223,8 @@ void setss(sitesite_t *ss, int i,int j, double C2,int onefour) /****** setss */
 #endif /*# WIDOM */
 
   if (option('v')&4)
-    prt("setss: %i %i  epsvdW=%.3f (%.5f kcal/mol) sigvdW=%.5f cutoff=%.4f %s",
-        i,j,pp.eps,pp.eps*(Eunit/kcal),pp.sig,C2,isfixed?"nbfix":"comb.r.");
+    prt("setss: %s-%s epsvdW=%.3f (%.5f kcal/mol) sigvdW=%.5f cutoff=%.4f %s",
+        name0,name1,pp.eps,pp.eps*(Eunit/kcal),pp.sig,C2,isfixed?"nbfix":"comb.r.");
 
 #ifndef NIBC
   if (pp.eps==0 || C2==0)
@@ -230,7 +233,7 @@ void setss(sitesite_t *ss, int i,int j, double C2,int onefour) /****** setss */
     /* it is assumed that sigvdW has meaning of (a sort of) atom diameter */
     if (C2<0) C2= -pp.sig*C2;
     if (box.cutoff>0 && C2>box.cutoff)
-      WARNING(("%d-%d: LJcutoff=%g > cutoff=%g",i,j,C2,box.cutoff))
+      WARNING(("%s-%s LJcutoff=%g > cutoff=%g",name0,name1,C2,box.cutoff))
 
 #  ifdef SHARPCUTOFF
     C1=C2; ss->A=0;
@@ -247,8 +250,8 @@ void setss(sitesite_t *ss, int i,int j, double C2,int onefour) /****** setss */
       double den=SS_F(C1);
 
       if (fabs(den)<1e-50) {
-        prt("! %d-%d: sigvdW=%g C1=%g force %g, smooth cutoff off",
-            i,j,pp.sig,C1,den);
+        prt("! %s-%s sigvdW=%g C1=%g force %g, smooth cutoff off",
+            name0,name1,pp.sig,C1,den);
         C1=-C1; break; }
       oldC1=C1;
       C1=1+4*SS_U(C1)/C1/den;
@@ -258,7 +261,7 @@ void setss(sitesite_t *ss, int i,int j, double C2,int onefour) /****** setss */
 #    ifdef GOLD
         if (i!=nsites-1 || j!=nsites-1)
 #    endif       /*# GOLD */
-          WARNING(("%d-%d: sigvdW=%g C2=LJcutoff=%g\n\
+          WARNING(("%s-%s sigvdW=%g C2=LJcutoff=%g\n\
 *** Cannot determine consistent smooth cutoff, C1=0.775*C2 will be used:\n\
 *** - The energy conservation precision will decrease.\n\
 *** - (This component to) the homogeneous cutoff correction in pressure will\n\
@@ -267,7 +270,7 @@ void setss(sitesite_t *ss, int i,int j, double C2,int onefour) /****** setss */
 ***   as a warning only.\n\
 *** DO NOT IGNORE THIS MESSAGE unless this interaction is never calculated.\n\
 *** NOTE: For LJ, the minimum LJcutoff=%.6f",
-                   i,j,pp.sig,C2,
+                   name0,name1,pp.sig,C2,
                    (-SS_F(C1)/(C1*SS_U(C1)*(C2*C2-C1*C1)))-1,
                    pp.sig*1.58741609+5e-7))
 /*.....      epsvdW=0; goto again;*/
@@ -279,7 +282,7 @@ void setss(sitesite_t *ss, int i,int j, double C2,int onefour) /****** setss */
 #    ifdef GOLD
       if (i!=nsites-1 || j!=nsites-1)
 #    endif /*# GOLD */
-        ERROR(("%d-%d: sigvdW=%f C1=%f C2=%f bad cutoff",i,j,pp.sig,C1,C2))
+        ERROR(("%s-%s: sigvdW=%f C1=%f C2=%f bad cutoff",name0,name1,pp.sig,C1,C2))
 
 /* potential-independent constants */
       ss->A=SS_U(C1)/Sqr(C2*C2-C1*C1);
@@ -433,6 +436,22 @@ smoothing u=A*(r^2-C2^2)^2: A=%.14g",C1,C2,pp.eps,pp.sig,ss->A);
       if (verbose) prt("setss: site-site tests passed"); }
   }
 
+  /* numerical reconstructing C/r^6 to calculate the Hamaker constant */
+  {
+#if POLAR&1
+    prt("WARNING: C and the Hamaker constant may be wrong for POLAR&1");
+#endif
+    double r=100; /* ad hoc */
+    double U=SS_U(r);
+    double F=SS_F(r);
+    //    put3(r,U,F)
+    if (U<0) {
+      double q=F/U*r;
+      if (fabs(q-6)<0.1) ss->C=U*Pow6(r);
+      if (verbose)
+        prt("for Hamaker, r->infty: u(r)=%.9g/r^%.9g",ss->C,q); }
+  }
+
   /* The normalized cuttoff correction is corr0+corr1, where
                         C2        2   2 2  2
        corr0 = -4 PI integral A (r -C2 )  r  dr
@@ -531,7 +550,7 @@ smoothing u=A*(r^2-C2^2)^2: A=%.14g",C1,C2,pp.eps,pp.sig,ss->A);
                                ss->Skk[k].E*box.V,
                                ss->Skk[k].D*box.V); } /* slab.K */
     } /* if (ss->A) */
-    else 
+    else
       ss->Skk=NULL;
   }
 #endif /*# SLAB */

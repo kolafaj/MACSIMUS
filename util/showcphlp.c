@@ -90,9 +90,9 @@ FORMAT OF CP-FILE:\n\
     CPmark = (float)-1.76398512e+37\n\
     NCP = (int)NCP (legacy: 2 most significant bytes of 4 ignored)\n\
     COL3 = (max 4 chars) name of field 3, ...\n\
-           for COL1,COL2, fixed names COL1=Etot,COL2=T are assumed\n\
+           COL1=\"Etot\", COL2=\"T   \" is fixed and cannot be changed\n\
 \n\
-  DATA RECORD = NCP float numbers (columns) so that: (1st number)>CPmark\n\
+  DATA RECORD = NCP float numbers (columns) such that (1st number)>CPmark\n\
 \n\
   CONTROL RECORDS are detected by the 1st float, see file sim/cpmark.h\n\
     {CPmark,24 chars}:\n\

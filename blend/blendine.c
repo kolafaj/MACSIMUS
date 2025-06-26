@@ -103,21 +103,32 @@ atoms\n\
        radiusvectors are R_x, R_y, R_z, has the same tensor (matrix) of
        inertia as the original molecule */
 
-    prt("! diagonalized %s matrix in g/mol*AA^2: %g %g %g",
-        IG,
-        IM[0][0],IM[1][1],IM[2][2]);
-    prt_("! principal moments of inertia in kg*m^2:");
-    if (IG[0]=='g')
-      prt(" %g %g %g",
-        (IM[2][2]+IM[1][1])*1.66053904e-47,
-        (IM[0][0]+IM[2][2])*1.66053904e-47,
-        (IM[0][0]+IM[1][1])*1.66053904e-47);
-    else 
-      prt(" %g %g %g",
-        IM[0][0]*1.66053904e-47,
-        IM[1][1]*1.66053904e-47,
-        IM[2][2]*1.66053904e-47);
+    {
+      double x=IM[0][0],y=IM[1][1],z=IM[2][2],w;
 
+      prt("! diagonalized %s matrix [g/mol*AA^2]: %g %g %g", IG, x,y,z);
+      
+      if (x>y) w=x,x=y,y=w;
+      if (y>z) w=y,y=z,z=w;
+      if (x>y) w=x,x=y,y=w;
+      prt("! diagonalized %s matrix, sorted: %g %g %g", IG, x,y,z);
+
+      if (IG[0]=='g') {
+        x=(IM[2][2]+IM[1][1])/6.0221408e+46;
+        y=(IM[0][0]+IM[2][2])/6.0221408e+46;
+        z=(IM[0][0]+IM[1][1])/6.0221408e+46; }
+      else {
+        x=IM[0][0]/6.0221408e+46;
+        y=IM[1][1]/6.0221408e+46;
+        z=IM[2][2]/6.0221408e+46; }
+      prt("! principal moments of inertia [kg*m^2]: %g %g %g",x,y,z);
+
+      if (x>y) w=x,x=y,y=w;
+      if (y>z) w=y,y=z,z=w;
+      if (x>y) w=x,x=y,y=w;
+      prt("! principal moments of inertia, sorted: %g %g %g",x,y,z);
+    }
+    
     loop (i,0,3)
       loop (j,0,3) R[i][j]*=sqrt(fmax(0,IM[i][i])/M);
 

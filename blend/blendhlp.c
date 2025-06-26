@@ -75,6 +75,8 @@ Force field options and files:\n\
  -i#            calc. max. angle pot. energies and warn if > # kcal/mol [df.=5]\n\
  -x[RRR]EEE     Lennard-Jones scaling; R in 1/1000, E in % [default=-x1000100]\n\
  -x-DDD         density scaled x=exp(DDD/1000) times (R: x^-1/3 and E: x)\n\
+ -q%            charge multiplication factor in % [default=-q100]\n\
+ -t#            cutoff switch function=[#-1,#+1]; -t-12345=[12.3,12.3+4.5]\n\
  -W#            warn on (sum of): 1=missing bonds, 2=missing angles [default=3]\n\
  PCHFILE.pch    partial charge assignment file\n\
  REAFILE.rea    chemical reaction file\n\
@@ -105,8 +107,6 @@ Molecule options:\n\
  -m#      minimize energy by # conjugate gradient steps\n\
  -m-#     -# steepest-descent steps, then as above [default=-m-100]\n\
  -n#      export number of molecules N (negative: split mol., abs config)\n\
- -q%      charge multiplication factor in % [default=-q100]\n\
- -t#      range for cutoff switch function=[#-1,#+1]; -t-12345=[12.3,12.3+4.5]\n\
  -u#/-u-# print # of pairs with max/min energy\n\
  -y#      SUM: 1=center before minimization  2=after minimization [df.=3]\n\
           4=set all coord.>0   8=place mol. in box  16=do 4,8 with LJsigma=0\n\
@@ -152,8 +152,8 @@ Special molecule options:\n\
  -[#       (with -n-1) reorder molecule of # of sites so that masses increase\n\
            example -[3: TIP3 water = HHO\n\
  -A        generate FILE.ang of independent internal coordinates\n\
- -C#       reference atom for dipole, quadrupole, virial is:\n\
-           -1=Z-centroid  -2=center-of-mass  -3=center [-1]\n\
+ -C#       reference atom for dipole, quadrupole, virial is: [-1]\n\
+           -1=Z-centroid  -2=center-of-mass  -3=center\n\
  -D        generate FILE.msd of mean square displacements\n\
  -E@       essential dynamics, @=atoms: All Heavy Calpha Backbone\n\
  -F#       for -NE: # of frames in each plb file, #>0:cos, #<0:lin [9]\n\

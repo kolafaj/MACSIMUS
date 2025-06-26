@@ -10,7 +10,7 @@ char Line[1024];
 char toksep[32]=" \t\n";
 char *strtofind="";
 
-void edittoksep(char *arg)
+void edittoksep(char *arg) /************************************* edittoksep */
 {
  if (isalnum(arg[1])) return;
  if (arg[0]=='+') {
@@ -30,7 +30,7 @@ void edittoksep(char *arg)
    }
 }
 
-int token(char *l,int i)
+int token(char *l,int i) /******************************************** token */
 {
   char *tok;
 
@@ -45,7 +45,7 @@ int token(char *l,int i)
   return strlen(l);
 }
 
-int main(int narg,char **arg)
+int main(int narg,char **arg) /**************************************** main */
 {
   int i,j,i1,i2;
   FILE *in;
@@ -56,12 +56,12 @@ int main(int narg,char **arg)
   int ifrom=-1,count;
 
   if (narg<2) {
-    fprintf(stderr,"Extracts parts from a text file. (c) J.Kolafa 1997\n\
-call by:\n\
+    fprintf(stderr,"\
+Extracts parts from a text file, (c) J.Kolafa 1997. Call by:\n\
   %s OPTION [ OPTION ... ] { FILE | - }\n\
 where OPTION is\n\
-  /STRING      find next line with STRING\n\
-  =STRING      find next line with STRING the field after\n\
+  /STRING      find next line with STRING, position at BOL\n\
+  =STRING      find next line with STRING and extract one item after STRING\n\
   /  =         repeat previous /STRING or =STRING\n\
   +NUMBER      go to line NUMBER relatively from the current position\n\
   FIELD:FIELD  extract fields in given range (default separators=SPACE TAB NL)\n\

@@ -1,4 +1,4 @@
-#define VERSION "3.6s"
+#define VERSION "3.7a"
 
 #if defined(LINKCELL) && defined(FREEBC)
 #  error "LINKCELL not supported for FREEBC"
@@ -115,7 +115,6 @@ int main(int narg,char **arg) /**************************************** main */
     no=10000,     /* # of cycles in 1 main cycle */
     nomax=0,      /* max # of cycles from start of measurements (init>=1) */
     initno=0,     /* option -NUMBER (overrides no in the 1st cycle) */
-    quit=0,       /* quit=1 causes program stop (deprecated) */
     key=0,        /* "command" */
     sort=0,       /* sort by CM, coordinate: 1=x, etc. (deprecated) */
     checkfrac=1,  /* check fractional charges once, turned off by -q */
@@ -232,17 +231,7 @@ int main(int narg,char **arg) /**************************************** main */
   double refrho;
   vector L={0,0,0}; /* box size (in input data) */
   double cutoff=0; /* cutoff (in input data) */
-  int corr=3+16;
-    /* 1=cutoff corrections included in final results, not in P for the barostat
-       2=cutoff corrections included (also in barostat)
-       4=kinetic pressure finite size correction (atom-based)
-       8=kinetic pressure finite size correction (molecule-based)
-      16=4+8 used if not NPT/MTK
-      32=# of pairs is N^2/2, not N(N-1)/2
-      64=subtract 1 from degrees of freedom for NVE,Berendsen
-         (reversed in V3.1m, default in older versions)
-     128=suppress warning
-    */
+  /* int corr=3+16; made global in V3.6v */
   FILE *indef=NULL; /* to reread the def-file */
 
   /* keys for ID="mnemonics" on data and help moved to mainhlp.c */
@@ -573,7 +562,7 @@ based on %s",
     prt("box.center=%g %g %g\n\
 This is used for center of mass (CM) and angular momentum (AM) mesurements:\n\
 lag.CM=%d  lag.LM=%d  lag.AM=%d\n\
-NB: slab.sp (in SLAB version) sets box.center automatically\n",
+NB: slab.sp (in SLAB version) sets box.center automatically",
         VARG(box.center),lag.CM,lag.LM,lag.AM);
 
     underline("pressure");
@@ -591,15 +580,18 @@ NB: slab.sp (in SLAB version) sets box.center automatically\n",
     prt(" virial=%d = %s",virial,
         virial==1 ? "P(vir) = virial theorem (elst_virial = -elst_energy)"
         : virial==2 ? "P(dV) = virtual volume (shape) change method"
-        : virial==3 ? "P(tens) = trace of pressure tensor" : "ERROR");
+        : virial==3 ? "P(tens) = trace of pressure tensor (from forces)" : "ERROR");
     prt("Will be reported as  Pcfg [Pa]  and shown in convergence profile\n\
 unless superseded by the virtual volume change method (see dV).\n\
 Pressures available, cf. variable virial:\n\
-  P(vir) = virial theorem (elst_virial = -elst_energy), OK with Ewald point charges,\n\
-          wrong for Gaussian charges, inaccurate for cutoff elst\n\
+  P(vir) = virial theorem (elst_virial = -elst_energy):\n\
+           - good with Ewald point charges\n\
+           - wrong for Gaussian charges\n\
+           - inaccurate for cutoff elst\n\
   P(dV) = virtual volume change, good for debugging, see dV and rescale\n\
-  P(tens) = trace of pressure tensor, (most accurate;\n\
-          for point charges Ewald consider faster PRESSURETENSOR=0)");
+  P(tens) = trace of pressure tensor (from forces):\n\
+            - most accurate\n\
+            - for Ewald point charges consider a bit faster PRESSURETENSOR=0");
     if (virial==2) {
       if (dV==0) ERROR(("Virtual volume change method (virial=2) selected but dV=0"))
       if (thermostat>=T_NPT) ERROR(("thermostat=%d cannot use the virtual volume change method"))
@@ -1011,6 +1003,8 @@ slab.mode specified, but slab.grid not given:\n\
 *** this violates strict definition of RDF, but gives consistent cutoff\n\
 *** corrections for replicated cell (e.g., with PERSUM)"))
 
+    Hamaker();
+                   
 #include "mainkinc.c"
 
 #ifdef COULOMB
@@ -1032,6 +1026,11 @@ Homogeneous cutoff corrections (corr&3) and slab cutoff corrections\n\
 Widom insertion or scaling requires a thermostat because\n\
 *** temperature T is used to calculate the insertion probability"))
     widom.corr=Widomcutcorr(widom.spreal,widom.sp,LJcutoff);
+    if (!(corr&1)) {
+      prt("Since !(corr&1), the above correction will not be included.\n");
+      widom.corr=0; }
+    else
+      _n
     if (widom.spreal>=0 && widom.n)
       ERROR(("Widom insertion (widom.n>0) and Widom scaling (widom.spreal>=0) are exclusive"))
 #endif /*# WIDOM */
@@ -1100,7 +1099,7 @@ Widom insertion or scaling requires a thermostat because\n\
 #ifdef SLAB
                 slab.geom
 #else /*# SLAB */
-                option('d')<0?-option('d'):0
+                option('d')<0?1-option('d'):0
 #endif /*#!SLAB */
                 ); } }
     else {
@@ -1210,6 +1209,38 @@ cleave.init bit 0 unset (not to copy next time)"); }
 
     box.V=PROD(box.L);
 
+    /* editing the configuration and velocities */
+    if (key>=97) {
+      int nn;
+      char line[128];
+
+      /* discard any text after ; to EOL */
+      if (!fgets(line,128,in)) ERROR(("unexpected EOF while cfg edit expected"))
+
+      loop (nn,0,key==97?2:1) {
+        int n,nl=0,k,ned=0;
+
+        if (key==98) n=1; else n=nn;
+        prt_("reading/editing %s: ",n?"velocities":"positions");
+
+        while (fgets(line,128,in)) {
+          char *tok=strtok(line," \t");
+
+          if (!tok) break;
+          if (tok[0]==';') break;
+          if (tok[0]=='.' && tok[1]<=' ') break;
+
+          if (nl>=No.s) { ERROR(("number of atoms overflow nl=%d",nl)) nl=0; }
+          loop (k,0,3) {
+            double x=atof(tok);
+            if (tok[0]!='=') {
+              ned++;
+              if (n) x/=h;
+              cfg[n]->rp[nl][k]=x; }
+            tok=strtok(NULL," \t"); }
+          nl++; }
+        prt("%d lines read, %d items replaced",nl,ned); } }
+
 #ifdef LINKCELL
     lcsetup(L);
 #endif /*# LINKCELL */
@@ -1286,8 +1317,6 @@ En.corr=%.9g [K AA3] (Ecorr=En.corr/V, Pcorr=En.corr/V^2)",
 #  endif /*#!COULOMB<0 */
 #endif /*# COULOMB */
     }
-
-    if (quit<0) quit=debugcfg(quit);
 
 #ifdef MARK
     /* Not tested recently! */
@@ -1700,15 +1729,16 @@ final drift = %d = %s",DRIFT_START,drift,int2sumbin(drift)))
 
       /*** pressure [Pa] ***/
       /* virial-based pressure w/o cutoff corrections (elst virial=energy) */
-      En.Pnc=((En.kin*2*No.Pkinq+En.vir)/DIM)/box.V;
+      En.Pelvir.n=((En.kin*2*No.Pkinq+En.vir)/DIM)/box.V; // former En.Pnc
 
       /* as above, w. cutoff corrections added */
-      // En.P=((En.kin*2*No.Pkinq+En.vir)/DIM+En.corr/box.V)/box.V;
-      if (option('v')&4) StaAdd("En.P double check [Pa]",((En.kin*2*No.Pkinq+En.vir)/DIM+En.corr/box.V)/box.V*Punit);
+      En.Pelvir.c=En.Pelvir.n+En.corr/Sqr(box.V);
+      // to move:      if (option('v')&4) StaAdd("En.P double check [Pa]",((En.kin*2*No.Pkinq+En.vir)/DIM+En.corr/box.V)/box.V*Punit);
 
 #  ifdef ECC
     /* Since V3.4a, En.P becomes the ECC pressure,
        in statistics and CP, these are still marked by ECC */
+      // TO BE FIXED AFTER CHANGES: should not *=Punit, use En.Pelvir
       En.ECC_Pcorr*=Punit;
       En.Pnc+=En.ECC_Pcorr;
       En.ECC_Pvir=En.P; /* Pvir - see the paper */
@@ -1747,15 +1777,16 @@ final drift = %d = %s",DRIFT_START,drift,int2sumbin(drift)))
 #  ifdef POLAR
         if (icyc==0) {
           if (tau.sig) header("   t/ps    Tkin/K   Epot/K    Etot/K   sigvdE/AA P/MPa  polerr polit  cerr1 ");
-          else header("   t/ps    Tkin/K   Epot/K    Etot/K  rho/kgm^-3 P/MPa  polerr polit  cerr1 "); }
+          else header("   t/ps    Tkin/K   Epot/K    Etot/K  rho/kgm^-3 P/MPa  polerr polit  cerr1 ");
+          fflush(out); }                                                                    
         if (tau.sig)
           prt("%9.3f %6.1f %9.0f %12.2f %7.4f %8.3f%9.2e%2.0f%10.2e",
                 t,    En.T,En.pot,En.tot,*sigvdWptr,
-                                              En.P*(Punit/1e6),En.polstderr,En.polnit,En.r1);
+                                              En.Pref*(Punit/1e6),En.polstderr,En.polnit,En.r1);
         else
           prt("%9.3f %6.1f %9.0f %12.2f %7.2f %8.3f%9.2e%2.0f%10.2e",
                t,    En.T,En.pot,En.tot,No.mass/box.V*rhounit,
-                                              En.P*(Punit/1e6),En.polstderr,En.polnit,En.r1);
+                                              En.Pref*(Punit/1e6),En.polstderr,En.polnit,En.r1);
 #  else /*# POLAR */
         double pcer=En.r1+En.r2+En.r3;
 
@@ -1772,11 +1803,11 @@ final drift = %d = %s",DRIFT_START,drift,int2sumbin(drift)))
         if (tau.sig)
           prt_("%9.3f %6.1f %9.0f %12.2f %7.4f %6.1f%5.2f",
                 t,    En.T,En.pot,En.tot,*sigvdWptr,
-                                               En.P*(Punit/1e6),pcer);
+                                               En.Pref*(Punit/1e6),pcer);
         else
           prt_("%9.3f %6.1f %9.0f %12.2f %7.2f %6.1f%5.2f",
                 t,    En.T,En.pot,En.tot,No.mass/box.V*rhounit,
-                                               En.P*(Punit/1e6),pcer);
+                                               En.Pref*(Punit/1e6),pcer);
         graph(En.T/(T+0.1*(T==0))*0.5,20);
 
         if (gear.order>2 && option('v')&4)

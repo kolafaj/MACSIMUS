@@ -3,6 +3,8 @@
  Start application associated with file extension.
  (c) Jiri Kolafa 2001, GNU General Public Licence
 
+ See also: xdg-open
+
  2011: exts made case-insensitive (.jpg=.JPG)
 
  Motivation:
@@ -66,7 +68,7 @@ struct reg_s {
       missing "%s" means that "%s.%s" & is appended */
 } *head;
 
-int nstr(char *s)
+int nstr(char *s) /**************************************************** nstr */
 /* counts %s in string s */
 {
   int n=0;
@@ -76,7 +78,7 @@ int nstr(char *s)
   return n;
 }
 
-void strtac(char *where,char *what)
+void strtac(char *where,char *what) /******************************** strtac */
 /* where:=what||where
    similas as strcat, which is where:=where||what */
 {
@@ -85,7 +87,7 @@ void strtac(char *where,char *what)
 }
 
 
-int EQUAL(char *a,char *b)
+int EQUAL(char *a,char *b) /****************************************** EQUAL */
 /* returns 1 if strings identical, case-insensitive */
 {
   while (*a && *b) {
@@ -95,7 +97,7 @@ int EQUAL(char *a,char *b)
   return *a==*b;
 }
 
-int main(int narg,char **arg)
+int main(int narg,char **arg) /**************************************** main */
 {
   struct reg_s *r,*rr,*r0=NULL;
   int iarg;
@@ -117,7 +119,8 @@ If there are several associated commands:\n\
 Extensions and commands are listed in ~/.startdata (read first) and may be\n\
   modified by ./.startdata (working directory local changes)\n\
 See also:\n\
-  mc.ext (MACSIMUS bindings for Midnight Commander)\n");
+  mc.ext (MACSIMUS bindings for Midnight Commander)\n\
+  xdg-open xdg-mime xdg-settings (similar system-wide tools)\n");
     exit(0); }
 
   if (!strcmp("s",arg[0])) ask=0;

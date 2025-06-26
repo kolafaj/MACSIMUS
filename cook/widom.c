@@ -42,7 +42,7 @@ void Eidchange(int sp,molecule_t *mol,vector *rpf,vector *rp) /*** Eidchange */
   VVV(rL,=No.cell,/box.L)
   En.el=En.pot=0;
 
-  n=mol-cfg; /* of the molecule grown */
+  n=mol-molec; /* of the molecule grown */
   allocarray(is,mol->ns);
 
   /* TRICK:

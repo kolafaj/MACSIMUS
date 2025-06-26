@@ -3,13 +3,19 @@ This is the standard (not particle-mesh) version of Ewald summation.
 This code uses ideas of J. Perram (making use of symmetry).
 See also macsimus/c/ewald.c (fool-proof slow standalone version for debugging).
 
-UPDATE 6/2022
+UPDATE 04/2024
+  - Ewald test module units fixed and improved
+
+UPDATE 03/2024
+  - alpha' (Hammonds Heyes)
+
+UPDATE 06/2022
   - background charges, Yeh-Berkowitz revisited
 
-UPDATE 3/2011
+UPDATE 03/2011
   - fluctuating charges
 
-UPDATE 2/2010
+UPDATE 02/2010
   - parallel support rehacked for pthreads
   - CLOCK, TIM_FILE removed
 
@@ -17,10 +23,10 @@ UPDATE 12/2008:
   - code cleaned and a bit optimized
   - obsolete DOS and HIT switches removed
 
-UPDATE 9/2008:
+UPDATE 09/2008:
   - obsolete switch SITEEWALD removed
 
-UPDATE 2/2005:
+UPDATE 02/2005:
   - L[3] (not cube) implemented
   - obsolete switches PAR, FASTRAM, POINTERS removed
   - k-vectors are allocated in a table and L must not change a lot
@@ -288,6 +294,7 @@ double Ewald(int pass,vector *frp,vector *rp) /*********************** Ewald */
   int isites;
 #else /*# GAUSSIANCHARGES */
   complex *Qk;
+  double alsPI=el.alphar/sqrt(PI);
 #endif /*#!GAUSSIANCHARGES */
   real e,c,kk,aux;
 #if COULOMB<0
@@ -296,7 +303,7 @@ double Ewald(int pass,vector *frp,vector *rp) /*********************** Ewald */
   int nagain=0;
 #endif /*# COULOMB<0 */
   vector PIL;
-  double Energy=0,alsPI=el.alpha/sqrt(PI);
+  double Energy=0;
   int i,kx,ky,kz,iQ,ikk,kymax,kzmax;
   long size,qtabsize;
 #if PARALLEL==1 || PARALLEL==3
@@ -307,7 +314,7 @@ double Ewald(int pass,vector *frp,vector *rp) /*********************** Ewald */
 #  ifdef GAUSSIANCHARGES
   complex AT,BT,CT,DT;
   complex AS,BS,CS,DS;
-#  endif /*# GAUSSIANCHARGES */
+#  endif /*#!GAUSSIANCHARGES */
   int jkk,iqt;
 #endif /*#!PARALLEL==1 || PARALLEL==3 */
 
@@ -1072,7 +1079,8 @@ int Ewaldtest(double *setL) /************************************* Ewaldtest */
     available as a reference (OBSOLETE?)
 ***/
 {
-  static double Epotref,Ediagref,dfref=1,maxfref,Evirref;
+  static double x,a,Epotref,EnPref,EntrPtref,Ediagref,dfref=1,maxfref;
+  Ediagref=Ediag;      
 #if PRESSURETENSOR&PT_VIR
   static double Pvirref[PT_DIM];
 #endif /*# PRESSURETENSOR&PT_VIR */
@@ -1080,7 +1088,7 @@ int Ewaldtest(double *setL) /************************************* Ewaldtest */
   double oldalpha=el.alpha,oldkappa=el.kappa,oldeps=eps,varf=1;
   double cutoff=box.cutoff;
   vector *d,*dref,dr;
-  int ns=No.s,quit=0,etestref=0;
+  int ns=No.s,etestref=0;
 
   int ii,no=1; /* just to do calculations several times to measure time */
   int i=-1,lasti=-1;
@@ -1126,11 +1134,12 @@ int Ewaldtest(double *setL) /************************************* Ewaldtest */
       putv(fi) }
 
     getdata
+      get(x) get(a)
       get(el.test)
       get(el.epsk) get(el.epsr) get(eps)
       get(el.grid) get(el.minqq)
+      get(el.rshift)
       get(el.alpha) get(el.kappa) get(cutoff)
-      get(quit)
 #ifdef LINKCELL
       getvec(No.cell,,DIM) get(rkspeed)
 #endif /*# LINKCELL */
@@ -1164,7 +1173,7 @@ int Ewaldtest(double *setL) /************************************* Ewaldtest */
 
     if (i>=0 && i<ns) VV(cfg[0]->rp[i],=ri)
 
-    if (quit) {
+    if (el.test==-9) {
 #if PARALLEL
       printpartimes();
 #endif /*# PARALLEL */
@@ -1193,11 +1202,12 @@ int Ewaldtest(double *setL) /************************************* Ewaldtest */
 
     if (Ewaldparm(cutoff,setL)<0) goto again;
 
-
 #if COULOMB<0
     prt("\
-Ewald auto set: cutoff=%g alpha=%g kappa=%g\n\
-                Kx=%.3f Ky=%.3f Kz=%.3f",
+Ewald auto set:\n\
+  epsr=%g epsk=%g cutoff=%g  =>  alpha=%g kappa=%g\n\
+  Kx=%.3f Ky=%.3f Kz=%.3f",
+        el.epsr,el.epsk,
         cutoff,el.alpha,el.kappa,
         VARG(el.kappa*setL));
 #else /*# COULOMB<0 */
@@ -1237,11 +1247,22 @@ Ewald auto set: cutoff=%g alpha=%g kappa=%g\n\
     } while (!selffield(A,cfg[0],scf.eps,scf.omega,1));
 #endif /*#!POLAR */
   }
-
 #ifdef POLAR
   En.pot += En.self;
+  En.vir -= En.self*2;                                              
 #endif /*# POLAR */
+  box.V=PROD(box.L);
+  En.vir += En.virc+En.el;
   En.pot += En.el; /* do not move to forces() */
+  VO(En.Pvir,/=(DIM*box.V))
+#if 0
+  // names in V3.6w and older
+  En.trPt=SUM(En.Pvir); /* trace-based, without kinetic terms */
+  En.P=En.vir/(DIM*box.V); /* virial-based el-part */
+#else /*# 0 */
+  En.Ptr.n=SUM(En.Pvir); /* trace-based, without kinetic terms */
+  En.Pelvir.n=En.vir/(DIM*box.V); /* virial-based el-part */
+#endif  /*#!0 */
 
   time(&time1);
 
@@ -1269,20 +1290,24 @@ Ewald auto set: cutoff=%g alpha=%g kappa=%g\n\
 
     if (etestref) {
       prt("\
-En.pot-Epotref = %.3e K (with diagonal corr. %.3e)\n\
-summarized standard deviation of forces = %.3e K/AA = %.3e rel.\n\
-calc.deviation/estimate = %.4g (should be 1 if accurate reference)\n\
-maximum  deviation of forces = %.3e K/AA = %.3e rel.",
+En.pot-Epotref = %.3e (with diagonal corr. %.3e)\n\
+summarized standard deviation of forces = %.3e = %.3e relatively\n\
+calculated deviation / estimate = %.4g (should be ~1 if accurate reference)\n\
+maximum deviation of forces = %.3e = %.3e relatively",
           En.pot-Epotref,
           En.pot+Ediag-Epotref-Ediagref,
           sqrt(df),sqrt(df/dfref),
           sqrt(df/(1e-99+Sqr(estimr)+Sqr(estimk))),
           sqrt(maxf),sqrt(maxf/dfref));
-      prt("deviation of Pvir = %g [Pa]",En.vir*Punit/(box.L[0]*box.L[1]*box.L[2]*DIM)-Evirref);
+      prt("deviation of P (from E by virial theorem) = %g [Pa]",(En.Pelvir.n-EnPref)*Punit);
+      prt("deviation of P (trace of pressure tensor) = %g [Pa]",(En.Ptr.n-EntrPtref)*Punit);
 #if PRESSURETENSOR&PT_VIR
-      prt_("deviation of virial tensor =");
-      loop (ii,0,PT_DIM) prt_(" %g",En.Pvir[ii]-Pvirref[ii]);
-      prt("\nPvir-diag(Pvir)/3 = %g BUG HERE (units? /V?)",Evirref-SUM(En.Pvir)/DIM);
+
+      prt_("deviation of pressure tensor [Pa]:");
+      loop (ii,0,PT_DIM)
+        prt_(" %s%.12g",ii%3?"":"\n   ",(En.Pvir[ii]-Pvirref[ii])*Punit);
+  prt("\nP(virial) - trace(Ptens)/3 = %g Pa",(En.Pelvir.n-En.Ptr.n)*Punit);
+
 #endif /*# PRESSURETENSOR&PT_VIR */
     }
 
@@ -1290,27 +1315,31 @@ maximum  deviation of forces = %.3e K/AA = %.3e rel.",
   } /* el.test==+-1 */
 
 
- setref: /* el.test=+=2 or init=20 */
+ setref: /* el.test=+-2 */
   etestref=1;
-  el.test=el.test/abs(el.test);
-  Epotref=En.pot; Ediagref=Ediag;
+  el.test=sign(el.test);
+  Epotref=En.pot;
+  EnPref=En.Pelvir.n;
+  EntrPtref=En.Ptr.n;
+  Ediagref=Ediag;
   dfref=maxfref=0;
   d=A->rp;
   loop (ii,0,ns) { dfref += ff = SQR(d[ii]); Max(maxfref,ff); }
   varf=sqrt(dfref/No.s);
-  prt(
-      "\nTTTTTT Ewald test TTTTTT reference set TTTTTT\n"
-      "Epot = %.14g K\n\
-sqrt(sum forces^2) = %.14g K/AA max = %.10g",
-      Epotref,sqrt(dfref),maxfref);
-
-  prt("Pvir (from En.vir) = %g (all pressures in [Pa])",
-      Evirref=En.vir*Punit/(PROD(box.L)*DIM));
+  prt("\n\
+TTTTTT Ewald test TTTTTT reference set TTTTTT\n\
+Epot = %.14g K\n\
+sqrt(sum forces^2) = %.14g, max force = %.10g",
+      Epotref,sqrt(dfref),sqrt(maxfref));
+  prt("Pressures do not contain the kinetic part nor En.virc");
+  prt("P (from E by virial theorem) = %.14g [Pa]",EnPref*Punit);
+  prt("P (trace of pressure tensor) = %.14g [Pa]",EntrPtref*Punit);
 #if PRESSURETENSOR&PT_VIR
-  prt_("virial tensor:");
-  loop (ii,0,PT_DIM)
-    prt_(" %s%.9g",ii==3?" ":"",Pvirref[ii]=En.Pvir[ii]);
-  prt("\nPvir-diag(Pvir)/3 = %g",Evirref-SUM(En.Pvir)/DIM);
+  prt_("pressure tensor [Pa]:");
+  loop (ii,0,PT_DIM) {
+    Pvirref[ii]=En.Pvir[ii];
+    prt_(" %s%.12g",ii%3?"":"\n   ",Pvirref[ii]*Punit); }
+  prt("\nP(virial) - trace(Ptens)/3 = %g [Pa]",(EnPref-EntrPtref)*Punit);
 #endif /*# PRESSURETENSOR&PT_VIR */
 
   goto again;

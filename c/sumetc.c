@@ -16,9 +16,11 @@ struct opt_s {
   double power; /* or relation */
   int ipower;
   char *fmt;
-  double sum[M];
+  double sum[M]; /* sum or other operation result */
+  unsigned i[M];   /* for min/Max, the line # */
 } *head,*last;
-int maxn=0;
+int maxn=0,printnline=0;
+unsigned nline=0;
 
 int main(int narg, char **arg) /*************************************** main */
 {
@@ -31,7 +33,7 @@ int main(int narg, char **arg) /*************************************** main */
 
   FMT=getenv("FMT");
   if (!FMT || !strchr(FMT,'%')) FMT="%.8g";
-  
+
   if (narg<2) {
     fprintf(stderr,"\
 Sum and other operations by columns of data. Call by:\n\
@@ -50,6 +52,7 @@ OPTIONS:\n\
   -g       = geometric average, (prod X_i)^(1/n)\n\
   -gt# -ge# -lt# -le# -ne# -eq#\n\
            = # of data > >= < <= != == given number #\n\
+  -i       = print also the line number (1st instance) of min/max (-m,-M) in ()\n\
   -m       = minimum\n\
   -M       = maximum\n\
   -n       = number of data (the same as -0)\n\
@@ -85,6 +88,8 @@ See also:\n\
           FMT[0]='%'; }
         else
           if (strchr(c+1,'%')) Error("sumetc: multiple %% in format"); }
+      else if (arg[iarg][1]=='i')
+        printnline++;
       else {
         alloconezero(one);
         if (head) last->next=one;
@@ -114,7 +119,6 @@ See also:\n\
           case 'v': one->op=VAR; break;
           case 'V': one->op=ABSVAR; break;
           case 'a': one->op=AV; break;
-
           case 'g':
             one->op=arg[iarg][2]=='e'?GE:arg[iarg][2]=='t'?GT:GEOMAV; break;
           case 'l':
@@ -152,22 +156,22 @@ See also:\n\
         if (n>=M) Error("sumetc: sumetc: too many columns");
         if (!tok || sscanf(tok,"%lf",&x[n])!=1) break;
         tok=strtok(NULL,"\t \r,"); }
-      
+
       loop (i,0,n) {
         if (N[i]==0) first[i]=x[i];
         N[i]++;
         sum[i]+=x[i]-first[i];
         sumg[i]+=log(x[i]);
         sumq[i]+=Sqr(x[i]-first[i]); }
-      
+
       looplist (one,head) switch (one->op) {
         case ISUM: loop (i,0,n) one->sum[i]+=powi(x[i],one->ipower); break;
         case XSUM: loop (i,0,n) one->sum[i]+=sg*powi(x[i],one->ipower); sg*=-1; break;
         case NSUM: loop (i,0,n) one->sum[i]+=1; break;
         case RSUM: loop (i,0,n) one->sum[i]+=pow(x[i],one->power); break;
         case PROD: loop (i,0,n) one->sum[i]*=x[i]; break;
-        case MAX: loop (i,0,n) Max(one->sum[i],x[i]); break;
-        case MIN: loop (i,0,n) Min(one->sum[i],x[i]); break;
+        case MAX: loop (i,0,n) if (x[i]>one->sum[i]) one->sum[i]=x[i],one->i[i]=nline; break;
+        case MIN: loop (i,0,n) if (x[i]<one->sum[i]) one->sum[i]=x[i],one->i[i]=nline; break;
         case EQ: loop (i,0,n) one->sum[i]+=(x[i]==one->power); break;
         case NE: loop (i,0,n) one->sum[i]+=(x[i]!=one->power); break;
         case GT: loop (i,0,n) one->sum[i]+=(x[i]> one->power); break;
@@ -176,6 +180,7 @@ See also:\n\
         case LE: loop (i,0,n) one->sum[i]+=(x[i]<=one->power); break;
         default: ; /* suppress compiler warning */
       }
+      nline++;
       Max(maxn,n) }
 
   loop (i,0,maxn)
@@ -188,6 +193,10 @@ See also:\n\
         case ABSSTDEV: printf(one->fmt,sqrt((sumq[i]-Sqr(sum[i])/N[i])/(N[i]))); break;
         case VAR: printf(one->fmt,(sumq[i]-Sqr(sum[i])/N[i])/(N[i]-1)); break;
         case ABSVAR: printf(one->fmt,(sumq[i]-Sqr(sum[i])/N[i])/(N[i])); break;
+        case MAX:
+        case MIN: printf(one->fmt,one->sum[i]);
+          if (printnline) printf("(%u)",one->i[i]);
+          break;
         default: printf(one->fmt,one->sum[i]); }
 
       if (one->next)
@@ -197,5 +206,4 @@ See also:\n\
         else printf("%s",SEP); } }
 
   return 0;
-
 }

@@ -14,8 +14,8 @@ static struct unit_s unitlist[] = {
   {"mol",1,{0,0,0,0,1}},
   {"A",1,{0,0,0,0,0,1}},
   {"g",1e-3,{0,1}}, /* to parse mg etc. */
-  {"ct",0.2e-3,{0,1}}, /* carat */
-  {"mcg",1e-6,{0,1}}, /* ug */
+  {"ct",0.2e-3,{0,1}}, /* carat, not centi-ton */
+  {"mcg",1e-6,{0,1}}, /* ug, not milli-centi-gram */
   //  {"cd",1,{0,0,0,0,0,0,1}},
   //  {"sr",1,{0,0,0,0,0,0,0,1}},
 
@@ -25,12 +25,12 @@ static struct unit_s unitlist[] = {
 
   {"B",8,{0}},
 
-  {"au",149597870700,{1}}, /* astronomical unit, before u */
+  {"au",149597870700,{1}}, /* astronomical unit, not atto-dalton */
   {"pc", 30.856775814913673e15, {1}}, /* parsec */
 
   {"J",1,{2,1,-2}},
   {"W",1,{2,1,-3}},
-  {"Wh",3600,{2,1,-2}},
+  {"Wh",3600,{2,1,-2}}, /* Ws etc. not supported */
   //  {"Ry",2.179872324923e-18,{2,1,-2}}, /* Rydberg (energy) */
   //  {"Rinf",10973731.568508,{-1}}, /* Rydberg (inverse length) */
   {"N",1,{1,1,-2}},
@@ -51,20 +51,21 @@ static struct unit_s unitlist[] = {
   // sqrt(2e-49[N m4]*pi*e^2/(alpha*h*c)) new SI
   {"D",3.3356409510722084e-30,{1,0,1,0,0,1}},
   {"ar",1e2,{2}}, /* ar - not a which collides with a=annus */
-  {"ha",1e4,{2}}, /* hectare (accepted as non-SI unit by CIPM and EEC), before a */
+  {"ha",1e4,{2}}, /* hectare (accepted as non-SI unit by CIPM and EEC), not hecto-annus */
   {"min",60,{0,0,1}},
   {"h",3600,{0,0,1}},
   {"d",3600*24,{0,0,1}},
   {"Ci",3.7e10,{0,0,-1}},
   {"Hz",1,{0,0,-1}},
   {"RPM",1./60,{0,0,-1}},
+  {"Sv",1e-13,{0,0,1}},
   {"a",  31556925.445,{0,0,1}}, /* annus = tropical year 2000 */
   {"a_T",31556925.216,{0,0,1}}, /* annus = mean tropical year */
   {"a_J",31557600,{0,0,1}}, /* annus = Julian year */
   {"a_G",31556952,{0,0,1}}, /* annus = Gregorian year */
   {"Bq",1,{0,0,-1}},
   {"L",1e-3,{3}},
-  {"gal",3.785411784e-3,{3}}, /* 231 in^3 */
+  {"gal",3.785411784e-3,{3}}, /* 231 in^3 = USgal */
   {"USgal",3.785411784e-3,{3}},
   {"UKgal",4.54609e-3,{3}},
   {"M",1e3,{-3,0,0,0,1}}, /* mol/L */
@@ -85,7 +86,11 @@ static struct unit_s unitlist[] = {
   {"HP",745.69987158227,{2,1,-3}}, /* mechanical, imperial */
   //  {"HPe",746,{2,1,-3}}, /* electric */
   {"PS",735.49875,{2,1,-3}}, /* metric */
-  {"lb",0.45359237,{0,1}},
+  {"lb",0.45359237,{0,1}}, /* avoirdupois */
+  {"lbt",0.0311034768*12,{0,1}}, /* troy */
+  {"oz",0.45359237/16,{0,1}}, /* avoirdupois */
+  {"ozt",0.0311034768,{0,1}}, /* troy */
+  {"floz",29.5735295625e-6,{3}}, /* US; for food, 30 mL used */
   {"PSI",6894.757293168,{-1,1,-2}},
   {"bar",1e5,{-1,1,-2}},
   {"atm",101325.,{-1,1,-2}},
@@ -115,7 +120,7 @@ static struct pref_s {
   {"p",1e-12}, // pico
   {"n",1e-9},  // nano
   {"u",1e-6},  // micro
-  //  {"μ",1e-6},
+  //  {"μ",1e-6}, // not-ASCII not supported, use u
   {"m",1e-3},  // milli
   {"c",1e-2},  // centi
   {"d",1e-1},  // deci
@@ -329,6 +334,7 @@ struct user_s {
   struct user_s *next;
   char *unit;
 } *userhead;
+char *lastunit;
 
 void removeunit(struct user_s *u) /****************************** removeunit */
 {
@@ -348,7 +354,7 @@ void removeunit(struct user_s *u) /****************************** removeunit */
 }
 
 void towards(char *u) /********************************************* towards */
-/* command to, u points to the argument
+/* command "to ", u points to the argument
   register the preferred form of unit: to J/s, to [J/s]
   remove it: to ~J/s, to ~[J/s]
   remove all: to ~
@@ -391,7 +397,7 @@ void towards(char *u) /********************************************* towards */
   if (!user) { fprintf(stderr,"no heap\n"); exit(1); }
   user->next=userhead;
   userhead=user;
-  user->unit=strdup(u);
+  lastunit=user->unit=strdup(u);
 }
 
 double unitfactor=1;
@@ -401,8 +407,7 @@ char *unit(struct unit_s *res) /*************************************** unit */
 {
   static char prtunit[128];
   char *p=prtunit+1;
-  int k;
-  int nz=0;
+  int k, nz=0;
   struct unit_s nr;
   struct user_s *u;
 

@@ -8,6 +8,11 @@
     cc -o evu -O2 -Wall -DCALC=1 ev.c -I../gen -lm -lncurses
 
 History:
+06/2024:
+  character '!' now recognized (! was treated as comment even in '!')
+  ` as 'logical not' was added (bitwise not is function not())
+03/2024:
+  m(FORMULA) added
 12/2023:
   in calc.c, ` changed to @ (alt for modulo)
 07/2023:
@@ -105,9 +110,44 @@ int cprintf(const char *format,...) /******************************* cprintf */
   return ret;
 }
 
+char *strlast(const char *str) /************************************ strlast */
+/* returns pointer to the last char, or NULL if str==NULL or str="" */
+{
+  char *c;
+
+  if (!str || !*str) return NULL;
+  for (c=(char*)str; *c; c++);
+
+  return c-1;
+}
+
+char *comment(char *c) /******************************************** comment */
+/*
+   find first ! which is comment (i.e., not character '!')
+   and put 0 there or to the first consecutive space before
+*/
+{
+  char *spc=NULL;
+
+  if (!c) return 0; /* should not happen */
+  /* line starting by ! */
+  if (*c=='!') { *c=0; return c; }
+  if (*c==' ') spc=c;
+
+  while (*++c) {
+    if (*c=='!' && !(c[1]=='\'' && c[-1]=='\'') ) {
+      /* this ! is comment */
+      if (spc) *spc=0; else *c=0; /* erase from ! or preceding space */
+      return c; }
+    if (*c!=' ') spc=NULL;
+    else if (!spc) spc=c; }
+
+  return NULL;
+}
+
 int texprintf(const char *format,...) /*************************** texprintf */
 {
-  int ret,com=0,res=0,nc=-2,inmac=0;
+  int ret,res=0,nc=-2,inmac=0;
   char L[PROMPT_N*5],*c;
   va_list args;
 
@@ -115,7 +155,6 @@ int texprintf(const char *format,...) /*************************** texprintf */
   ret=vsprintf(L,format,args);
   va_end(args);
   for (c=L; *c; c++) {
-    if (*c=='!') com++;
     if (!inmac) if ((nc>44 && *c==' ') || (nc>47 && !isalnum(*c)) || nc>=50) {
       printf("\\\\\\hspace*{1em}");
       nc=0; }
@@ -131,12 +170,10 @@ int texprintf(const char *format,...) /*************************** texprintf */
       printf("{[\\Unit{\\rm "); inmac=1; }
     else if (*c==']') {
       printf("}]}"); inmac=0; }
-    else if (*c=='�') printf("$^\\circ$");
+    else if (*c==176) printf("$^\\circ$"); // iso-8859-2 ° 
     else if (*c=='\\' && (c>=L && c[-1]!='\\') && c[1]!='\\') printf("$\\surd$");
-    // ??? might be a clash with newly introduces @ instead of `
-    else if (*c=='@') { res=1; printf("\\tt\\mbox{}\\hfill$"); }
-    else if (res && *c=='e' && !inmac) {
-      res=3; printf("\\times10^{"); }
+    else if (*c=='@') { res=1; printf("\\tt\\mbox{}\\hfill$"); } // ?
+    else if (res && *c=='e' && !inmac) { res=3; printf("\\times10^{"); }
     else if (*c=='%') printf("\\%%");
     else if (*c=='.' && inmac) printf(",");
     else if (*c=='~') printf("$\\sim$");
@@ -169,6 +206,7 @@ static int err,inputmod;
 #if CALC&1
 #  define VAL .val
 #  define OP3(A,B,C) opunits(A,B,C)
+static int checkto=0;
 #else
 #  define VAL /**/
 #  define OP3(A,B,C) /**/
@@ -202,8 +240,8 @@ char assignop='=';
 
 void assign(char *b) /*********************************************** assign */
 /*
-   perform assignement (operators =,:=) to global register res from variable b
-   or modification (+=,-=,*=,/=,@=) of global register res by variable b
+  Assignment (operators =,:=) to global register res from variable named b,
+  or modification (+=,-=,*=,/=,@=) of global register res by variable b
 */
 {
   struct _Idlist_s *is;
@@ -230,14 +268,14 @@ void assign(char *b) /*********************************************** assign */
     case '-': OP3(&res,&is->val,assignop); res VAL=is->val VAL-=res VAL; break;
     case '*': OP3(&res,&is->val,assignop); res VAL=is->val VAL*=res VAL; break;
     case '/': OP3(&res,&is->val,assignop); res VAL=is->val VAL/=res VAL; break;
-    case '@': OP3(&res,&is->val,assignop); res VAL=is->val VAL-(int)(is->val VAL/res VAL)*res VAL; break;
+    case '`': OP3(&res,&is->val,assignop); res VAL=is->val VAL-(int)(is->val VAL/res VAL)*res VAL; break;
     case ':':
     case '=': is->val=res; break; }
 
   assignop='=';
 }
 
-void deassign(char *b) /******************************************* deassign */
+void deassign(char *b,char *msg) /********************************* deassign */
 /* remove variable b from the list */
 {
   struct _Idlist_s *is,*last=NULL;
@@ -246,7 +284,7 @@ void deassign(char *b) /******************************************* deassign */
     if (!strcmp(is->id,b)) {
       if (last) last->next=is->next;
       else _Id.head=is->next;
-/*.....  myprintf("variable %s freed\n",b);*/
+      myprintf(" (%s)\n",msg); // re-added because of tevu.sh
       free(is); return; }
     last=is; }
   myprintf("variable %s not found\n",b);
@@ -279,7 +317,8 @@ void clip(char *s) /* ------------------------------------------------- clip */
     else
       sprintf(ll,"%s \'%s\'",toclip,s);
 
-    system(ll); }
+    if (system(ll))
+      myprintf("xclip: system call failed\n"); }
 }
 
 /* verbosity level, sum of flags:
@@ -300,6 +339,18 @@ void printres(void) /* -------------------------------------------- printres */
 #if CALC&1
   char *u=unit(&res);
   double q=res VAL/unitfactor;
+  int donotprint=0;
+
+  if (checkto) {
+    char *c1,*c2;
+  
+    if (lastunit) {
+      for (c1=lastunit,c2=u; *c1 && *c2; c1++,c2++) {
+        if (strchr("[]",*c2)) c2++;
+        if (*c1!=*c2) { donotprint++; goto fin; } }
+
+    fin:; } }
+      //  fprintf(stderr,"•%s•%s•\n",lastunit,u);
 
   switch (cast) {
     case DOUBLE: sprintf(s,fmt,q,u); break;
@@ -312,7 +363,14 @@ void printres(void) /* -------------------------------------------- printres */
     case UNSIGNED: sprintf(s,fmt,(unsigned)res); break; }
 #endif
 
-  if (verbose&1) myprintf(s);
+#if CALC&1
+  if (donotprint)
+    /* do not print the value if another unit set by 'to' */
+    myprintf(" unit set\n");
+  else
+    /* re-print value if 'to' applies to the unit of the last result */
+#endif
+    if (verbose&1) myprintf(s);
   clip(s);
 
   _Id.nr=res;
@@ -502,6 +560,8 @@ int oper(char *expr) /* ----------------------------------------------- oper */
     char *name; /* keyword */
     int minparm; /* min # of parameters */
     int maxparm; /* max # of parameters */
+    int dimless; /* active if UNITS: dimensioness parameter index, 0 if none
+                    for check; also checked: unit(parm[0]==unit(parm[1]) */
     char *help; /* text to print if w/o parms */
     /* notes:
        * if less than maxparm parameters are give, undefined
@@ -510,27 +570,27 @@ int oper(char *expr) /* ----------------------------------------------- oper */
          has been assigned before
     */
     } op[]= {
-      /* index must correspond to enum op_e above */
-      {"",0,0,""},
-      {"solve",   0,3,"X[=INIT] EXPR (secants), X=FROM,TO[,BY] EXPR (search)"},
-      {"min",     0,3,"X[=INIT] EXPR, X=FROM,TO[,BY] EXPR"},
-      {"max",     0,3,"X[=INIT] EXPR, X=FROM,TO[,BY] EXPR"},
-      {"plot",    2,3,"X=FROM,TO[,N] EXPR [N<0: 1/2-shift]"},
-      {"integ",   2,3,"X=FROM,TO[,N] EXPR"},
-      {"deriv",   0,2,"X[=VALUE[,D]] EXPR"},
-      {"diff",    0,2,"X[=VALUE[,D] EXPR"}, /* = deriv */
-      {"sum",     2,3,"N=FROM,TO[,BY] EXPR"},
-      {"prod",    2,3,"N=FROM,TO[,BY] EXPR"},
-      {"iter",    1,2,"X=FROM[,EPS] EXPR (repeat X=EXPR until |X-Xlast|<EPS)"},
-      {"repeat",  2,2,"X=FROM,COUNT EXPR (COUNT* repeat X=EXPR)"},
-      {"contfrac",2,3,"N=FROM,TO[,BY] [BEFORE++]NUM//DENOM"},
-      {"def",     0,0,"X ANY_STRING, def X=A -> def X (A)"}, /* see DIRTY HACK */
-      {"expand",  0,0,"= def with all macros expanded now"}, /* see DIRTY HACK */
-      {"undef",   0,0,"X"},
+    /* index must correspond to enum op_e above */
+    {"",0,0,0,""},
+    {"solve",   0,3,0,"X[=INIT] EXPR (secants), X=FROM,TO[,BY] EXPR (search)"},
+    {"min",     0,3,0,"X[=INIT] EXPR, X=FROM,TO[,BY] EXPR"},
+    {"max",     0,3,0,"X[=INIT] EXPR, X=FROM,TO[,BY] EXPR"},
+    {"plot",    2,3,2,"X=FROM,TO[,N] EXPR [N<0: 1/2-shift]"},
+    {"integ",   2,3,2,"X=FROM,TO[,N] EXPR"},
+    {"deriv",   0,2,0,"X[=VALUE[,D]] EXPR"},
+    {"diff",    0,2,0,"X[=VALUE[,D] EXPR"}, /* = deriv */
+    {"sum",     2,3,1,"N=FROM,TO[,BY] EXPR"},
+    {"prod",    2,3,1,"N=FROM,TO[,BY] EXPR"},
+    {"iter",    1,2,0,"X=FROM[,EPS] EXPR (repeat X=EXPR until |X-Xlast|<EPS)"},
+    {"repeat",  2,2,1,"X=FROM,COUNT EXPR (COUNT* repeat X=EXPR)"},
+    {"contfrac",2,3,1,"N=FROM,TO[,BY] [BEFORE++]NUM//DENOM"},
+    {"def",     0,0,0,"X ANY_STRING, def X=A -> def X (A)"}, /* see DIRTY HACK */
+    {"expand",  0,0,0,"= def with all macros expanded now"}, /* see DIRTY HACK */
+    {"undef",   0,0,0,"X"},
 #if CALC&1
-	{"to",      0,0,"UNIT (preferred output, remove: to ~UNIT / to ~)"},
+	{"to",      0,0,0,"UNIT (preferred output, remove: to ~UNIT / to ~)"},
 #endif
-      {NULL,0,0,""} };
+    {NULL,0,0,0,""} };
   int i,np;
 
   if (sp) *sp=0;
@@ -572,7 +632,7 @@ int oper(char *expr) /* ----------------------------------------------- oper */
   np=0;
 
   if (eq) {
-    /* = */
+    /* = found, scan ,-separated parameters */
     for (np=0; np<4; np++) {
       char *comma=strchr(eq,',');
 
@@ -586,8 +646,9 @@ int oper(char *expr) /* ----------------------------------------------- oper */
       parm[np]=Calc(eq,&c);
       err=eq==c;
 #if CALC&1
-      if (np) OP3(&parm[0],&parm[np],'p');
-      else if (nop>=ITER) OP3(&parm[0],&parm[0],'i');
+      if (np) {
+        if (np==op[nop].dimless) OP3(&parm[np],&parm[np],'i');
+        else OP3(&parm[0],&parm[np],'p'); }
       if (unitserr) return 0;
 #endif
       if (err) {
@@ -831,8 +892,8 @@ int Checkres(double eps) /***************************************** Checkres */
   return fabs(froot_ext)<fabs(300*eps); /* 3e-7 of typical y-value */
 }
 
-double getmass(char *c,char **ret) /******************************** getmass */
-/* for function M() */
+double elemmass(char *c,char **ret) /****************************** elemmass */
+/* for functions M(), m() */
 {
   char elem[4];
   struct mend_s {
@@ -932,7 +993,7 @@ double getmass(char *c,char **ret) /******************************** getmass */
       {"Th",232.0381},
       {"Pa",231.03588},
       {"U",238.02891},
-      {"Np",237},
+      {"Np",237.05},
       {"Pu",244},
       {"Am",243},
       {"Cm",247},
@@ -943,20 +1004,25 @@ double getmass(char *c,char **ret) /******************************** getmass */
       {"Md",258},
       {"No",259},
       {"Lr",262},
-      {"Rf",261},
+      {"Rf",267},
       {"Db",262},
-      {"Sg",266},
+      {"Sg",269},
       {"Bh",264},
-      {"Hs",277},
-      {"Mt",268},
-      {"Uun",281},
-      {"Uuu",272},
-      {"Uub",285},
-      {"Uuq",289},
+      {"Hs",269},
+      {"Mt",278},
+      {"Ds",281},
+      {"Rg",282},
+      {"Cn",285},
+      {"Nh",286},
+      {"Fl",289},
+      {"Mc",289},
+      {"Lv",293},
+      {"Ts",294},
+      {"Og",294},
       {NULL,0} };
 
   elem[0]=*c;
-  elem[1]=elem[2]=elem[3]=0;
+  elem[1]=elem[2]=elem[3]=0; /* used to support UUn etc. */
   *ret=c+1;
   if (islower(c[1])) {
     elem[1]=c[1];
@@ -972,21 +1038,25 @@ double getmass(char *c,char **ret) /******************************** getmass */
   return 0;
 }
 
-void molarmass(char key,char *c) /******************************* molarmass */
+void molarmass(char key,char *c) /******************************** molarmass */
 /*
-  in place replace M(FORMULA) by MMkey
+  In place replacement of M(FORMULA) or m(FORMULA) by MM<key>[spaces],
+  where variable MM<key> (key=A..Z) contains the (molar) mass.
+  char *c is a pointer to M( or m( found
   Accepted expressions:
     M(C2H6)
     M(CuSO4 H10O5)
-    M(Cu(
     M(Fe0.5)
-  Not accepted:
-    CuSO4.5H20   - means Cu S O4.5 H2 O)
+  Wrong:
+    CuSO4.5H20   - accepted, but interpreted as Cu S O4.5 H2 O
     CuSO4 (H2O)5 - parentheses not supported
+  molar=1: mass in g/mol (w/o units), or any compatible unit with units
+  molar=0: mass in kg, or any mass unit with units
 */
 {
   char *e=strchr(c,')');
   char *b=c;
+  int molar=*c=='M'; /* m() or M() */
   double m,x,s=0;
 
   c+=2;
@@ -994,44 +1064,57 @@ void molarmass(char key,char *c) /******************************* molarmass */
 #if CALC&1
   OP3(&res,&res,'0');
   res.pow[1]=1;
-  res.pow[4]=-1; /* kg/mol */
+  res.pow[4]=-molar; /* kg/mol or kg */
 #endif
 
   if (!e) {
-    myprintf("M( : ) expected");
+    myprintf("missing ) after M( or m(");
+    return; }
+  else if (e==c) {
+    myprintf("M() or m() without compound");
     return; }
 
   if (key>'Z') {
-      myprintf("max 26 expressions M() allowed in 1 line");
-      return; }
+    myprintf("max 26 functions M() or m() allowed in 1 line");
+    return; }
 
   for (;;) {
     while (*c==' ') c++;
-    m=getmass(c,&c);
+    m=elemmass(c,&c);
     if (*c==0)  {
-      myprintf("M( : syntax or internal error");
+      myprintf("M() or m(): syntax or internal error");
       return; }
-    x=strtod(c,&e);
+    x=strtod(c,&e); /* real number, stoichiometric coeff. after element name */
     if (c==e) x=1;
     c=e;
     if (*c==0) {
-      myprintf("M( : syntax or internal error");
+      myprintf("M() or m(): syntax or internal error");
       return; }
-    s+=m*x;
+    s+=m*x; /* molar mass summed up */
+
     if (*c==')') {
+      /* matching ) found: s=molar mass in g/mol */
       for (e=b; e<=c; e++) *e=' ';
-      b[0]=b[1]='M';
+      b[0]=b[1]='M'; /* MM<key> used for both */
       b[2]=key;
-      b[3]=0;
-      x=res VAL;
+      b[3]=0; /* temporary: b=MM<key> */
+      x=res VAL; /* remember */
+      if (molar) {
 #if CALC&1
 	res VAL=s*1e-3; /* g->kg conversion */
 #else
-	res VAL=s;
+	res VAL=s;      /* no conversion (result in g/mol) */
 #endif
-      assign(b);
-      res VAL=x; /* why? */
-      b[3]=' ';
+      } else {
+#if CALC&1
+	res VAL=s/6.02214076e+26; /* g->kg conversion */
+#else
+	res VAL=s/6.02214076e+26; /* g->kg conversion */
+#endif
+      }
+      assign(b); /* assign res to variable b=MM<key> */
+      res VAL=x; /* return back - is it needed? */
+      b[3]=' '; /* restore space filling after M<key> */
       return;
     }
   }
@@ -1090,7 +1173,7 @@ void calculate(char *expr) /************************************** calculate */
 
   /* molar mass, e.g. M(H2O) */
   key='A'; /* A,B,..*/
-  for (c=expr; *c; c++) if (*c=='M' && c[1]=='(') molarmass(key++,c);
+  for (c=expr; *c; c++) if (toupper(*c)=='M' && c[1]=='(') molarmass(key++,c);
 
   /* looking for id=expr */
   c=expr;
@@ -1157,7 +1240,7 @@ void calculate(char *expr) /************************************** calculate */
 	looplist (u,userhead) myprintf("to [%s]\n",u->unit);
 #endif
         } }
-      else if (key=='~') deassign(b);
+      else if (key=='~') deassign(b,"removed");
       else assign(b); /* assignop=extra (see above) */ }
     else {
       /* id=expr */
@@ -1530,23 +1613,23 @@ void calculate(char *expr) /************************************** calculate */
       res VAL=parm[0] VAL; assign(var);
       fclose(plot);
       if (system("plot /tmp/ev.tmp &"))
-        myprintf("plot: system call failed\n"); }
-      break;
+        myprintf("plot: system call failed\n");
+      break; }
 
     case DEF:
       defmacro(var,eqn);
-      deassign(var);
-      if (mode==FILTER) myprintf(" (defined)\n");
+      deassign(var,"defined");
+      //      if (mode==FILTER) myprintf(" (defined)\n");
       break;
     case UNDEF:
       undefmacro(var);
-      deassign(var);
-      if (mode==FILTER) myprintf(" (undefined)\n");
+      deassign(var,"undefined");
+      //      if (mode==FILTER) myprintf(" (undefined)\n");
       break;
     case EXPAND:
       expand(var,eqn);
-      deassign(var);
-      if (mode==FILTER) myprintf(" (expanded)\n");
+      deassign(var,"expanded");
+      //      if (mode==FILTER) myprintf(" (expanded)\n");
       break;
       //    HELP:
       //      break;
@@ -1728,10 +1811,9 @@ int main(int narg,char **arg) /**************************************** main */
   if (!strcmp(evdata,"/")) {
     char *h=getenv("HOME");
     if (h) {
-      evdata=malloc(strlen(h)+9);
+      evdata=malloc(strlen(h)+10); /* bug fixed by J. Janek 2024-08-27 */
       strcpy(evdata,h);
-      strcat(evdata,"/." EV "data");
-    } }
+      strcat(evdata,"/." EV "data"); } }
 
   if (strlen(evdata)) f=fopen(evdata,"rt");
 
@@ -1739,16 +1821,22 @@ int main(int narg,char **arg) /**************************************** main */
   if (!(verbose&8)) myprintf=dummyprintf;
 
   isconst=1;
-  if (f) while (fgets(line0,PROMPT_N+1,f)) {
-    if ((unsigned char)line0[strlen(line0)-1]<' ') line0[strlen(line0)-1]=0;
-    c=strchr(line0,'!');
-    if (c) *c=0;
-    myprintf("%s\n",line0);
-    if (strlen(line0)>2) {
+  if (f)
+    while (fgets(line0,PROMPT_N+1,f)) {
+      char *u=strlast(line0);
+
+      /* removing trailing \n */
+      if (u && (unsigned char)*u<=' ') *u=0;
+
+      /* removing trailing comment (w. preceding spaces) */
+      comment(line0);
+
+      myprintf("%s\n",line0);
+      if (strlen(line0)>2) {
 #if CALC&1
 	if (!memcmp(line0,"to ",3)) towards(line0+3); else
 #endif
-      calculate(line0); } }
+        calculate(line0); } }
   isconst=0;
 
   myprintf=auxprintf;
@@ -1808,13 +1896,12 @@ int main(int narg,char **arg) /**************************************** main */
       if (strlen(line)==0) strcpy(line,"!");
       texprintf("%s\n",line); }
 
-    /* ! is comment */
-    for (c=line; *c; c++)
-      if (*c=='!') {
-        if (mode==FILTER && (verbose&16) && !printed) {
-          printed++;
-          puts(c); }
-        *c=0; }
+    c=comment(line);
+    if (c)
+      if (mode==FILTER && (verbose&16) && !printed) {
+        printed++;
+        putchar('!');
+        puts(c+1); }
 
     /* , -> . */
     if (inputmod&1) {
@@ -1871,8 +1958,10 @@ int main(int narg,char **arg) /**************************************** main */
 #if CALC&1
         else if (!memcmp(line,"to ",3)) {
           towards(line+3);
+          checkto=1;
           /* last result printed even if 'to' applied to another unit */
-          printres(); }
+          printres();
+          checkto=0; }
 #endif
         else if (!strcmp(line,"prompt")) prompt^=1;
         else

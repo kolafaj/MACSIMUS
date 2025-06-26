@@ -998,6 +998,8 @@ macsimus/sim/shakev0.c
 macsimus/sim/shakev1.c
 macsimus/sim/shakev2.c
 macsimus/sim/shakev3.c
+macsimus/sim/shakev30.c
+macsimus/sim/shakev4.c
 macsimus/sim/shakev5.c
 macsimus/sim/shakev6.c
 macsimus/sim/simcg.c

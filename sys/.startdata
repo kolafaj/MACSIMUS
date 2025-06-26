@@ -122,7 +122,7 @@ sh	sh "%s.%s"
 rpm	rpm -q -i -p "%s.%s"
 deb	dpkg -I	dpkg -c
 py	python
-
+ipynb	jupyter-lab
 tex	e
 
 # `run the first line' of a file - it is assumed that the 1st line

@@ -1,28 +1,39 @@
-/* Spline preparation of two functions (eru and erd) at once.
-   To be used for electrostatic/Ewald.
-   Robust code replacing the old versions, still backward compatible
-   Needs function
-     erfcs(i,&eru,&erd) -> eru(i*Erfc.h), erd(i*Erfc.h)
-   which is called with non-increasing i's (therefore compatible with
-   the old code using numerical integration from long i).
-   SUBGRID accepted (as for old numerical integration code)
+/* Spline preparation of two functions (eru and erd) at once, to be used in
+   the (r-space part of) the electrostatic forces.
+   The electrostatic energy/force between charges qi,qj is then
+     uij = qi*qj*eru(rr)
+     fij = qi*qj*eru(rr)*rij (vector)
+   where rij=rj-ri (vector) and rr=rij^2.
 
-SPLINE==2: A+x*(B+x*C) - fastest, least accurate
-SPLINE==-2: A+B/(x+C) - good for r-space Ewald, cannot use for nonmonotonous functions
-SPLINE==3: A+x*(B+x*(C+x*D)) - good for Gaussian charges + Ewald
+   Robust code replacing the old versions, still backward compatible.
+
+   Needed:
+     erfcs(i,&eru,&erd) should return eru(i*Erfc.h), erd(i*Erfc.h)
+   where Erfc.h=1/grid/SUBGRID
+   This function is be called with non-increasing i's 
+   (therefore it remains compatible with the old code using 
+   numerical integration from long i).
+
+   SPLINE values:
+   2  A+x*(B+x*C)       - fastest, least accurate
+   -2 A+B/(x+C)         - good monotonously decreasing functions as erfc
+   3  A+x*(B+x*(C+x*D)) - good for Gaussian charges + Ewald
 */
 
-static void makesplines(int ito,double alpha) /********* makesplines */
+static void makesplines(int ito,double alpha) /***************** makesplines */
 /*
-   ito in units of step
-   alpha = scaling factor (only old module erfc.c)
+   ito = max. spline interval index
+   alpha = scaling factor (with erfc.c only: USE 1 OTHERWISE)
 */
 {
   int i,n;
-  double Du,Dd,x,h,xh;
-  double Duh,Ddh;
+#if SPLINE==3  
+  /* long double improves spline precision for SPLINE=3 */
+  long
+#endif
+    double Du,Dd,x,h,xh, Duh,Ddh;
   ertab_p p;
-  struct {
+  struct f_e {
     double u,d;
   } *f;
 
@@ -110,19 +121,27 @@ static void makesplines(int ito,double alpha) /********* makesplines */
       Du=(-25./12*f[i].u+4*f[i+1].u-3*f[i+2].u+4./3*f[i+3].u-1./4*f[i+4].u)/Erfc.h;
       Dd=(-25./12*f[i].d+4*f[i+1].d-3*f[i+2].d+4./3*f[i+3].d-1./4*f[i+4].d)/Erfc.h; }
 #  endif /*#!SUBGRID>1 */
-    p->Au=(h-2*x)*Sqr(xh)*f[i].u + Sqr(x)*(h+2*xh)*f[i+SUBGRID].u - x*h*Sqr(xh)*Du -xh*h*Sqr(x)*Duh;
-    p->Bu=6*x*xh*(f[i].u-f[i+SUBGRID].u) +  h*(2*x+xh)*xh*Du +h*x*(2*xh+x)*Duh;
-    p->Cu=-3*(x+xh)*(f[i].u-f[i+SUBGRID].u) -  h*(x+2*xh)*Du -h*(2*x+xh)*Duh;
+    /* See splines.mw and maple2spline.sh
+       In V3.6w and older, numerically unstable formulas were used which made
+       problems for el.grid>64 and/or demanding applications like virtual
+       volume change method.  For standard MD, el.grid=32 worked fine.      
+     */
+    p->Au=-Du*x*h*(xh+x)*xh+Sqr(x)*h*(Du-Duh)*xh + (f[i].u*Cub(h)+(f[i+SUBGRID].u-f[i].u)*Sqr(x)*(h + 2*xh));
+    p->Bu=Sqr(h)*(x+xh)*Du + h*x*(x+2*xh)*(Duh+Du) + 6*x*xh*(f[i].u-f[i+SUBGRID].u);
+    p->Cu=-Sqr(h)*Du + (-Sqr(h) - 3*h*x)*(Duh+Du) + 3*(xh+x)*(f[i+SUBGRID].u-f[i].u);
     p->Du=2*(f[i].u-f[i+SUBGRID].u)+h*(Du+Duh);
 
-    p->Ad=(h-2*x)*Sqr(xh)*f[i].d + Sqr(x)*(h+2*xh)*f[i+SUBGRID].d - x*h*Sqr(xh)*Dd -xh*h*Sqr(x)*Ddh;
-    p->Bd=6*x*xh*(f[i].d-f[i+SUBGRID].d) +  h*(2*x+xh)*xh*Dd +h*x*(2*xh+x)*Ddh;
-    p->Cd=-3*(x+xh)*(f[i].d-f[i+SUBGRID].d) -  h*(x+2*xh)*Dd -h*(2*x+xh)*Ddh;
+    p->Ad=-Dd*x*h*(xh+x)*xh+Sqr(x)*h*(Dd-Ddh)*xh + (f[i].d*Cub(h)+(f[i+SUBGRID].d-f[i].d)*Sqr(x)*(h + 2*xh));
+    p->Bd=Sqr(h)*(x+xh)*Dd + h*x*(x+2*xh)*(Ddh+Dd) + 6*x*xh*(f[i].d-f[i+SUBGRID].d);
+    p->Cd=-Sqr(h)*Dd + (-Sqr(h) - 3*h*x)*(Ddh+Dd) + 3*(xh+x)*(f[i+SUBGRID].d-f[i].d);
     p->Dd=2*(f[i].d-f[i+SUBGRID].d)+h*(Dd+Ddh);
 
-    p->Au *= alpha/Cub(h);       p->Ad *= Cub(alpha)/Cub(h);
-    p->Bu *= Cub(alpha)/Cub(h);  p->Bd *= Pow5(alpha)/Cub(h);
-    p->Cu *= Pow5(alpha)/Cub(h); p->Cd *= Pow4(alpha)*Cub(alpha)/Cub(h);
+    p->Au *= alpha/Cub(h);
+    p->Ad *= Cub(alpha)/Cub(h);
+    p->Bu *= Cub(alpha)/Cub(h);
+    p->Bd *= Pow5(alpha)/Cub(h);
+    p->Cu *= Pow5(alpha)/Cub(h);
+    p->Cd *= Pow4(alpha)*Cub(alpha)/Cub(h);
     p->Du *= Pow4(alpha)*Cub(alpha)/Cub(h);
     p->Dd *= Pow4(alpha)*Cub(alpha)*Sqr(alpha)/Cub(h);
 
@@ -133,5 +152,7 @@ static void makesplines(int ito,double alpha) /********* makesplines */
 
   Erfc.sgrid *= Sqr(alpha);
 
+  prt("Splines calculated with compile-time switches: SPLINE=%d, SUBGRID=%d",SPLINE,SUBGRID);
+
   free(f);
-} /* eerfcs */
+} /* makesplines */

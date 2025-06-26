@@ -22,6 +22,7 @@ void fixsites(ToIntPtr X);
 int isfixed(int i);
 void checkfixed(void);
 void printmasses(void);
+void Hamaker(void);
 
 #ifdef WIDOM
 double Widomcutcorr(int spreal,int spvirt,double LJcutoff);

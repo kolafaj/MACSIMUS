@@ -8,15 +8,21 @@ int main(int narg,char **arg)
   FILE **f;
   char *nl;
   int iarg,nopen;
+  char *SEP=getenv("HCAT");
 
   if (narg<2) {
-    fprintf(stderr,"Concatenate text files horizontally. Call by:\n\
-  hcat FILE [FILE..] > OUTFILE\n\
+    fprintf(stderr,"\
+Concatenate text files horizontally. Call by:\n\
+  [HCAT=] hcat FILE [FILE..] > OUTFILE\n\
+Where\n\
+  HCAT = separator string (default=" ")\n\
 See also:\n\
   cat mergetab\n\
 ");
     exit(0); }
 
+  if (SEP[0]==0) SEP=" ";
+  
   allocarray(f,narg);
   
   loop (iarg,1,narg) 
@@ -30,8 +36,8 @@ See also:\n\
         nopen++;
         if (iarg!=narg-1) {
           nl=strchr(line,'\n');
-          if (nl) *nl=' ';
-          else strcat(line," "); }
+          if (nl) *nl=0;
+          strcat(line,SEP); }
         printf("%s",line); }
     if (!strchr(line,'\n')) printf("\n");  
   } while (nopen);

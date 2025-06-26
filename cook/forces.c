@@ -115,7 +115,7 @@ void forces(ToIntPtr B, ToIntPtr A) /******************************** forces */
   /*** Ewald k-forces (parallelized) ***/
   Ewald(1,B->rp,A->rp);
   En.el=Ewald(2,B->rp,A->rp);
-  if (option('v')&4) prt("after Ewald k-space: En.el=%.12g (P1)",En.el);
+  if (option('v')&4) prt("after Ewald k-space: En.el=%.15g (P1)",En.el);
 
                                                       CPUtime("Ewald k-space");
   /* pair forces (x-slab-parallelized) + intramolecular forces */
@@ -175,7 +175,7 @@ void forces(ToIntPtr B, ToIntPtr A) /******************************** forces */
   if (partimes.kspace) partimes.kspace[0]+=(times[0][1]-times[0][0])/(double)CLOCKS_PER_SEC;
   if (partimes.rspace) partimes.rspace[1]+=(times[1][1]-times[1][0])/(double)CLOCKS_PER_SEC;
 
-  if (option('v')&4) prt("after Ewald k-space: En.el=%.12g (P2, from stored value)",EnEwald);
+  if (option('v')&4) prt("after Ewald k-space: En.el=%.15g (P2, from stored value)",EnEwald);
 
 #  else /*#!PARALLEL==1!PARALLEL==2 */
   /* serial version (and PARALLEL==3 - no longer active) */
@@ -188,7 +188,7 @@ void forces(ToIntPtr B, ToIntPtr A) /******************************** forces */
   En.el=Ewald(2,B->rp,A->rp);
                                                       CPUtime("Ewald k-space");
 
-  if (option('v')&4) prt("after Ewald k-space: En.el=%.12g (P0)",En.el);
+  if (option('v')&4) prt("after Ewald k-space: En.el=%.15g (P0)",En.el);
 #    else /*# COULOMB */
   En.el=0;
 #    endif /*#!COULOMB */
@@ -214,7 +214,7 @@ void forces(ToIntPtr B, ToIntPtr A) /******************************** forces */
   /* NOTES:
    * En.pot += En.el is AFTER forces() and optionally selffield() is called
                      (because selffield() modifies both En.el and En.self)
-   * En.vir += En.el is in measureconstraints()
+   * En.vir += En.el is in measurePconstraints()
    */
   userforces(B,A);
   advancerdf();
