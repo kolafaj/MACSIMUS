@@ -502,7 +502,7 @@ typedef struct En_s {
   double Pref;     /* reference pressure [p.u.] monitored in col 5 of .cp
                       pressure used in a barostat (if active)
                       for thermostat="MTK" calculated every step */
-  P_t Pelvir;      /* pressure [p.u.] using elst virial (En.vir); virial=1
+  P_t Pevir;       /* pressure [p.u.] using elst virial (En.vir); virial=1
                       NB: inaccurate for CUTELST, wrong for Gaussian charges */
   P_t PdV;         /* pressure from virtual V change; virial=2 */
 

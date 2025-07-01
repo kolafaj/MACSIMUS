@@ -492,8 +492,8 @@ void printdpr(int slabmode,int slabprt,double dV,char *PdVname) /* printdpr */
   /* surface tension */
   if (slabmode&1) {
     double c[3]={slabcorr(0),slabcorr(1),slabcorr(2)};
-    double Esta,Psta=StaMean("P(vir) [Pa]"),Ptsta=StaMean("Pt [Pa]");
-    double sc[3],Pc,dP=StaStdErr("P(vir) [Pa]")*Lzf;
+    double Esta,Psta=StaMean("Pevir [Pa]"),Ptsta=StaMean("Pt [Pa]");
+    double sc[3],Pc,dP=StaStdErr("Pevir [Pa]")*Lzf;
     double V=box.L[0]*box.L[1]*(dprz->Lz/dprz->nmeas);
 
     Esta=StaMean("Epot [J/mol]");
@@ -583,7 +583,7 @@ Fourier expansion cutoff corrections for the slab geometry (slab.K=%d):\n\
       header(slab.K?
              " surface tension gamma in N/m: DO_NOT_USE    stderr    FF-corrected":
              " surface tension gamma in N/m: corrected     stderr    uncorrected");
-      prt("from P(vir) assuming Psat=0 %12.7f %12.7f %12.7f (a,b)",
+      prt("from Pevir assuming Psat=0 %12.7f %12.7f %12.7f (a,b)",
           -Pc*Lzf, dP, -(Psta-En.corr/(V*V)*Punit)*Lzf);
       if (dV) {
         char shortname[8];
@@ -613,7 +613,7 @@ Fourier expansion cutoff corrections for the slab geometry (slab.K=%d):\n\
       prt("(a) Assumes <Pzz>=0: subtract %g*(saturated pressure in Pa)",Lzf);
       prt("(b) Assumes elst.virial = -elst.energy, "
 #if COULOMB<0
-          "cf. =P(tens)-P(vir) [Pa]= for accuracy"
+          "cf. =Ptr-Pevir [Pa]= for accuracy"
 #else /*# COULOMB<0 */
           "not good with cut-off electrostatics"
 #endif /*#!COULOMB<0 */

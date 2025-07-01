@@ -578,20 +578,22 @@ NB: slab.sp (in SLAB version) sets box.center automatically",
 #endif
     }
     prt(" virial=%d = %s",virial,
-        virial==1 ? "P(vir) = virial theorem (elst_virial = -elst_energy)"
-        : virial==2 ? "P(dV) = virtual volume (shape) change method"
-        : virial==3 ? "P(tens) = trace of pressure tensor (from forces)" : "ERROR");
-    prt("Will be reported as  Pcfg [Pa]  and shown in convergence profile\n\
-unless superseded by the virtual volume change method (see dV).\n\
+        virial==1 ?   "Pevir = virial theorem (elst_virial = -elst_energy)"
+        : virial==2 ? "PdV   = virtual volume (shape) change method"
+        : virial==3 ? "Ptr   = trace of pressure tensor (from forces)" : "ERROR");
+    prt("\
+Will be reported as  Pcfg [Pa]  and shown in convergence profile\n\
+(unless superseded by the virtual volume change method, see dV).\n\
 Pressures available, cf. variable virial:\n\
-  P(vir) = virial theorem (elst_virial = -elst_energy):\n\
-           - good with Ewald point charges\n\
-           - wrong for Gaussian charges\n\
-           - inaccurate for cutoff elst\n\
-  P(dV) = virtual volume change, good for debugging, see dV and rescale\n\
-  P(tens) = trace of pressure tensor (from forces):\n\
-            - most accurate\n\
-            - for Ewald point charges consider a bit faster PRESSURETENSOR=0");
+  Pevir = uses the virial theorem (elst_virial = -elst_energy):\n\
+          - good with Ewald point charges (cookew*)\n\
+          - wrong for Gaussian charges (cookgc*)\n\
+          - inaccurate for cutoff electrostatics (cookce*)\n\
+  PdV = virtual volume change, good for debugging, see variables dV and rescale\n\
+  Ptr = trace of pressure tensor (from forces):\n\
+          - most accurate\n\
+          - for Ewald point charges is a bit faster (if the full pressure tensor\n\
+            calculation is turned off by #define PRESSURETENSOR=0 in simopt.h");
     if (virial==2) {
       if (dV==0) ERROR(("Virtual volume change method (virial=2) selected but dV=0"))
       if (thermostat>=T_NPT) ERROR(("thermostat=%d cannot use the virtual volume change method"))
@@ -741,9 +743,10 @@ also, [+UNIT] converts to p.u. and [-UNIT] backwards, see evu -> p(.)units.",
       else
         /* no -^ nor scf.omega: defaults
            - for -m2 (ASPC) the default is postponed to pred2.c
-           - for -m>2 (full-iteration) the default is scf.omega=0.95
+           - for -m>2 (full-iteration) the default is scf.omega=0.9
         */
-        if (gear.order!=2) scf.omega=0.95; }
+        if (gear.order!=2) {
+          WARNING(("undefined scf.omega set to %g",scf.omega=0.9)) } }
     else {
       /* scf.omega specified in data */
       option('^')=100*scf.omega+0.5; /* not to be set to default in pred2.c */ }
@@ -1329,9 +1332,9 @@ En.corr=%.9g [K AA3] (Ecorr=En.corr/V, Pcorr=En.corr/V^2)",
       measure=1; /* debugging only! */
       /* necessary rhs if Verlet? */
 #  ifdef POLAR
-      { /* OOPS! scf.omega may be -9 here to be set later.... */
+      { /* OOPS! scf.omega may be -9 here to be set later... */
         double o=scf.omega;
-        scf.omega=0.95;
+        scf.omega=0.9;
 #    if POLAR&32
         initfqcharges();
 #    endif /*# POLAR&32 */
@@ -1358,15 +1361,15 @@ En.corr=%.9g [K AA3] (Ecorr=En.corr/V, Pcorr=En.corr/V^2)",
     if (tau.P==0 && tau.rho==0 && tau.sig==0)
       // prior V2.8c:      initCP(no,CPnbit,dV==0?(thermostat==T_NOSE?"Ep+k":No.first?"Ep0":"Ein"):constrd.PdVname,"P",corr);
       initCP(no,CPnbit,dV==0?(thermostat==T_NOSE?"Ep+k":FROM?"Ep0":"rho"):constrd.PdVname,"PECC",corr);
-    else /* "P" changed to "Pcfg" in V3.6l */
+    else /* "P" changed to "Pcfg" in V3.6l, but in V3.7a changed to "Pref" */
       WARNING(("tau.P, tau.rho, tau.sig not supported with ECC except initialization"))
-      initCP(no,CPnbit,tau.sig?"svdW":"rho",dV==0?"Pcfg":constrd.PdVname,corr);
+      initCP(no,CPnbit,tau.sig?"svdW":"rho",dV==0?"Pref":constrd.PdVname,corr);
 #  else /*# ECC */
     if (tau.P==0 && tau.rho==0 && tau.sig==0)
       // prior V2.8c:      initCP(no,CPnbit,dV==0?(thermostat==T_NOSE?"Ep+k":No.first?"Ep0":"Ein"):constrd.PdVname,"P",corr);
-      initCP(no,CPnbit,dV==0?(thermostat==T_NOSE?"Ep+k":FROM?"Ep0":"rho"):constrd.PdVname,"Pcfg",corr);
+      initCP(no,CPnbit,dV==0?(thermostat==T_NOSE?"Ep+k":FROM?"Ep0":"rho"):constrd.PdVname,"Pref",corr);
     else
-      initCP(no,CPnbit,tau.sig?"svdW":"rho",dV==0?"Pcfg":constrd.PdVname,corr);
+      initCP(no,CPnbit,tau.sig?"svdW":"rho",dV==0?"Pref":constrd.PdVname,corr);
 #  endif /*#!ECC */
 
     if (tau.sig==0) {
@@ -1729,16 +1732,16 @@ final drift = %d = %s",DRIFT_START,drift,int2sumbin(drift)))
 
       /*** pressure [Pa] ***/
       /* virial-based pressure w/o cutoff corrections (elst virial=energy) */
-      En.Pelvir.n=((En.kin*2*No.Pkinq+En.vir)/DIM)/box.V; // former En.Pnc
+      En.Pevir.n=((En.kin*2*No.Pkinq+En.vir)/DIM)/box.V; // former En.Pnc
 
       /* as above, w. cutoff corrections added */
-      En.Pelvir.c=En.Pelvir.n+En.corr/Sqr(box.V);
+      En.Pevir.c=En.Pevir.n+En.corr/Sqr(box.V);
       // to move:      if (option('v')&4) StaAdd("En.P double check [Pa]",((En.kin*2*No.Pkinq+En.vir)/DIM+En.corr/box.V)/box.V*Punit);
 
 #  ifdef ECC
     /* Since V3.4a, En.P becomes the ECC pressure,
        in statistics and CP, these are still marked by ECC */
-      // TO BE FIXED AFTER CHANGES: should not *=Punit, use En.Pelvir
+      // TO BE FIXED AFTER CHANGES: should not *=Punit, use En.Pevir
       En.ECC_Pcorr*=Punit;
       En.Pnc+=En.ECC_Pcorr;
       En.ECC_Pvir=En.P; /* Pvir - see the paper */
@@ -1950,11 +1953,11 @@ scf.domega:=0 (no autoset in the next sweep)",
     if (scf.epsq>0) {
       put3(scf.epsq,scf.eps,scf.eps0)
       scf.eps=scf.eps0; scf.epsq=-fabs(scf.epsq); }
-    prt("%g  %g %g  %g %g  %g %g POLAR SCF:omega  iter err  maxerr err  stderr err",
+    prt("%g  %g %g  %g %g  %g %g  POLAR SCF:omega  iter err  1maxerr err  1stderr err  lastmaxerr err  laststderr err",
         scf.omega,
         StaMean("polar no of iter"),StaStdErr("polar no of iter"),
-        StaMean("polar one-step maxerr"),StaStdErr("polar one-step maxerr"),
-        StaMean("polar 1st iter stderr"),StaStdErr("polar 1st iter stderr"));
+        StaMean("polar 1st iter stderr"),StaStdErr("polar 1st iter stderr"),
+        StaMean("polar last iter stderr"),StaStdErr("polar last iter stderr"));
 #  endif /*# POLAR */
 
     underline("sweep timing");

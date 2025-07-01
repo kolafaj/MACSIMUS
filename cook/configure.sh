@@ -347,7 +347,7 @@ else
 
   echo
   echo "===== Request PRESSURE TENSOR calculations; sum the following flags:"
-  echo "  0 = no pressure tensor calculated (by 1-2% faster than 3)"
+  echo "  0 = no pressure tensor calculated (1-2% faster than option 3)"
   echo "  1 = calculate the virial (static) part incl. constraint forces"
   echo "  2 = calculate the kinetic part"
   echo "> 3 = 1+2 (DEFAULT)"

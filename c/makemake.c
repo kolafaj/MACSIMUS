@@ -3,12 +3,13 @@
 
 #define METAMAKE "metamake.mmk" /* source file */
 
-/*** makemake.c *** (c) J.Kolafa 07/1993--2024 ***
+/*** makemake.c *** (c) J.Kolafa 07/1993--2025 ***
 
 Generate unix-style `makefile' from `metamake.mmk'.
 Simplified version with all DOS/EMX legacy features removed.
 
 History:
+  06/2025  help slightly updates
   02/2024: !private added because of easier GitHub compatibility
            `metamake' renamed to `metamake.mmk'
   06/2022: DOS support removed, spaces in names allowed
@@ -645,20 +646,26 @@ int main(int narg,char **arg) /**************************************** main */
   struct project_s *project;
 
   fprintf(stderr,"\
-MAKEMAKE 02/2024: MACSIMUS makefile generator\n");
+MAKEMAKE 06/2025: MACSIMUS makefile generator\n");
 
   if (narg<2) {
     fprintf(stderr,"\
-Generate `makefile' from `metamake'. Call by:\n\
+Generate `makefile' from `metamake.mmk'. Call by:\n\
   makemake DEF [DEF..]\n\
-where DEFs are keywords (conditionals) handled in `metamake'.\n\
+where DEFs are keywords (conditionals) handled in `metamake.mmk'\n\
+or mmk-files files !included from `metamake.mmk'.\n\
 Special DEFs:\n\
   filelist = generate `filelist' with all needed files\n\
   linux = (legacy default)\n\
   makefile = all modules will depend also on the makefile\n\
              => recompile if the makefile changes\n\
 Example:\n\
-  makemake lj polar gcc\n"
+  makemake lj polar gcc\n\
+where the switches are treated in the mmk-files, for instance:\n\
+!if gcc\n\
+CC := gcc # $(CC) is used as the compiler in the makefile\n\
+!endif\n\
+"
       );
     exit(4); }
   else
@@ -732,9 +739,9 @@ Example:\n\
               else if (token[0]=='i') {
                 fprintf(stderr,"makemake: cannot open !include file \"%s\"\n",inpathname);
                 exit(3); }
-              else 
+              else
                 fprintf(stderr,"makemake: NOTE: no private \"%s\" to include\n",inpathname); }
-      
+
             else if (!strcmp(token,"if") || !strcmp(token,"ifdef")) {
               if (ifnest>=7) {
                 fprintf(stderr,"makemake: too many nested !if's\n");

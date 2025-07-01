@@ -103,13 +103,13 @@ static struct CPItab_s {
      (no such automatic mechanism applies to other units)  */
   {"Epnc","potential energy without cutoff corrections [J/mol]",&En.pot},
   {"Eusr","user potential energy (see userforces.c) [J/mol]",&En.usr}, // NEW in V2.9f
-  {"elst","electrostatic energy (POLAR: w/o self-energy) [J/mol]",&En.el},
+  {"elst","electrostatic energy (POLAR: excl. self-energy) [J/mol]",&En.el},
   {"bond","bonded energy [J/mol]",&En.bonded},
-  {"Eext","Extended degrees of freedom energy (Nose, barostat) [J/mol]",&En.ext},
-  {"Ekin","Kinetic energy [J/mol]",&En.kin},
-  {"U",   "Internal energy = Epot + Ekin, with cutoff corrections [J/mol]",&En.U},
-  {"Unc", "Internal energy = Epot + Ekin, without cutoff corrections [J/mol]",&En.Unc},
-  {"H",   "Enthalpy = Epot + Ekin + pV, with cutoff corrections [J/mol]",&En.H},
+  {"Eext","extended degrees of freedom energy (Nose-Hoover, MTK barostat) [J/mol]",&En.ext},
+  {"Ekin","kinetic energy [J/mol]",&En.kin},
+  {"U",   "internal energy = Epot + Ekin with cutoff corrections [J/mol]",&En.U},
+  {"Unc", "internal energy = Epot + Ekin without cutoff corrections [J/mol]",&En.Unc},
+  {"H",   "enthalpy = Epot + Ekin + pV with cutoff corrections [J/mol]",&En.H},
   //REMOVED  {"Hnc", "Enthalpy = Epot + Ekin + pV, without cutoff corrections [J/mol]",&En.Hnc},
   {"fix", "potential energy of forces fixing sites in place (-k) [J/mol]",&En.fix},
 
@@ -120,11 +120,11 @@ static struct CPItab_s {
   {"Psc","conventional pressure w/o any epsf-based ECC terms [Pa]",&En.ECC_Pscaled},
   {"Pcor","ECC correction (to be added to Pvir) [Pa]",&En.ECC_Pcorr},
 #else /*# ECC   */
-  {"Pref","pressure as defined by variables virial, corr [Pa]",&En.Pref},
+  {"Pref","pressure as defined by variables virial, corrected [Pa]",&En.Pref},
 #endif   /*#!ECC   */
   {"PdV","pressure by virtual volume change (also PdVm/PdVa) w. cutoff corr. [Pa]",&En.PdV.c},
-  {"Pevc","pressure (based on el. virial) w. LJ cutoff corr. [Pa]",&En.Pelvir.c},
-  {"Pevn","pressure (based on el. virial) w/o LJ cutoff corr. [Pa]",&En.Pelvir.n},
+  {"Pevc","pressure (based on el. virial) w. LJ cutoff corr. [Pa]",&En.Pevir.c},
+  {"Pevn","pressure (based on el. virial) w/o LJ cutoff corr. [Pa]",&En.Pevir.n},
   {"V"   ,"volume [p.u.=AA^3]",&box.V},
 
 #ifdef LOG
@@ -149,21 +149,21 @@ static struct CPItab_s {
   {"LMx", "linear momentum [kg m/s]",En.LM},
   {"LMy", "linear momentum [kg m/s]",En.LM+1},
   {"LMz", "linear momentum [kg m/s]",En.LM+2},
-  {"TLM", "cluster translational temperature",&En.TLM},
+  {"TLM", "cluster translational temperature (from CoM) [K]",&En.TLM},
   {"AMx", "angular momentum [kg m2/s]",En.AM},
   {"AMy", "angular momentum [kg m2/s]",En.AM+1},
   {"AMz", "angular momentum [kg m2/s]",En.AM+2},
-  {"TAM", "cluster rotational temperature",&En.TAM},
+  {"TAM", "cluster rotational temperature [K]",&En.TAM},
 #ifdef POLAR
-  {"Tpol", "T of Car-Parrinello-like dipoles [K]",&En.Tpol}, /* new in 2.0c: to be used for mech.dip. */
-  {"pstd","polar 1st iter stderr [p.u.]",&En.polstderr},
-  {"pmax","polar 1st iter max err. [p.u.]",&En.polmaxerr},
-  {"plst","polar last iter stderr [p.u.]",&En.pollaststderr},
-  {"plmx","polar last iter max err. [p.u.]",&En.pollastmaxerr},
-  {"Pstd","Polar stderr (vs. iterated solution) [p.u.]",&En.Polstderr},
-  {"Pmax","Polar max err. (vs. iterated solution) [p.u.]",&En.Polmaxerr},
-  {"rate","polar convergence rate of iterations, if available",&scf.rate},
-  {"iter","polar number of iterations (per MD step)",&En.polnit},
+  {"Tpol", "POLAR DEPRECATED T of Car-Parrinello-like dipoles [K]",&En.Tpol}, /* new in 2.0c: to be used for mech.dip. */
+  {"pstd","POLAR 1st iteration stderr [p.u.]",&En.polstderr},
+  {"pmax","POLAR 1st iteration max. err. [p.u.]",&En.polmaxerr},
+  {"plst","POLAR last iter stderr [p.u.]",&En.pollaststderr},
+  {"plmx","POLAR last iter max err. [p.u.]",&En.pollastmaxerr},
+  {"Pstd","POLAR stderr (vs. iterated solution, scf.test=1) [p.u.]",&En.Polstderr},
+  {"Pmax","POLAR max err. (vs. iterated solution, scf.test=1) [p.u.]",&En.Polmaxerr},
+  {"rate","POLAR averaged convergence rate (scf.test=1 or dV)",&scf.rate},
+  {"iter","POLAR number of iterations (per MD step)",&En.polnit},
   {"X_hf","high-frequency susceptibility by direct response to ext.field",&En.chi_hf},
 #endif /*# POLAR */
 #if PRESSURETENSOR&PT_VIR

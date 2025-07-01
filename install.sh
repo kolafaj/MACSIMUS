@@ -386,12 +386,13 @@ MACSIMUS offers the following commands:
           evu "exp(-1.1[kcal/mol]/298[K]/R)"
   start - extension-based start (MACSIMUS files and more), e.g.:
           start simul.plb
-NB: render option in show requires start installed
-Get help by running them without parameters.
+Get help to commands by running them without parameters.
+NB: render option in `show' requires `start' installed.
 * Installation will copy the executables to ~/bin/
   and initialization .files to ~/.
 * Not-installation will remove the temporary files
   $PWD/bin/{ev,evu,start}.
+* In either case, a testing simulation can be run.
 Install ev,evu,start (y/N)?
 EOF
 

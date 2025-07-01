@@ -193,7 +193,7 @@ loop (i,0,anchor.col) {
              V3.6r: bad units forgotten from previous change (P real, En.P p.u.)
              V3.4l: cutoff correction was added twice; use P for NPT 
              V2.7f: was En.pot instead of En.U */
-            // REMOVED: En.Hnc=En.Unc+(tau.P?P/Punit:En.Pelvir.n)*box.V;
+            // REMOVED: En.Hnc=En.Unc+(tau.P?P/Punit:En.Pevir.n)*box.V;
           En.H=En.U+(tau.P?P/Punit:En.Pref)*box.V;
 
 #if (PRESSURETENSOR&PT_ANY) == PT_ANY
@@ -232,7 +232,7 @@ loop (i,0,anchor.col) {
         StaAdd("Epot [J/mol]",Epot); /* Epot is in J/mol */
         StaSet(DT,lag.err,2,lag.n);
         StaAdd("Pref [Pa]",En.Pref*Punit);
-        StaAdd("P(vir) [Pa]",En.Pelvir.c*Punit);
+        StaAdd("Pevir [Pa]",En.Pevir.c*Punit);
 #endif /*#!ECC */
         if (dV)
           StaAdd("Pref-P(dV) [Pa]",(En.Pref-En.PdV.c)*Punit);
@@ -287,14 +287,14 @@ loop (i,0,anchor.col) {
 #if 1
         {
           double x=SUM(En.Ptens)/3+En.corr/(box.V*box.V)-En.Ptr.c;
-          if (fabs(x)>1e-10) ERROR(("DEBUG INTERNAL P(tens)-En.Ptr.c = %g (=! 0)\n",x))
+          if (fabs(x)>1e-10) ERROR(("DEBUG INTERNAL Ptr-En.Ptr.c = %g (=! 0)\n",x))
         }
 #endif
-        StaAdd("P(tens) [Pa]",En.Ptr.c*Punit);
+        StaAdd("Ptr [Pa]",En.Ptr.c*Punit);
         StaSet(DT,2,2,0);
-        if (En.corr) StaAdd("P(tens) no corr [Pa]",En.Ptr.n*Punit);
-        StaAdd("P(vir)-P(tens) [Pa]",(En.Pelvir.n-En.Ptr.n)*Punit);
-        if (dV) StaAdd("P(dV)-P(tens) [Pa]",(En.PdV.n-En.Ptr.n)*Punit);
+        if (En.corr) StaAdd("Ptr no corr [Pa]",En.Ptr.n*Punit);
+        StaAdd("Pevir-Ptr [Pa]",(En.Pevir.n-En.Ptr.n)*Punit);
+        if (dV) StaAdd("P(dV)-Ptr [Pa]",(En.PdV.n-En.Ptr.n)*Punit);
 #endif /*# (PRESSURETENSOR&PT_ANY) == PT_ANY */
 
 #ifdef SPCTCF

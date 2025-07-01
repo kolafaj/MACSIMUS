@@ -96,8 +96,6 @@ rescale & RESCALE_PT (%d) was specified but this version\n\
           Pscale[0]=Pscale[1]=Pscale[2]=scaling(tauloc,noint,h*beta_T*(No.P-Ploc),maxscale);
           if (rescale & RESCALE_CLEAVE) ERROR(("cleaving rescaling incompatible with virial-based pressure"))
 
-          fprintf(stderr,"DEBUG t=%g No.P=%g Ploc=%g En.Ptr=%g En.Pvir=%g\n", t,No.P,Ploc,En.Ptr.c,En.Pelvir.c);
-
           if (tau.P<0) /* rescale now (otherwise every step) */
             rescalecfg(cfg[0],rescale|RESCALE_L,0,Pscale);
 

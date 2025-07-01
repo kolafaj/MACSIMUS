@@ -17,7 +17,7 @@
     if (option('v')&4) StaPrintAll("");
     else prt("HINT: use `staprt %s' for detailed time-series analysis",simils.simname);
 if (option('m')<2) {
-      if (option('f')) prt("WARNING: T, P(tens), enthalpy.. may be wrong in the reread mode");
+      if (option('f')) prt("WARNING: T, Ptr, enthalpy.. may be wrong in the reread mode");
       else prt("WARNING: forces and energy not calculated because -f0"); }
     prt("V = %g m3 (last value)",box.V*1e-30);
     _n
@@ -66,7 +66,7 @@ if (option('m')<2) {
          this actually duplicates Pvirerr, but is more fool-proof
          because is based on the final pressure tensor
       */
-      double x=StaMean("P(tens) [Pa]")-StaMean("P(vir) [Pa]");
+      double x=StaMean("Ptr [Pa]")-StaMean("Pevir [Pa]");
 
       prt("\n\
 %sressure accuracy: tr(<Ptens>)/3+corr-<P>=%g Pa\n\

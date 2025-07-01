@@ -293,10 +293,10 @@ int selffield(ToIntPtr B,ToIntPtr A, /**************************** selffield */
     /* here we record the errors of the predictor (in the 1st iteration) */
     StaSet(0,2,2,lag.n);
     if (run) {
-      En.sumpolmaxerr+=En.polmaxerr=maxerr;
-      StaAdd("polar 1st iter maxerr",maxerr);
       En.sumpolstderr+=En.polstderr=err;
-      StaAdd("polar 1st iter stderr",err); }
+      StaAdd("polar 1st iter stderr",err);
+      En.sumpolmaxerr+=En.polmaxerr=maxerr;
+      StaAdd("polar 1st iter maxerr",maxerr); }
     nbad=0; }
   else /* scf.nit>1 */
     StaAdd(run?"polar iter rate":"polar iter rate aux",scf.rate=maxerr/scf.maxerr);
@@ -386,14 +386,15 @@ int selffield(ToIntPtr B,ToIntPtr A, /**************************** selffield */
   //  fprintf(stderr,"t=%g scf.nit=%d maxerr=%g iret=%d\n",t,scf.nit,maxerr,iret);
   
   if (iret) {
-    StaAdd("polar last iter maxerr",En.pollastmaxerr=maxerr);
-    StaAdd("polar last iter stderr",En.pollaststderr=err); }
+    StaAdd("polar last iter stderr",En.pollaststderr=err);
+    StaAdd("polar last iter maxerr",En.pollastmaxerr=maxerr); }
 
   return iret;
 }
 
 void mechpolar(ToIntPtr B,ToIntPtr A) /************************** mechpolar */
 /*
+  DEPRECATED (Drude subsystem not thermostated)
   mechanical model of polarizable dipoles: just rhs
   NOTE: this was created as a simplified copy of selffield(),
         to be rewritten so that selffield() calls mechpolar()...
@@ -485,4 +486,187 @@ int scfautoset(int icyc,int noint) /***************************** scfautoset */
     scf.cycmaxit=0; }
 
   return 0;
+}
+
+/*
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                                 POLAR ERRORS                                %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+*/
+
+void testSCF(void) /************************************************ testSCF */
+/*
+  For testing quality of SCF integration: full iterations
+  FREEBC also supported
+  See also measureP() where some test are also performed (except FREEBC)
+  WARNING: 1st evalation of forces unnecessarily calculated twice
+*/
+{
+  En_t En0;
+  FILE *frun=NULL,*fex=NULL,*ferr=NULL;
+  int n,i;
+
+  if (!scf.test) return;
+
+  En0=En;
+
+  box.V=PROD(box.L);
+  box.cq=Sqr(box.cutoff);
+
+  if (!locA) sdsalloc(locA,cfg[0]->size);
+  if (!locB) sdsalloc(locB,cfg[0]->size);
+
+  sdscopy(locA,cfg[0]);
+
+  if (!(constrd.mode&RESCALE_CM)) depend_r(locA,1); /* meaningfull for Rowlinson only */
+
+  scforces(locB,locA);
+  depend_f(locA,locB); /* warning: param order ! */
+  StaAdd("scf.nit",scf.nit);
+  StaAdd("scf.maxdr",scf.maxdr);
+
+  En=En0;
+  En.Polmaxerr=En.Polstderr=0;
+  En.Fstderr=En.Fmaxerr=0;
+
+  if (option('v')&32) {
+    char *fmode=init<2 || (init_append&2) ? "at" : "wt";
+
+    frun=fopen(Fn("run.pol"),fmode);
+    fex=fopen(Fn("ex.pol"),fmode);
+    ferr=fopen(Fn("err.pol"),fmode);
+    fprintf(frun,"\
+#  t=%.4f  Running induced dipole moments in p.u. (%.11g D)\n\
+#  dip_x              dip_y              dip_z               |dip|\n",t,Debye);
+    fprintf(fex,"\
+#  t=%.4f  Iterated induced dipole moments in p.u. (%.11g D)\n\
+#  dip_x              dip_y              dip_z               |dip|\n",t,Debye);
+    fprintf(ferr,"\
+#  t=%.4f  Errors in induced dipole moments in p.u. (%.11g D)\n \
+#  dip_x              dip_y              dip_z               |dip|\n",t,Debye); }
+
+  loop (n,FROM,No.N) {
+    molecule_t *mn=molec+n;
+    int ns=mn->ns;
+    siteinfo_t *si=spec[mn->sp]->si;
+    vector *rpolRun=polarrof(mn,cfg[0]->rp);
+    vector *rpolA=polarrof(mn,locA->rp);
+    vector *fRun=rof(mn,cfg[2]->rp);
+    vector *fB=rof(mn,locB->rp);
+    vector dd;
+    double f;
+
+    loop (i,0,ns) if (si[i].chargepol) {
+
+      VVV(dd,=rpolRun[i],-rpolA[i])
+      f=SQR(dd)*si[i].qqpol;
+      if (frun) fprintf(frun,"%18.12f %18.12f %18.12f  %18.12f\n",
+                        rpolRun[i][0]*si[i].chargepol,
+                        rpolRun[i][1]*si[i].chargepol,
+                        rpolRun[i][2]*si[i].chargepol,
+                        sqrt(SQR(rpolRun[i])*si[i].qqpol));
+      if (fex) fprintf(fex,"%18.12f %18.12f %18.12f  %18.12f\n",
+                       rpolA[i][0]*si[i].chargepol,
+                       rpolA[i][1]*si[i].chargepol,
+                       rpolA[i][2]*si[i].chargepol,
+                       sqrt(SQR(rpolA[i])*si[i].qqpol));
+      if (ferr) fprintf(ferr,"%18.12f %18.12f %18.12f  %18.12f\n",
+                        dd[0]*si[i].chargepol,
+                        dd[1]*si[i].chargepol,
+                        dd[2]*si[i].chargepol,
+                        sqrt(f));
+      En.Polstderr+=f; Max(En.Polmaxerr,f)
+
+      f=SQRD(fRun[i],fB[i]);
+      En.Fstderr+=f; Max(En.Fmaxerr,f) } }
+
+  if (frun) { fprintf(frun,"\n"); fclose(frun); }
+  if (fex) { fprintf(fex,"\n"); fclose(fex); }
+  if (ferr) { fprintf(ferr,"\n"); fclose(ferr); }
+
+  // StaSet(0,lag.ierr,2,lag.in); ?
+  StaSet(0,lag.err,2,lag.n);
+
+  En.Polstderr=sqrt(En.Polstderr/No.pol);
+  En.Polmaxerr=sqrt(En.Polmaxerr);
+  StaAdd("Polar stderr",En.Polstderr);
+  StaAdd("Polar maxerr",En.Polmaxerr);
+
+  En.Fstderr=sqrt(En.Fstderr/No.pol);
+  En.Fmaxerr=sqrt(En.Fmaxerr);
+  StaAdd("Polar force stderr [N]",En.Fstderr*(massunit*lengthunit/Sqr(timeunit)));
+  StaAdd("Polar force maxerr [N]",En.Fmaxerr*(massunit*lengthunit/Sqr(timeunit)));
+} /* testSCF() */
+
+void measureepspol(void) /************************************ measureepspol */
+/*
+   to determine eps^inf (optical permittivity)
+   Ewald needed
+*/
+{
+#  ifndef FREEBC
+  //  static ToIntPtr locA=NULL,locB; // not local now
+  vector M0,dM;
+  int i,nit0;
+  double E,aux;
+  static int phase; /* x,-x,y,-y,z,-z */
+  static int stride=0; /* not every cycle */
+
+  /* save previous state */
+  struct Eext_s Eext0;
+  En_t En0;
+  vector QM0;
+
+  if (scf.Estride && stride++%scf.Estride) return;
+
+  En0=En;
+  Eext0=Eext;
+  VV(QM0,=Q->M)
+
+  box.cq=Sqr(box.cutoff);
+
+  if (!locA) sdsalloc(locA,cfg[0]->size);
+  if (!locB) sdsalloc(locB,cfg[0]->size);
+
+  sdscopy(locA,cfg[0]);
+
+  scforces(locB,locA);
+  nit0=scf.nit;
+
+  VVV(M0,=dM,=Q->M)
+
+  E=Eext.Eepspol*(1-2*(phase&1)); /* in prog. units, w. sign */
+
+  Eext.E[phase/2]+=E;
+  Eext.isE=1;
+
+  scforces(locB,locA);
+
+  VVV(dM,=Q->M,-M0)
+  aux=4*PI/PROD(box.L)/E;
+  if (option('v')&4) prt("%g %g %g  %c E=%g p.u. it=%d,%d HIGHFREQ",
+      dM[0]*aux,dM[1]*aux,dM[2]*aux,
+      'x'+phase/2,
+      E,nit0,scf.nit);
+
+  StaSet(0,2,2,0);
+  StaAdd("hf:scf.nit(0)",nit0);
+  StaAdd("hf:scf.nit(E)",scf.nit);
+
+  StaSet(0,2,2,lag.in);
+  En.chi_hf=dM[phase/2]*aux;
+  StaAdd("high-frequency chi",En.chi_hf);
+  aux=4*PI/(3*T*PROD(box.L));
+  StaAdd("total chi",En.chi_hf+aux*SQR(M0));
+
+  phase=(phase+1)%6;
+  Eext=Eext0;
+  /* to fix total chi (original Eext) */
+  if (Eext.isE && scf.Estride>1) {
+    aux=sqrt(aux);
+    putv(Eext.E)
+    loop (i,0,3) if (Eext.E[i]) StaAdd(string("xchi_%c",'x'+i),aux*M0[i]); }
+  En=En0;
+  VV(Q->M,=QM0)
+#  endif /*# FREEBC */
 }

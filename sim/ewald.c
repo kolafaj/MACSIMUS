@@ -1080,7 +1080,7 @@ int Ewaldtest(double *setL) /************************************* Ewaldtest */
 ***/
 {
   static double x,a,Epotref,EnPref,EntrPtref,Ediagref,dfref=1,maxfref;
-  Ediagref=Ediag;      
+  Ediagref=Ediag;
 #if PRESSURETENSOR&PT_VIR
   static double Pvirref[PT_DIM];
 #endif /*# PRESSURETENSOR&PT_VIR */
@@ -1160,12 +1160,7 @@ int Ewaldtest(double *setL) /************************************* Ewaldtest */
     box.cutoff=cutoff;
 
 #ifdef POLAR
-    if (scf.omega<0) {
-      scf.omega=0.95;
-      Max(scf.maxit,100)
-      Min(scf.eps,1e-9)
-      WARNING(("polar iterations not set, using scf.omega=%g scf.maxit=%d scf.eps=%g",
-        scf.omega,scf.maxit,scf.eps)) }
+    if (scf.omega<0) ERROR(("scf.omega not set"))
 #endif /*# POLAR */
 
     if (el.alpha<=0) el.alpha=oldalpha;
@@ -1249,20 +1244,21 @@ Ewald auto set:\n\
   }
 #ifdef POLAR
   En.pot += En.self;
-  En.vir -= En.self*2;                                              
+  En.vir -= En.self*2;
 #endif /*# POLAR */
   box.V=PROD(box.L);
   En.vir += En.virc+En.el;
   En.pot += En.el; /* do not move to forces() */
+
+#if PRESSURETENSOR&PT_VIR
   VO(En.Pvir,/=(DIM*box.V))
-#if 0
-  // names in V3.6w and older
-  En.trPt=SUM(En.Pvir); /* trace-based, without kinetic terms */
-  En.P=En.vir/(DIM*box.V); /* virial-based el-part */
-#else /*# 0 */
   En.Ptr.n=SUM(En.Pvir); /* trace-based, without kinetic terms */
-  En.Pelvir.n=En.vir/(DIM*box.V); /* virial-based el-part */
-#endif  /*#!0 */
+#endif /*# PRESSURETENSOR&PT_VIR */
+  En.Pevir.n=En.vir/(DIM*box.V); /* virial-based el-part */
+
+  /* names in V3.6w and older
+  En.trPt=SUM(En.Pvir); // trace-based, without kinetic terms
+  En.P=En.vir/(DIM*box.V); // virial-based el-part */
 
   time(&time1);
 
@@ -1299,15 +1295,13 @@ maximum deviation of forces = %.3e = %.3e relatively",
           sqrt(df),sqrt(df/dfref),
           sqrt(df/(1e-99+Sqr(estimr)+Sqr(estimk))),
           sqrt(maxf),sqrt(maxf/dfref));
-      prt("deviation of P (from E by virial theorem) = %g [Pa]",(En.Pelvir.n-EnPref)*Punit);
-      prt("deviation of P (trace of pressure tensor) = %g [Pa]",(En.Ptr.n-EntrPtref)*Punit);
+      prt("deviation of P (from E by virial theorem) = %g [Pa]",(En.Pevir.n-EnPref)*Punit);
 #if PRESSURETENSOR&PT_VIR
-
+      prt("deviation of P (trace of pressure tensor) = %g [Pa]",(En.Ptr.n-EntrPtref)*Punit);
       prt_("deviation of pressure tensor [Pa]:");
       loop (ii,0,PT_DIM)
         prt_(" %s%.12g",ii%3?"":"\n   ",(En.Pvir[ii]-Pvirref[ii])*Punit);
-  prt("\nP(virial) - trace(Ptens)/3 = %g Pa",(En.Pelvir.n-En.Ptr.n)*Punit);
-
+      prt("\nP(virial) - trace(Ptens)/3 = %g Pa",(En.Pevir.n-En.Ptr.n)*Punit);
 #endif /*# PRESSURETENSOR&PT_VIR */
     }
 
@@ -1319,8 +1313,10 @@ maximum deviation of forces = %.3e = %.3e relatively",
   etestref=1;
   el.test=sign(el.test);
   Epotref=En.pot;
-  EnPref=En.Pelvir.n;
+  EnPref=En.Pevir.n;
+#if PRESSURETENSOR&PT_VIR
   EntrPtref=En.Ptr.n;
+#endif /*# PRESSURETENSOR&PT_VIR */
   Ediagref=Ediag;
   dfref=maxfref=0;
   d=A->rp;

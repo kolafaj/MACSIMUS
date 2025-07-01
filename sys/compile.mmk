@@ -96,4 +96,4 @@ OPT = -O2 $O -std1 -warnprotos -w0 $(OPTX11) $(EXTOPT)
 !endif
 
 # do not export these modules to the list of dependencies for make
-!ignore = shmalloc.c xxxdef.c xxxplus.c xxxdip.c vircdiat.c seasr.c shakev30.c shakev4.c shakev9.c
+!ignore = shmalloc.c xxxdef.c xxxplus.c xxxdip.c vircdiat.c seasr.c shakev30.c shakev4.c shakev9.c spctcf.c

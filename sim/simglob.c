@@ -71,7 +71,7 @@ double omegac=-1.2;  /* relaxation parameter for 'correct' or
 
 #ifdef POLAR
              /* eps,epsq, omega, epsx, omegax, maxit,domega margin */
-struct scf_s scf={1,0.8, -9,     3e33,   0.95, 30,   0,     -0.03};
+struct scf_s scf={1,0.8, -9,     3e33,   0.90, 30,   0,     -0.03};
 #endif /*# POLAR */
 
 double T=300;        /* Nose|friction temperature (if tau.T) */
