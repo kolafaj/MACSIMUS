@@ -70,6 +70,7 @@
         get(el.sf)
         get(el.rplus) get(el.rshift)
         get(el.sat)
+        getvec(el.L,,DIM)
         get(virial)
         get(tau.sat)
         get(tau.CM)
@@ -256,7 +257,7 @@
 #  endif /*# SLAB */
 #endif /*# WIDOM */
 
-        get(diff.mode)
+        get(MSD.mode)
 
 #ifdef BJERRUM
         get(bj.mode) get(bj.from) get(bj.to) get(bj.q) get(bj.eps)
@@ -291,6 +292,7 @@
         checkdata
       enddata
       newt=t;
+      box.rho=rho; /* shadowed */
       _n
       onefourinrdf=rdf.onefour;
 

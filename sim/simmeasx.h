@@ -6,7 +6,7 @@ void calculateSF(void);
 void printfSF(void);
 
 void initdiff(double dtplb);
-void calculatediff(int n,int no);
+void calculateMSD(int n,int no);
 void printdiff(void);
 
 #ifdef XSECTION

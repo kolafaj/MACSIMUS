@@ -3,11 +3,14 @@ This is the standard (not particle-mesh) version of Ewald summation.
 This code uses ideas of J. Perram (making use of symmetry).
 See also macsimus/c/ewald.c (fool-proof slow standalone version for debugging).
 
+UPDATE 07/2025
+  - el.L added
+
 UPDATE 04/2024
   - Ewald test module units fixed and improved
 
 UPDATE 03/2024
-  - alpha' (Hammonds Heyes)
+  - alpha' (Hammonds--Heyes correction)
 
 UPDATE 06/2022
   - background charges, Yeh-Berkowitz revisited
@@ -32,28 +35,6 @@ UPDATE 02/2005:
   - k-vectors are allocated in a table and L must not change a lot
 
 FIRST VERSION 1991
-
-  pass -1: initialization
-        0: initialization & protocol printed to out
-        1: sums Q(k)
-        2: energy (return value) and forces calculated
-  frp  (in format described by cfg): to sum up forces
-  rp   (in format described by cfg): coordinates of sites
-  if pass==2 then energy is returned
-
-WARNINGS: if alpha<0 then masses are used (and copied to the configuration!)
-instead of charges.  This is for calculating the structure factor from
-stored configurations and cannot be used for simulating!!!
-Sequential version only!
-
-Calling scheme:
-^^^^^^^^^^^^^^^
-vector *forces,*configuration;
-Ewald(0,<any>,<any>);  (* initialization - may be repeated *)
-repeat {
-  Ewald(1,<any>,configuration->rp);
-  E=Ewald(2,forces->rp,configuration->rp);
-}
 
 Formulas:
 ^^^^^^^^^
@@ -275,6 +256,28 @@ static int almostint(real x) /************************************ almostint */
 #endif /*# COULOMB<0 */
 
 double Ewald(int pass,vector *frp,vector *rp) /*********************** Ewald */
+/***
+  pass -1: initialization, no protocol
+        0: initialization, protocol printed
+        1: sums Q(k)
+        2: energy (return value) and forces calculated
+  frp  (in format described by cfg): to sum up forces
+  rp   (in format described by cfg): coordinates of sites
+
+alpha<0: Masses are used (and copied to the configuration!) instead of
+charges.  This is for calculating the structure factor from stored
+configurations and cannot be used for simulating.
+Sequential version only!
+
+Calling scheme:
+^^^^^^^^^^^^^^^
+vector *forces,*configuration;
+Ewald(0,<any>,<any>);  (* initialization - may be repeated *)
+repeat {
+  Ewald(1,<any>,configuration->rp);
+  E=Ewald(2,forces->rp,configuration->rp); }
+***/
+
 {
   static vector oldL={-3e33,-3e33,-3e33};
   static vector firstL;
@@ -327,7 +330,6 @@ double Ewald(int pass,vector *frp,vector *rp) /*********************** Ewald */
 
   if (el.kappa<=0) return 0;
 
-  VV(PIL,=2*PI/box.L)
   /* WARNING: the initialization logic is weird... */
   if (pass<=0) {
     /*
@@ -335,6 +337,16 @@ double Ewald(int pass,vector *frp,vector *rp) /*********************** Ewald */
       %                        pass 0 - initialization                       %
       %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     */
+    vector locL;
+
+    if (el.L[0]>0 && el.L[1]>0 && el.L[2]>0) {
+      /* using reference box set by rho and el.L instead of box.L */
+      VV(locL,=el.L)
+      setL(locL,box.rho); }
+    else
+      VV(locL,=box.L);
+
+    VV(PIL,=2*PI/locL)
 
     if (Nkk==-1 || fabs(el.kappa-oldkappa)>1e-11) {
 
@@ -349,7 +361,7 @@ double Ewald(int pass,vector *frp,vector *rp) /*********************** Ewald */
      AGAIN: if (nagain++>25) ERROR(("Ewald: cannot solve rounding problems"))
 
       if (pass>=0) prt("initializing Ewald: kappa=K/L=%.9g",el.kappa);
-      KX=box.L[0]*el.kappa;
+      KX=locL[0]*el.kappa;
       Kk=Sqr(el.kappa);
 
       /*** if not the 1st initialization then free the previous arrays ***/
@@ -376,8 +388,8 @@ double Ewald(int pass,vector *frp,vector *rp) /*********************** Ewald */
         charges.sum=charges.sumq=charges.max=charges.summq=0;
 
       /* this part was optimized in V3.3b:
-         - sped up
-         - cumulation of errors (esp. for almost point Drude dipoles) avoided */
+         - speed gain
+         - error cummulation (esp. for almost point Drude dipoles) avoided */
       for (n=0;n<No.N;) {
         mn=molec+n;
         si=spec[mn->sp]->si;
@@ -470,14 +482,14 @@ double Ewald(int pass,vector *frp,vector *rp) /*********************** Ewald */
         double kappax=sqrt(qkappax);
         double kk;
         double q= -Sqr(PI/el.alpha);
-        int Kx=kappax*box.L[0];
-        int Ky=kappax*box.L[1];
-        int Kz=kappax*box.L[2];
+        int Kx=kappax*locL[0];
+        int Ky=kappax*locL[1];
+        int Kz=kappax*locL[2];
 
         loopto (kx,-Kx,Kx) loopto (ky,-Ky,Ky) loopto (kz,-Kz,Kz) {
-          kk=Sqr(kx/box.L[0])+Sqr(ky/box.L[1])+Sqr(kz/box.L[2]);
+          kk=Sqr(kx/locL[0])+Sqr(ky/locL[1])+Sqr(kz/locL[2]);
           if (kk>Sqr(el.kappa) && kk<qkappax) Ediag+=exp(kk*q)/kk; }
-        Ediag *= charges.sumq/(2*PI*box.L[0]*box.L[1]*box.L[2]); }
+        Ediag *= charges.sumq/(2*PI*locL[0]*locL[1]*locL[2]); }
 
       /*** computing sizes of Q and ekk;
            readjusting K for rounding problems:
@@ -489,16 +501,16 @@ double Ewald(int pass,vector *frp,vector *rp) /*********************** Ewald */
       iQ=ikk=0;
       kxmax=(int)KX;
       loopto (kx,0,kxmax) {
-        kxq=Kk-Sqr(kx/box.L[0]);
-        aux=box.L[1]*sqrt(kxq);
+        kxq=Kk-Sqr(kx/locL[0]);
+        aux=locL[1]*sqrt(kxq);
         if (pass==0 && almostint(aux)) {
           el.kappa+=el.kappa*dK; dK*=1.4;
           prt("Ewald: possible rounding problem (x) => kappa increased to %.12g",el.kappa);
           goto AGAIN; }
         kymax=(int)aux;
         loopto (ky,0,kymax) {
-          kyq=kxq-Sqr(ky/box.L[1]);
-          aux=box.L[2]*sqrt(kyq);
+          kyq=kxq-Sqr(ky/locL[1]);
+          aux=locL[2]*sqrt(kyq);
           if (pass==0 && almostint(aux)) {
             el.kappa+=el.kappa*dK; dK*=1.4;
             prt("Ewald: possible rounding problem (y) => kappa increased to %.12g",el.kappa);
@@ -513,13 +525,13 @@ double Ewald(int pass,vector *frp,vector *rp) /*********************** Ewald */
       ktabsize=kxmax+1;
       allocarray(ktab,ktabsize);
       loopto (kx,0,kxmax) {
-        kxq=Kk-Sqr(kx/box.L[0]);
-        kymax=(int)(box.L[1]*sqrt(kxq));
+        kxq=Kk-Sqr(kx/locL[0]);
+        kymax=(int)(locL[1]*sqrt(kxq));
         ktab[kx].kymax=kymax;
         allocarray(ktab[kx].kzmax,kymax+1);
         loopto (ky,0,kymax) {
-          kyq=kxq-Sqr(ky/box.L[1]);
-          ktab[kx].kzmax[ky]=(int)(box.L[2]*sqrt(kyq)); } }
+          kyq=kxq-Sqr(ky/locL[1]);
+          ktab[kx].kzmax[ky]=(int)(locL[2]*sqrt(kyq)); } }
 
       VO(oldL,=-3e33) /* to pretend the old L is different and calculate ekk later */
       if (!pass) { /*** initialization protocol printed to out ***/
@@ -546,6 +558,8 @@ double Ewald(int pass,vector *frp,vector *rp) /*********************** Ewald */
     return 0;
 #endif /*#!COULOMB<0 */
   } /* initialization (pass<=0) */
+
+  VV(PIL,=2*PI/box.L)
 
   /*
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

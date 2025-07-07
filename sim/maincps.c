@@ -49,7 +49,7 @@ loop (i,0,anchor.col) {
 #endif  /*# XSECTION  */
 
         calculateSF();
-        if (diff.mode&3) calculatediff(reread.frame,reread.to);
+        if (MSD.mode&3) calculateMSD(reread.frame,reread.to);
 
 #ifdef FREEBC
         VO(box.center,=0)
@@ -284,10 +284,10 @@ loop (i,0,anchor.col) {
         StaSet(DT,lag.err,2,lag.n);
         // ?        En.trPt=SUM(En.Ptens)/3+En.corr/(box.V*box.V);
 
-#if 1
-        {
+#if 0
+        { // small error OK for MTK - it is at different time 
           double x=SUM(En.Ptens)/3+En.corr/(box.V*box.V)-En.Ptr.c;
-          if (fabs(x)>1e-10) ERROR(("DEBUG INTERNAL Ptr-En.Ptr.c = %g (=! 0)\n",x))
+          if (fabs(x)>1e-10) WARNING(("DEBUG INTERNAL Ptr-En.Ptr.c = %g (=! 0)\n",x))
         }
 #endif
         StaAdd("Ptr [Pa]",En.Ptr.c*Punit);

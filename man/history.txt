@@ -108,6 +108,10 @@ HISTORY
   * feature changed
   - feature removed
 
+cook 3.7b:
+  ! el.L added to fix a minor flaw in Ewald initialization
+  ! polishing plb2diff and plb2diff.sh
+
 cook 3.7a:
   ! wrong pressure in Berendsen barostat (for GC, cutelst) fixed
   ! virtual volume change fixed

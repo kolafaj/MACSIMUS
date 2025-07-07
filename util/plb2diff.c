@@ -2,6 +2,7 @@
 
 This utility automates diffusion (D) and conductivity (kappa) calculations.
 
+07/2025: update to match new features of cook
 09/2019: bit of cleaning
 05/2017: V3.0 compatible with cook V3.0a and newer, viscosity removed
          env.variable PLB2DIFF removed, synopsis changed
@@ -104,7 +105,6 @@ Bugs:
 */
 
 #include "ground.h"
-#include "alloc.h"
 #include "linregr.h"
 #include "sdfit.h"
 #include "cpmark.h"
@@ -114,13 +114,13 @@ Bugs:
 
 FILE *sh;
 
-void Setenv(char *name,char *value)
+void Setenv(char *name,char *value) /******************************** Setenv */
 {
   if (setenv(name,value,1)) ERROR(("setenv(%s,%s,1)",name,value))
   fprintf(sh,"export %s=\"%s\"\n",name,getenv(name));
 }
 
-int plbno(char *fn)
+int plbno(char *fn) /************************************************* plbno */
 {
   FILE *f=fopen(fn,"r");
   float h[2];
@@ -138,11 +138,11 @@ int plbno(char *fn)
   return len;
 }
 
-int main(int narg,char **arg)
+int main(int narg,char **arg) /**************************************** main */
 {
   int NO=0,START=0,NBLOCKS=0;
   double MFACTOR=0,QFACTOR=0,BLOCK=0.25,OMIT=0.25,erasetemp=1;
-  int PLOT=15;
+  int PLOT=15,NPT=0;
   int init,no,iblock,ncps[128],ncp,icp,pass,iarg,ir;
   FILE *get=NULL,**mf=NULL,**qf=NULL;
   float *r=NULL;
@@ -156,7 +156,7 @@ int main(int narg,char **arg)
   static char plotm[1024]="plot ",plotq[1024]="plot ";
   double av=0,err,cov,COVERAGE=0;
   double msdb=0,mscdb=0;
-  char *defaultopt="-m1 -y0 -w0";
+  char *defaultopt="-m1 -y0 -w0 -r1";
   char *extraopt="",*geometry="800x600";
 
   void (*MYAdd)(char *name,double weight,double X,double Y);
@@ -173,8 +173,8 @@ int main(int narg,char **arg)
     fprintf(stderr,"\
 *** plb2diff V3.0, compatible with cook V3.0a and later ***\n\
 \n\
-  Difusivity and conductivity are calculated from a stored SIMNAME.plb.\n\
-  The trajectory is split into (generally overlapping) blocks which are\n\
+  Difusivity and conductivity are calculated from stored SIMNAME.plb.\n\
+  The trajectory is split into (generally overlapping) blocks, which are\n\
   re-read by COOK to calculate square displacements via Einstein formulas.\n\
   Averaging and statistics is finished by plb2diff.\n\
 \n\
@@ -182,14 +182,14 @@ CALL BY:\n\
   plb2diff [OPTIONS] COOK SYSNAME SIMNAME [OPTIONS]\n\
 \n\
 ARGUMENTS:\n\
-  COOK : cook version (or a script calling cook) for block calculations\n\
-  SYSNAME : refers to SYSNAME.ble and SYSNAME.def (if not SIMNAME.def)\n\
-  SIMNAME : simulation name of the original simulation (SIMNAME.*)\n\
+  COOK    cook version (or a script calling cook) for block calculations\n\
+  SYSNAME refers to SYSNAME.ble (and SYSNAME.def if SIMNAME.def is missing)\n\
+  SIMNAME simulation name of the original simulation (SIMNAME.*)\n\
 \n\
 OPTIONS (#=integer or real number):\n\
-  -a\"COOK_OPTIONS\"\n\
-       additional options appended after \"-y0 -w0 -m1\"\n\
-       -a\"-a0\" recommended for POLAR except Gaussian charges on springs\n\
+  -a\'COOK_OPTIONS\'\n\
+       additional options appended after \'-y0 -w0 -m1 -r1\'\n\
+       -a\'-a0\' is recommended for POLAR except Gaussian charges on springs\n\
   -b#  int: block size (# of frames) for 1 analysis\n\
        #<1: as a fraction of the full length given by -n#\n\
   -B#  number of blocks (the blocks may overlap), exclusive with -c\n\
@@ -197,18 +197,18 @@ OPTIONS (#=integer or real number):\n\
        for coverage<1 there are unused data\n\
        for coverage>1 the blocks overlap, data become correlated\n\
   -f#  fit Mean Square (Charge) Displacements (MSD, MSCD) to [2]\n\
-         2=a+b*t, error estimates incl. [default]\n\
+         2=a+b*t, incl. error estimates [default]\n\
          3=a+b*t+c/sqrt(t) (hydrodynamic tail, no error estimates)\n\
   -g#x# plot geometry (size without position) [800x600]\n\
-  -k   keep all temporary files after cook runs [default=remove]\n\
+  -k   keep all temporary files [default=remove]\n\
   -m#  calculate mass diffusivity by species [0=do not calculate]\n\
        #=factor to multiply, in cook program units ps,AA,K as follows:\n\
-       NVT simulation: 1/dt.plb\n\
-       NPT simulation: <V>^(2/3)/dt.plb\n\
-  -n#  # of frames to read (use plbinfo) [default=0=whole SIMNAME.plb]\n\
+         NVT simulation: 1/dt.plb\n\
+         NPT simulation: <V>^(2/3)/dt.plb  NB: use option -P\n\
+  -n#  # of frames to read [default=0=whole SIMNAME.plb]\n\
   -o#  int: # of frames not used for linear regression at block beginning\n\
        #<1: in the units of block size (see -b) [0.25]\n\
-       Hint: check the <..(t)> graphs for linear parts\n\
+       Hint: check the <X(t)> graphs for linear parts\n\
   -p#  launch plots, sum of bits [15=all]:\n\
          1=diffusivity/block as a function of block #\n\
          2=conductivity/block as a function of block #\n\
@@ -218,10 +218,11 @@ OPTIONS (#=integer or real number):\n\
        for MSD of the 1st species, for MSCD of the sum (giving the bulk\n\
        conductivity). Use hotkeys b B ^B / * or button [b] to change b\n\
        The last column for MSD should be noisy zero (with b=0)\n\
+  -P#  tau.P (or any nonzero) for NPT [default=0=NVT]\n\
   -q#  calculate conductivity [0=do not calculate]\n\
        #=factor to multiply, in cook program units ps,AA,K as follows:\n\
        NVT simulation: 1/(V*T*dt.plb)\n\
-       NPT simulation: 1/(<V>^(1/3)*T*dt.plb)\n\
+       NPT simulation: 1/(<V>^(1/3)*T*dt.plb)  NB: use option -P\n\
   -s#  # of frames skipped from start [0=none]\n\
        use #>0 if the beginning is unequilibrated\n\
 \n\
@@ -251,7 +252,7 @@ BUGS:\n\
   multiplication factors are not calculated and must be given as options -m,-q\n\
 \n\
 EXAMPLE:\n\
-  plb2diff cookpol -a-a0 ions salt -n2000 -b.1 -o.2 -c3 -m13171 -q0.0007807\n\
+  plb2diff cookpol -a-a0 ions salt -n2000 -b.1 -o.2 -c3 -m13171 -q.0007807\n\
 \n\
 SEE ALSO:\n\
   plb2diff2 (older version) cook* plbinfo plbmsd plbbox plot showcp\n");
@@ -293,6 +294,7 @@ SEE ALSO:\n\
         case 'k': erasetemp=0; break;
         case 'a': extraopt=arg[iarg]+2; break;
         case 'g': geometry=arg[iarg]+2; break;
+        case 'P': NPT=f; break;
         default: ERROR(("%s: unknown option",arg[iarg])) } }
     else {
       if (COOK) ERROR(("%s: third position arguments (not -OPTION) invalid",arg[iarg]))
@@ -309,14 +311,14 @@ SEE ALSO:\n\
   if (BLOCK<0) { ERROR(("invalid option -b%g",BLOCK)) BLOCK=0; }
   if (BLOCK<=1) {
     BLOCK=(int)(BLOCK*NO);
-    prt("BLOCK=%d frames set",BLOCK); }
+    prt("BLOCK=%g frames set",BLOCK); }
 
   if (OMIT<0) { ERROR(("invalid option -o%g",OMIT)) OMIT=0; }
   if (OMIT<1) {
     OMIT=(int)(OMIT*BLOCK);
     prt("OMIT=%d frames set",OMIT); }
 
-  fprintf(stderr,"%s %s %s %s %s",COOK,defaultopt,extraopt,SYSNAME,SIMNAME);
+  fprintf(stderr,"%s %s %s %s %s <SIMNAME>\n",COOK,defaultopt,extraopt,SYSNAME,SIMNAME);
 
   if (NO<BLOCK) ERROR(("NO=%d < BLOCK=%d",NO,BLOCK))
   if (OMIT>=BLOCK) ERROR(("OMIT=%d >= BLOCK=%d",OMIT,BLOCK))
@@ -369,12 +371,15 @@ SEE ALSO:\n\
     get=fopen(fn=string("%s.get",BASENAME),"wt");
     if (!get) ERROR(("cannot write to %s",fn))
                 fprintf(get,"! %s",cmd);
-    fprintf(get,"\ndiff.mode=%d\n\
+    fprintf(get,"\n\
+MSD.mode=%d\n\
+thermostat=-1\n\
 reread.from=%d reread.to=%d\n\
-dt.plb=0 init=2;\n",(MFACTOR!=0)+2*(QFACTOR!=0),init,no);
+%s\n\
+dt.plb=1 init=2;\n",(MFACTOR!=0)+2*(QFACTOR!=0),init,no,NPT?"tau.P=1 tau.rho=0":"tau.P=0 tau.rho=1");
     if (fclose(get)) ERROR(("%s write error",fn))
 
-    fn=string("ln -s %s.def %s.def",SIMNAME,BASENAME);
+    fn=string("ln -sf %s.def %s.def",SIMNAME,BASENAME);
     if (system(fn)) ERROR(("%s: execution error",fn))
     fn=string("ln -sf %s.cfg %s.cfg",SIMNAME,BASENAME);
     if (system(fn)) ERROR(("%s: execution error",fn))
@@ -497,7 +502,7 @@ dt.plb=0 init=2;\n",(MFACTOR!=0)+2*(QFACTOR!=0),init,no);
     xr=*mode=='m' ? mr : qr;
     msd=fopen(string("%s.%s.dat",SIMNAME,*mode=='m'?"msd":"mscd"),"wt");
     fprintf(msd,"# %s %s %s\n",arg[3],arg[4],arg[5]);
-    if (*mode=='m') 
+    if (*mode=='m')
       fprintf(msd,"#t/dt  <MSCD_0(t)> ... <sum MSCD(t)> (NB: factor 1/6 included)\n");
     else {
       fprintf(msd,"#t/dt  <MSD_0(t)> ... <sum MSD(t)> (NB: factor 1/6 included)\n");

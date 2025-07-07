@@ -16,7 +16,7 @@
 
       if (rescale & RESCALE_PT) {
         /* rescaling based on pressure tensor components */
-        if (thermostat<T_NPT && tau.P!=0) {
+        if (thermostat>=0 && thermostat<T_NPT && tau.P!=0) {
 #  if (PRESSURETENSOR&PT_ANY) == PT_ANY
           int ii;
           double beta_T; /* compressibility in 1 direction */
@@ -36,7 +36,6 @@
 #endif
             Pscale[ii]=scaling(tau.P,noint,h*beta_T*(No.P-Ploc),maxscale); }
 /*  Pscale=exp((tau.P+tau.R<0?noint:-1)*h*box.V/No.f/En.T/(tau.P+tau.R)*(No.P-locP)); */
-
 
           if (rescale & RESCALE_XisY) Pscale[0]=Pscale[1]=sqrt(Pscale[0]*Pscale[1]);
           if (rescale & RESCALE_XisYisZ) Pscale[0]=Pscale[1]=Pscale[2]=cbrt(PROD(Pscale));
@@ -73,7 +72,7 @@ rescale & RESCALE_PT (%d) was specified but this version\n\
         } }
       else { /* !(rescale & RESCALE_PT) */
         /* isotropic (virial-based) rescaling */
-        if (thermostat<T_NPT && (tau.P!=0 || tau.sig!=0)) {
+        if (thermostat>=0 && thermostat<T_NPT && (tau.P!=0 || tau.sig!=0)) {
           double tauloc=tau.P;
           /* tau.P<0: rescaled every cycle
              tau.P>0: rescaled every step (keeps scaling factor through whole cycle)

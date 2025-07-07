@@ -862,6 +862,9 @@ extern struct el_s {
                      POLAR: includes induced moments */
   double xinf;    /* 1/(el.epsinf*2+1) */
   double epsq;    /* for neutrality test if automatic setup does not work */
+  vector L;       /* reference box shape for Ewald,
+                     0,0,0 means that Ewald reinitialization may use
+                     a different number of k-vectors */
 } el;
 
 extern struct box_s {
@@ -883,11 +886,10 @@ extern struct box_s {
   real r0;        /* minimum x,y,z of (any site of) a molecule - used */
   real r0limit;   /* to warn only once */
 #  endif /*# LINKCELL */
-  vector L;       /* size of the periodic box;
-                     it's important that L is real, not double, for automatic
-                     float<->double conversion in loadcfg() */
-  vector center;    /* FREEBC: 0 (or CoM?), p.b.c.: Lh, SLAB: may be set to CoM */
-                    /* droplet (x,y,z), cylinder (y,z), slab(z) position by autocenter */
+  double rho;     /* shadows rho in main.c */
+  vector L;       /* size of the periodic box */
+  vector center;  /* FREEBC: 0 (or CoM?), p.b.c.: Lh, SLAB: may be set to CoM */
+                  /* droplet (x,y,z), cylinder (y,z), slab(z) position by autocenter */
 #  if 0
   /* obsolete: */
   double Lx[4];   /* if tau.rho=-3: L[0] as a poly of t */
@@ -1032,9 +1034,9 @@ extern struct cleave_s {
 #  endif /*# SLAB */
 
 /* move to simmeasx.h ? */
-extern struct diff_s {
+extern struct MSD_s {
   int mode; /* sum of flags: 1=MSD + diffusivities, 2=MSCD+conductivities */
-} diff;
+} MSD;
 
 #  ifdef XSECTION
 /* move to simmeasx.h ? */

@@ -175,7 +175,7 @@ struct cleave_s cleave = { 0,  0,-0x7fffffff };
 #  endif /*# SLAB & 2 */
 #endif /*# SLAB */
 
-struct diff_s diff;
+struct MSD_s MSD;
 
 #ifdef XSECTION
 /*              grid  RvdW Rscale             mode freq maxs  sizelimit     maxsize  */

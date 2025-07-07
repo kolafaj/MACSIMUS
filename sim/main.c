@@ -1,4 +1,4 @@
-#define VERSION "3.7a"
+#define VERSION "3.7b"
 
 #if defined(LINKCELL) && defined(FREEBC)
 #  error "LINKCELL not supported for FREEBC"
@@ -453,6 +453,7 @@ int main(int narg,char **arg) /**************************************** main */
     get(el.ecc) get(el.epsf)
 #endif /*# ECC */
   enddata
+  box.rho=rho; /* shadowed */
   _Id.ignoreid=0; /* check of data again */
 
   rewind(in);
@@ -632,10 +633,9 @@ Pressures available, cf. variable virial:\n\
       if (gear.order>2)
         WARNING(("Gear integration inacccurate with Andersen/Maxwell thermostat")) }
 
-    if (thermostat>=T_NPT) {
-      if (gear.order!=2) ERROR(("NPT via Nose/MTK not implemented with Gear")) }
-    if (tau.rho<0) {
-      if (gear.order!=2) ERROR(("Box size as a function of time not implemented with Gear.")) }
+    if (gear.order>2) {
+      if (thermostat>=T_NPT) ERROR(("NPT via Nose/MTK not implemented with Gear"))
+      if (tau.rho<0) ERROR(("Box size as a function of time not implemented with Gear.")) }
 
     if (tau.T && !thermostat)
       prt("WARNING no thermostat: nonzero tau.T=%g ignored\n\
@@ -1455,7 +1455,7 @@ final drift = %d = %s",DRIFT_START,drift,int2sumbin(drift)))
       drift=0; }
 
     initSF();
-    if (diff.mode&3) initdiff(gear.order==0?dt.cfg*reread.by:
+    if (MSD.mode&3) initdiff(gear.order==0?dt.cfg*reread.by:
                               gear.order==1?dt.plb*reread.by:
                               h*noint);
 #  ifdef CLUSTERS

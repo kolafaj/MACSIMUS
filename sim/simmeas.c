@@ -202,11 +202,11 @@ static struct CPItab_s {
 #endif /*# PRESSURETENSOR&PT_MOL */
 #if (PRESSURETENSOR&PT_ANY) == PT_ANY
 /* total pressure tensor */
-  {"Ptxx","pressure tensor w/o LJ cutoff corrections [Pa]",En.Ptens},
-  {"Ptyy","pressure tensor w/o LJ cutoff corrections [Pa]",En.Ptens+1},
-  {"Ptzz","pressure tensor w/o LJ cutoff corrections [Pa]",En.Ptens+2},
-  {"Ptrc","corrected P from pressure tensor: tr(Pt)/3+corr [Pa]",&En.Ptr.c},
-  {"Ptrc","uncorrected P from pressure tensor: tr(Pt)/3 [Pa]",&En.Ptr.n},
+  {"Ptxx","pressure tensor w/o cutoff corrections [Pa]",En.Ptens},
+  {"Ptyy","pressure tensor w/o cutoff corrections [Pa]",En.Ptens+1},
+  {"Ptzz","pressure tensor w/o cutoff corrections [Pa]",En.Ptens+2},
+  {"Ptrc","P from pressure tensor w. cutoff corr: tr(Pt)/3+corr [Pa]",&En.Ptr.c},
+  {"Ptrn","P from pressure tensor w/o cutoff corr : tr(Pt)/3 [Pa]",&En.Ptr.n},
 #  if PRESSURETENSOR&PT_OFF
   {"Ptyz","pressure tensor w/o LJ cutoff corrections [Pa]",En.Ptens+3},
   {"Ptzx","pressure tensor w/o LJ cutoff corrections [Pa]",En.Ptens+4},

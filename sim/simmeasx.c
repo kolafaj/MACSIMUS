@@ -238,7 +238,7 @@ void initdiff(double dtplb) /************************************** initdiff */
 
   if (dtplb==0) dtplb=1; /* info only */
 
-  if (diff.mode==0) return;
+  if (MSD.mode==0) return;
 
   if (tau.P) {
     loop (i,0,No.s) VV(rrow[i],/=box.L)
@@ -259,7 +259,7 @@ void initdiff(double dtplb) /************************************** initdiff */
   firstt=t;
   sumV=sumL=sumL2=0;
 
-  if (diff.mode&4) alloczero(rcenter,No.s*sizeof(vector));
+  if (MSD.mode&4) alloczero(rcenter,No.s*sizeof(vector));
   alloczero(charge,sizeof(charge[0])*nspec); // WHY THIS? IN SF???
 
   loop (n,0,nspec) {
@@ -277,8 +277,8 @@ void initdiff(double dtplb) /************************************** initdiff */
 #endif /*#!POLAR */
     } }
 
-  if (diff.mode&1) mcp=fopen(Fn("m.cp"),"wb");
-  if (diff.mode&2) qcp=fopen(Fn("q.cp"),"wb");
+  if (MSD.mode&1) mcp=fopen(Fn("m.cp"),"wb");
+  if (MSD.mode&2) qcp=fopen(Fn("q.cp"),"wb");
 
   allocarrayzero(rcp,nspec+1);
   rcp[0]=CPmark;
@@ -293,7 +293,7 @@ void initdiff(double dtplb) /************************************** initdiff */
                : " t-t0[ps] t[ps]       msd [AA^2]    mscd     L [AA]  ");
 }
 
-void calculatediff(int n,int no) /**************************** calculatediff */
+void calculateMSD(int n,int no) /****************************** calculateMSD */
 {
   int i,j,sp,ns;
   vector *rrow=rof(molec,cfg[0]->rp); /* r: access by No.s sites */
@@ -324,9 +324,7 @@ void calculatediff(int n,int no) /**************************** calculatediff */
 #ifndef FREEBC
   if (!ndiff) {
     sdscopy(firstcfg,cfg[0])
-    CoM(lastCM,firstcfg);
-    fprintf(stderr,"%g %g %g\n",VARG(lastCM));
-  }
+    CoM(lastCM,firstcfg); }
   else {
     if (tau.P) { VV(oldL,=box.L) VO(box.L,=1) VO(box.Lh,=0.5) }
 
@@ -370,6 +368,7 @@ void calculatediff(int n,int no) /**************************** calculatediff */
 
     CoM(CM,cfg[0]);
     CMshift=sqrt(SQRD(lastCM,CM));
+
     if (CMshift>CMSHIFTERR) {
       double maxD=0;
       int k,kk=-1;
@@ -386,15 +385,14 @@ void calculatediff(int n,int no) /**************************** calculatediff */
       putv(maxthisjump.i)
       put(maxthisjump.no)
 
-      WARNING(("center of mass shifted by %g\n\
+      WARNING(("Center of mass has shifted by %g\n\
 *** first(n=%d) = %g %g %g\n\
 *** this(no=%d) = %g %g %g\n\
-*** I will try to fix it assuming that one molecule\n\
-*** moved by more than L/2 in one direction.\n",
+*** I will try to fix it assuming that a single molecule have moved\n\
+*** by more than L/2 in one direction.\n",
                                         CMshift,
             n,    VARG(lastCM),
             no,   VARG(CM)))
-        // sleep(1);
 
       loop (k,0,3) if (fabs(maxthisjump.xi[k])>fabs(maxD)) {
         j=maxthisjump.n[k];
@@ -414,8 +412,9 @@ void calculatediff(int n,int no) /**************************** calculatediff */
       CMshift=sqrt(SQRD(lastCM,CM));
       put(CMshift)
       if (CMshift>CMSHIFTERR)
-        ERROR(("sorry, the fixup failed"))
-    }
+        ERROR(("Sorry, the fixup failed.\n\
+*** Check whether tau.P in the reread mode is the same as in the simulation.\n\
+*** If called from plb2diff, check option -P.")) }
 
     VV(lastCM,=CM)
 
@@ -455,7 +454,7 @@ void calculatediff(int n,int no) /**************************** calculatediff */
     VV(msdm,+=vm)
     VV(msdq,+=vq) } /* molecules */
 
-  if (diff.mode&4) loop (i,0,No.s) VV(rcenter[i],+=rrow[i])
+  if (MSD.mode&4) loop (i,0,No.s) VV(rcenter[i],+=rrow[i])
   nd++;
 
   putv(msdm)
@@ -492,7 +491,7 @@ void printdiff(void) /******************************************** printdiff */
   if (mcp) fclose(mcp);
   if (qcp) fclose(qcp);
 
-  if (diff.mode&4) fcenter=fopen("center.plb","wb");
+  if (MSD.mode&4) fcenter=fopen("center.plb","wb");
 
   loop (k,0,3) if (maxjump.i[k]>=0) {
     prt("%c-axis:\n\
