@@ -131,6 +131,7 @@
         getkey(sort,sortkey)
         getkey(pins,pinskey) get(initrho) getkey(MC,yesno)
         get(E) get(rho) getvec(L,,DIM)
+        get(box.follow)
 #if 0
         getvec(box.Lx,,4) getvec(box.Ly,,4) getvec(box.Lz,,4)
         getvec(box.rho,,4)

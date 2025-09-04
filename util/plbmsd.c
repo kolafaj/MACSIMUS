@@ -2,7 +2,6 @@
  */
 
 #include "ground.h"
-#include "alloc.h"
 #include "linregr.h"
 
 /*
@@ -44,17 +43,17 @@ typedef double vector[3];
 typedef float fvector[3];
 
 FILE *plb;
-int ns,reverse=0,varL;
+int ns,reverse=0,varL,n=0;
+fvector fL,*fr;
 double argL;
 float hdr[2];
 
 int readframe(vector L,vector *r) /******************************* readframe */
 {
   int i,k;
-  fvector fL,*fr;
 
-  allocarray(fr,ns);
-
+  n++;
+  
   if (varL) {
     if (fread(fL,sizeof(fL),1,plb)!=1) return 0; }
   else 
@@ -79,7 +78,7 @@ int readframe(vector L,vector *r) /******************************* readframe */
 int main(int narg,char **arg) /*************************************** main */
 {
   vector *r0,*r1,*r,L,L0,L1;
-  int i,n,k,is,from=2,DIM=3;
+  int i,k,is,from=2,DIM=3;
   char *fn,*end,*c;
   double *msd;
   int *site;
@@ -137,11 +136,12 @@ first square displacement is available between t=1 and 2",from))
   strcpy(end,".msd");
   out=fopen(fn,"wt");
 
-  alloc(r0,ns*sizeof(vector));
-  alloc(r1,ns*sizeof(vector));
-  alloc(r,ns*sizeof(vector));
-  alloc(site,narg*sizeof(site[0]));
-  alloc(msd,narg*sizeof(msd[0]));
+  allocarray(r0,ns);
+  allocarray(r,ns);
+  allocarray(r1,ns);
+  allocarray(site,narg);
+  allocarray(msd,narg);
+  allocarray(fr,ns);
 
   prt("# square displacements from configuration 1: (r(t)-r(1))^2, DIM=%d",DIM);
 
@@ -153,12 +153,11 @@ first square displacement is available between t=1 and 2",from))
   if (narg>3) prt_("    aver");
   _n
 
-  readframe(L0,r0); n=1;
+  readframe(L0,r0);
   memcpy(L1,L0,sizeof(vector));
   memcpy(r1,r0,ns*sizeof(vector));
 
   while (readframe(L,r)) {
-    n++;  
 
     loop (k,0,DIM) {
       if (L[k]) loop (i,0,ns) {

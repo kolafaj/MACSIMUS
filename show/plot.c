@@ -930,12 +930,10 @@ int main(int narg,char **arg) /**************************************** main */
                         parm[ii].used?WHITE:LIGHTGRAY,
                         ii==lastparm?RED:BLACK,as);
         if (my_style.ps)
-          fprintf(my_style.ps,"%.2f %.2f moveto (%s) show\n",
+          fprintf(my_style.ps,"gsave 0 setgray %.2f %.2f moveto (%s) show grestore\n",
                   lblx/(double)maxxn*my_style.xsize,
                   (1-lbly/(double)maxyn)*my_style.ysize+(maxparm-ii)*my_style.fontsize*1.15,
                   psshow(as));
-
-
       }
 #endif /*# PARM */
 

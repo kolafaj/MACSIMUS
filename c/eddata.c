@@ -4,6 +4,7 @@
 
  */
 #include "../gen/include.h"
+#include <errno.h>
 
 #define LEN 1024
 
@@ -42,10 +43,11 @@ See also:\n\
   loop (iarg,ifile,narg) {
     fn=arg[iarg]+(arg[iarg][0]=='-');
     fnbak=string("%s~",fn);
-    rename(fnbak,string("%s~",fnbak));
+    if (rename(fnbak,string("%s~",fnbak)))
+      fprintf(stderr,"eddata: cannot rename %s to %s~, continuing\n",fnbak,fnbak);
 
     if (rename(fn,fnbak)) {
-      fprintf(stderr,"eddata: cannot rename %s to %s, file skipped\n",fn,fnbak);
+      fprintf(stderr,"eddata: cannot rename %s to %s, file skipped\n(%s)\n",fn,fnbak,strerror(errno));
       continue; }
     else {
       in=fopen(fnbak,"rt");

@@ -901,6 +901,7 @@ extern struct box_s {
   real V;         /* Lx*Ly*Lz */
   real cutoff;    /* r-space cutoff */
   real cq;        /* =cutoff^2 */
+  real follow;    /* max CM drift to follow the periodic b.c. */
 } box;
 
 extern int cache;    /* molecules in block for r-space sum */

@@ -466,7 +466,7 @@ En.pot=%.9g En.kin=%.9g En.tot=%.12g",
       pass=1; }
 
     printfSF();
-    if (MSD.mode&3) printdiff();
+    if (MSD.mode&3) printMSD();
 #ifdef CLUSTERS
     printclusters();
 #endif /*# CLUSTERS */

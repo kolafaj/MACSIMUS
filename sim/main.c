@@ -1,4 +1,4 @@
-#define VERSION "3.7b"
+#define VERSION "3.7d"
 
 #if defined(LINKCELL) && defined(FREEBC)
 #  error "LINKCELL not supported for FREEBC"
@@ -358,7 +358,7 @@ int main(int narg,char **arg) /**************************************** main */
 
   prts(INFO);
 
-  prts_("***");
+  prts_("*** ");
 
   printdefines(out); /* out of the (deprecated) scroll system */
 
@@ -374,7 +374,7 @@ int main(int narg,char **arg) /**************************************** main */
     if (!host) host=getenv("HOST");
     if (!host) host="UNKNOWN";
 
-    prt("*** %s endian short=%d int=%d long=%d pointer=%d ***",
+    prt("***\n*** %s endian short=%d int=%d long=%d pointer=%d ***",
         *end==1?"little":*end==0?"BIG":"?",
         sizeof(short),sizeof(int),sizeof(long),sizeof(void*));
 
@@ -1455,9 +1455,9 @@ final drift = %d = %s",DRIFT_START,drift,int2sumbin(drift)))
       drift=0; }
 
     initSF();
-    if (MSD.mode&3) initdiff(gear.order==0?dt.cfg*reread.by:
-                              gear.order==1?dt.plb*reread.by:
-                              h*noint);
+    if (MSD.mode&3) initMSD(gear.order==0?dt.cfg*reread.by:
+                             gear.order==1?dt.plb*reread.by:
+                             h*noint /* normally should not be called during dimulation */);
 #  ifdef CLUSTERS
     readclusterdef(Fn("cli"));
 #  endif /*# CLUSTERS */
@@ -1496,7 +1496,7 @@ final drift = %d = %s",DRIFT_START,drift,int2sumbin(drift)))
         else {
           /* read playback instead of simulating */
           if (dt.plb<=0) ERROR(("Re-read mode (-m1) and dt.plb <= 0.\n\
-*** Set dt.plb > 0 to the stride between PLBNAME.# files."))
+*** Set dt.plb > 0 to the stride between frames."))
           if (dt.cfg!=0 && dt.cfg<dt.plb)
             ERROR(("Re-read mode (-m1) and dt.cfg(%g) < dt.plb*reread.by(%g).\n\
 *** Set dt.cfg, preferably to an integer multiple of dt.plb*reread.by.",

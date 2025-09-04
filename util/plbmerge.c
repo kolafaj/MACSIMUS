@@ -35,7 +35,8 @@ OPTIONs:\n\
 \t- output box size L is set to MAXIMUM of all plb-files\n\
 \t- hint: use molcfg to create merged mol- and gol-files\n\
   -cNS\ttruncate playback files to NS sites and concatenate\n\
-  -c\tas concatenate, the first file is the shortest (or all the same length)\n\
+  -c\tconcatenate files of the same numbers of sites; if the numbers of sites\n\
+\tdiffer, the first file must have the smallest numbers of sites\n\
   -fNF\tmerge/concatenate at most NF frames from each file [default=all]\n\
 The output plb file contains box info (cf. plbconv or mergeplb for old format)\n\
 Examples:\n\
@@ -70,7 +71,7 @@ See also:\n\
   
   if (CAT) {
     /* concatenate */
-    fvector *R;
+    fvector *R=NULL;
     int varL;
 
     fprintf(stderr,"concatenating plb-files (serially):\n");

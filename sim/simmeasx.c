@@ -27,8 +27,6 @@
 #include "asksig.h"
 #include "simdef.h"
 
-#define CMSHIFTERR 3e-7
-
 #ifdef CLUSTERS
 #  include "intermac.h"
 #  include "cluster.c" /* updated and fixed 9/2009 */
@@ -231,32 +229,25 @@ static struct maxjump_s
   maxjump= {{0,0,0},{-1,-1,-1},{-1,-1,-1},{-1,-1,-1}},
   max1jump={{0,0,0},{-1,-1,-1},{-1,-1,-1},{-1,-1,-1}};
 
-void initdiff(double dtplb) /************************************** initdiff */
+void initMSD(double dtplb) /**************************************** initMSD */
+/* preparation of data structures
+   - the first cfg is read on the 1st call of calculateMSD() */
 {
   int n,i;
-  vector *rrow=rof(molec,cfg[0]->rp); /* r: access by No.s sites */
 
   if (dtplb==0) dtplb=1; /* info only */
 
   if (MSD.mode==0) return;
 
-  if (tau.P) {
-    loop (i,0,No.s) VV(rrow[i],/=box.L)
-    sumL+=box.L[0];
-    sumL2+=Sqr(box.L[0]);
-    sumV+=box.L[0]*box.L[1]*box.L[2];
-    nL++; }
+  if (box.follow>2e-6) prt("\
+WARNING: box.follow=%g (plb2diff -F%g) is likely too long.\n\
+         Please use as short value as possible.",box.follow,box.follow);
 
   sdsalloc(lastcfg,cfg[0]->size);
   sdsalloc(firstcfg,cfg[0]->size);
 
-  VV(lastL,=box.L)
-  if (tau.P) VO(lastL,=1)
-  VV(oldL,=box.L) /* ??? duplicated */
-
-  nd=nL=ndiff=0;
+  nd=nL=ndiff=0; /* ndiff==0 tells calculateMSD() to store */
   dt=dtplb;
-  firstt=t;
   sumV=sumL=sumL2=0;
 
   if (MSD.mode&4) alloczero(rcenter,No.s*sizeof(vector));
@@ -306,31 +297,32 @@ void calculateMSD(int n,int no) /****************************** calculateMSD */
     double m,q;
     int n;
   } *msd,*msp;
-  vector msdm,msdq;
-  double totm,totq,CMshift;
+  vector msdm,msdq,CMshift;
+  double totm,totq,CMshiftabs;
   siteinfo_t *si;
   struct maxjump_s maxthisjump= {{0,0,0},{-1,-1,-1},{-1,-1,-1},{-1,-1,-1}};
 
-  if (tau.P) {
+  if (tau.P) { /* rescale to box 1^3 in place in cfg[0] */
     loop (i,0,No.s) VV(rrow[i],/=box.L)
     if (!iscube()) ERROR(("not cube (2nd check)"))
 
     sumL+=box.L[0];
     sumL2+=Sqr(box.L[0]);
     sumV+=PROD(box.L);
-    nL++; }
+    nL++;
+    VV(oldL,=box.L)
+    VO(box.L,=1)
+    VO(box.Lh,=0.5) }
 
-  /* remove nearest image jumps in the molecule moves */
+  if (!ndiff) sdscopy(firstcfg,cfg[0])
+
 #ifndef FREEBC
-  if (!ndiff) {
-    sdscopy(firstcfg,cfg[0])
-    CoM(lastCM,firstcfg); }
+  /* remove nearest image jumps in the molecule moves */
+  if (!ndiff) CoM(lastCM,firstcfg);
   else {
-    if (tau.P) { VV(oldL,=box.L) VO(box.L,=1) VO(box.Lh,=0.5) }
-
     loop (j,FROM,No.N) {
-      firstr=rof(molec+j,firstcfg->rp);
       r=     rof(molec+j,cfg[0]->rp);
+      firstr=rof(molec+j,firstcfg->rp);
       lastr= rof(molec+j,lastcfg->rp);
       ns=molec[j].ns;
 
@@ -367,9 +359,10 @@ void calculateMSD(int n,int no) /****************************** calculateMSD */
             maxjump.no=no; } } } }
 
     CoM(CM,cfg[0]);
-    CMshift=sqrt(SQRD(lastCM,CM));
+    VVV(CMshift,=CM,-lastCM)
+    CMshiftabs=sqrt(SQR(CMshift));
 
-    if (CMshift>CMSHIFTERR) {
+    if (CMshiftabs>box.follow) { /* Center of mass has shifted too much */
       double maxD=0;
       int k,kk=-1;
 
@@ -385,23 +378,36 @@ void calculateMSD(int n,int no) /****************************** calculateMSD */
       putv(maxthisjump.i)
       put(maxthisjump.no)
 
-      WARNING(("Center of mass has shifted by %g\n\
-*** first(n=%d) = %g %g %g\n\
-*** this(no=%d) = %g %g %g\n\
-*** I will try to fix it assuming that a single molecule have moved\n\
-*** by more than L/2 in one direction.\n",
-                                        CMshift,
-            n,    VARG(lastCM),
-            no,   VARG(CM)))
+      WARNING(("Center of mass has shifted by %g in frame %d\n\
+*** in the block starting from frame %d.\n\
+*** CM(prev)= %10.6f %10.6f %10.6f\n\
+*** CM(this)= %10.6f %10.6f %10.6f\n\
+*** CMshift = %10.6f %10.6f %10.6f\n\
+*** Double check box.follow (plb2diff -F)!\n\
+*** I will try to fix it assuming that a single molecule has moved by more\n\
+*** than L/2 in one direction.",
+                                              CMshiftabs,
+           no,                          n,
+               VARG(lastCM),
+               VARG(CM),
+               VARG(CMshift)))
 
+      if (box.follow<6e-7) prt("\
+WARNING: box.follow=%g (plb2diff -F%g) might be too short.\n\
+         The typical range is 2e-7 to 4e-7.",box.follow,box.follow);
+
+      /* fix using the longest jump */
       loop (k,0,3) if (fabs(maxthisjump.xi[k])>fabs(maxD)) {
         j=maxthisjump.n[k];
         maxD=maxthisjump.xi[k];
         kk=k; }
       if (k<0) ERROR(("internal"))
       k=kk;
-      put3(j,k,maxD)
+      prt("The longest jump found for mol=%d jump[%d]=%g L\n\
+corrected CMshift:",j,k,maxD);
       ns=molec[j].ns;
+
+      r=rof(molec+j,cfg[0]->rp);
 
       loop (i,0,ns) r[i][k]-=sign(maxD)*box.L[k];
       maxD-=sign(maxD);
@@ -409,16 +415,60 @@ void calculateMSD(int n,int no) /****************************** calculateMSD */
       max1jump.xi[k]=maxD;
 
       CoM(CM,cfg[0]);
-      CMshift=sqrt(SQRD(lastCM,CM));
-      put(CMshift)
-      if (CMshift>CMSHIFTERR)
-        ERROR(("Sorry, the fixup failed.\n\
+      VVV(CMshift,=CM,-lastCM)
+      CMshiftabs=sqrt(SQR(CMshift));
+      putv(CMshift)
+      if (CMshiftabs<box.follow)
+        prt("The fixup has been successful, max jump=%g!",CMshiftabs);
+      else {
+        double dm=0,d,DCM,sh,q;
+        int nhits=0,jj;
+        
+        WARNING(("The fixup using the longest jump failed.\n\
+*** I will try harder..FINGERS CROSSED, THIS CODE HAS NOT BEEN DEBUGGED"))
+
+        /* returning the configuration before fix */
+        loop (i,0,ns) r[i][k]+=sign(maxD)*box.L[k];
+        CoM(CM,cfg[0]);
+        VVV(CMshift,=CM,-lastCM)
+
+        k=0; /* finding the coordinate with bad shift */
+        dm=fabs(CMshift[0]);
+        d=fabs(CMshift[1]);
+        if (d>dm) k=1,dm=d;
+        d=fabs(CMshift[2]);
+        if (d>dm) k=2,dm=d;        
+
+        /* trying all molecules in the k-axis */
+        loop (j,0,No.N) {
+          sp=molec[j].sp;
+          ns=molec[j].ns;
+          q=spec[sp]->mass/No.mass;
+          DCM=CMshift[k]+q*box.L[k];
+          if (fabs(DCM)<box.follow) jj=j,nhits++,sh=box.L[k];
+          DCM=CMshift[k]-q*box.L[k];
+          if (fabs(DCM)<box.follow) jj=j,nhits++,sh=-box.L[k]; }
+
+        put2(nhits,k)
+        
+        if (nhits!=1) ERROR(("The fixup failed: nhits=%d,k=%d.\n\
+*** Try to increase box.follow (but not above 1e-6)\n\
 *** Check whether tau.P in the reread mode is the same as in the simulation.\n\
-*** If called from plb2diff, check option -P.")) }
+*** If called from plb2diff, check option -P.",nhits,k))
+
+      r=rof(molec+jj,cfg[0]->rp);
+      loop (i,0,ns) r[i][k]+=sh;
+      CoM(CM,cfg[0]);
+      VVV(CMshift,=CM,-lastCM)
+      putv(CMshift)
+      if (sqrt(SQR(CMshift))>box.follow) ERROR(("The fixup failed"))
+      prt("The fixup has been successful.");
+      ERROR(("THIS CODE HAS NOT BEEN DEBUGGED, double check and remove this message")) }
+    }
 
     VV(lastCM,=CM)
 
-    if (tau.P) {
+    if (tau.P) { /* probably not needed because cfg[0] scaled anyway */
       VV(box.L,=oldL)
       VV(box.Lh,=0.5*box.L) } }
 #endif /*# FREEBC */
@@ -479,7 +529,7 @@ void calculateMSD(int n,int no) /****************************** calculateMSD */
   free(msd);
 }
 
-void printdiff(void) /******************************************** printdiff */
+void printMSD(void) /********************************************** printMSD */
 {
   FILE *aux=fopen(Fn("aux"),"wb"); /* separate files in V3.0 */
   FILE *fcenter=NULL;
@@ -501,9 +551,10 @@ max jump over periodic boxes = %g*L (frames 1->%d, mol.s=%d.%d)",
         max1jump.xi[k],max1jump.frame[k]-1,max1jump.frame[k],max1jump.n[k],max1jump.i[k]);
     if (fabs(max1jump.xi[k])>0.4)
       WARNING(("\
-max jump between consecutive frames is too close to L/2\n\
-*** diffusions etc. may be wrong - check whether msd and column difm are tiny\n\
-*** if wrong then simulate again with shorter dt.plb")) }
+The maximum jump between consecutive frames is too close to L/2 or over!\n\
+*** Diffusions/conductivity may be wrong!\n\
+*** Check whether MSD and column difm are tiny.\n\
+*** If wrong then simulate again with a shorter dt.plb.")) }
 
   fwrite(&maxjump,sizeof(maxjump),1,aux);
   fwrite(&max1jump,sizeof(max1jump),1,aux);

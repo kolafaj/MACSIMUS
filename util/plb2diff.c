@@ -2,7 +2,7 @@
 
 This utility automates diffusion (D) and conductivity (kappa) calculations.
 
-07/2025: update to match new features of cook
+07/2025: update to match new features of cook, small improvements
 09/2019: bit of cleaning
 05/2017: V3.0 compatible with cook V3.0a and newer, viscosity removed
          env.variable PLB2DIFF removed, synopsis changed
@@ -141,7 +141,7 @@ int plbno(char *fn) /************************************************* plbno */
 int main(int narg,char **arg) /**************************************** main */
 {
   int NO=0,START=0,NBLOCKS=0;
-  double MFACTOR=0,QFACTOR=0,BLOCK=0.25,OMIT=0.25,erasetemp=1;
+  double MFACTOR=0,QFACTOR=0,BLOCK=0.25,OMIT=0.25,erasetemp=1,boxfollow=0;
   int PLOT=15,NPT=0;
   int init,no,iblock,ncps[128],ncp,icp,pass,iarg,ir;
   FILE *get=NULL,**mf=NULL,**qf=NULL;
@@ -158,6 +158,7 @@ int main(int narg,char **arg) /**************************************** main */
   double msdb=0,mscdb=0;
   char *defaultopt="-m1 -y0 -w0 -r1";
   char *extraopt="",*geometry="800x600";
+  static char progress[80]="-------------------------------------------------------------------------------";
 
   void (*MYAdd)(char *name,double weight,double X,double Y);
   double (*MYRes)(char *name,char *key);
@@ -199,6 +200,7 @@ OPTIONS (#=integer or real number):\n\
   -f#  fit Mean Square (Charge) Displacements (MSD, MSCD) to [2]\n\
          2=a+b*t, incl. error estimates [default]\n\
          3=a+b*t+c/sqrt(t) (hydrodynamic tail, no error estimates)\n\
+  -F#  box.follow for cook [default=0]\n\
   -g#x# plot geometry (size without position) [800x600]\n\
   -k   keep all temporary files [default=remove]\n\
   -m#  calculate mass diffusivity by species [0=do not calculate]\n\
@@ -280,6 +282,7 @@ SEE ALSO:\n\
           default:
             ERROR(("only -f2 or -f3 supported")) }
           break;
+        case 'F': boxfollow=f; break;
         case 'n': NO=f; break;
           NO=f;
           break;
@@ -364,7 +367,13 @@ SEE ALSO:\n\
     else init=1+START+(long long int)iblock*(NO-BLOCK-START)/(NBLOCKS-1);
     no=init+BLOCK-1;
     prt("block %-3d: from=%-7d to=%-7d",iblock+1,init,no);
-    fprintf(stderr,"## %d/%d ## frames %d-%d ## ",iblock+1,NBLOCKS,init,no);
+
+    progress[(int)((double)(iblock+1)/NBLOCKS*78.9)]='%';
+    fprintf(stderr,"%s\n",progress);
+    fprintf(stderr,"## %.2f%% = %d/%d ## frames %d-%d ##\n",
+            (double)(iblock+1)/NBLOCKS*100.,
+            iblock+1,NBLOCKS,
+            init,no);
 
     cmd=string("%s %s %s %s %s %s.plb",
                COOK,defaultopt,extraopt,SYSNAME,BASENAME,SIMNAME);
@@ -375,8 +384,12 @@ SEE ALSO:\n\
 MSD.mode=%d\n\
 thermostat=-1\n\
 reread.from=%d reread.to=%d\n\
+box.follow=%g\n\
 %s\n\
-dt.plb=1 init=2;\n",(MFACTOR!=0)+2*(QFACTOR!=0),init,no,NPT?"tau.P=1 tau.rho=0":"tau.P=0 tau.rho=1");
+dt.plb=1 init=2;\n",(MFACTOR!=0)+2*(QFACTOR!=0),
+            init,no,
+            boxfollow,
+            NPT?"tau.P=1 tau.rho=0":"tau.P=0 tau.rho=1");
     if (fclose(get)) ERROR(("%s write error",fn))
 
     fn=string("ln -sf %s.def %s.def",SIMNAME,BASENAME);
@@ -694,20 +707,15 @@ max jump over periodic boxes in blocks:\n\
      prt("max jump between consecutive frames:\n\
   %f*L (no=%d frames=%d->%d mol.site=%d.%d)",
      max1jump.xi[k],max1jump.no,max1jump.frame[k]-1,max1jump.frame[k],max1jump.n[k],max1jump.i[k]);
-     if (fabs(max1jump.xi[k])>0.5)
-       WARNING(("Maximum jump between consecutive frames %.4f*L is more than L/2.\n\
-*** This means that a molecule moved by more than L/2 between frames,\n\
-*** but this has been fixed using the center-of-mass condition.\n\
-*** Fingers crossed - diffusions may be wrong:\n\
-    - check table JUMP above\n\
-    - check difm in table DIFFUSION and the last column of %s.msd.dat",
-               max1jump.xi[k],SIMNAME))
-      else if (fabs(max1jump.xi[k])>0.45)
+     if (fabs(max1jump.xi[k])>0.45)
        WARNING(("max jump between consecutive frames %.4f*L is very close to +-L/2\n\
-*** diffusions may be wrong:\n\
-    - check table JUMP above\n\
-    - check difm in table DIFFUSION and the last column of %s.msd.dat",
-               max1jump.xi[k],SIMNAME)) }
+*** Program cook* (called from plb2diff) checks the center-of-mass condition\n\
+*** and may have fixed a jump of one molecule by more than half the box.\n\
+*** You should check:\n\
+    - table JUMP above\n\
+    - check difm in table DIFFUSION and the last column of %s.msd.dat\n\
+    - rerun plb2diff with -k and watch WARNING \'Center of mass has shifted\'",
+                max1jump.xi[k],SIMNAME)) }
 
     if (fabs(MYRes("difm","B"))>3e-7)
       WARNING(("difm=%g is not tiny (up to 1e-5 acceptable for large systems)\n\

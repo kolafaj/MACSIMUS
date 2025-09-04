@@ -141,7 +141,7 @@ void setss(sitesite_t *ss, int i,int j, double C2,int onefour) /****** setss */
 
   Normally, C2=LJcutoff as given in the input data.
   If C2<0 then C2=abs(C2)*sigvdW is used (i.e., -C2 is in units of
-  potential minimum sigvdW)
+  potential minimum sigvdW).
 
   The pair potential U(r) is approximated by:
     u(r) = U(r)              for r<C1
@@ -151,19 +151,26 @@ void setss(sitesite_t *ss, int i,int j, double C2,int onefour) /****** setss */
     f(r)/r = F(r)/r          for r<C1
     f(r)/r = -4*A*(r^2-C2^2) for C1<r<C2
     f(r)/r = 0               for C2<r
-  (Note that the vector of force = f(r)/r*(vector r), so f(r)/r is needed)
-  A,C1 are calculated from the max. cutoff C2 so that the forces are continuous.
 
-  The lowest possible value for LJ is C2/sigvdW=1.59 (C2/LJsigma=1.7819),
-  if shorter C2 is requested, the calculations are inaccurate and a WARNING
-  is printed
+  Note: The vector of force = f(r)/r*(vector r); therefore, f(r)/r (not f(r)
+  itself) is needed in the calculation of both forces and the virial.
+  
+  Constants A,C1 are calculated from the cutoff C2 using the condition that
+  the forces are continuous.  For Lennard-Jones, this is not possible for
+  C2/sigvdW<1.58740488 (C2/LJsigma<1.78180173); if this happens, a WARNING is
+  printed.  Note that if (e.g.) there is a single large atom X present, the
+  algorithm stil prepares the X--X potential term and may detect this error
+  even if it will never be used (but it may be used with the PERSUM version).
 
-  The cutoff corrections are calculated using the assumption that
-  g(r)=1 for r>C1.  The normalized cutoff correction corr for a pair
-  is returned, then the cutoff correction of total energy is sum over
-  pairs of corr/V and the cutoff correction of pressure is sum over
-  pairs of corr/V^2.  (It follows from integration by parts that the
-  factor corr is the same for both pressure and energy.)
+  The theoretical limits are C2/sigvdW<2^(2/3) and C2/LJsigma<2^(5/6), but the
+  algorithm used is a bit worse.
+
+  The cutoff corrections are calculated using the assumption that g(r)=1 for
+  r>C1.  The normalized cutoff correction corr for a pair is returned, then
+  the cutoff correction of total energy is sum over pairs of corr/V and the
+  cutoff correction of pressure is sum over pairs of corr/V^2.  (It follows
+  from integration by parts that the factor corr is the same for both pressure
+  and energy.)
 
   The code is mostly potential-independent (the dependency by macros
   U,F only).

@@ -449,14 +449,18 @@ void slabcutcor(ToIntPtr B, ToIntPtr A)  /********************** slabcutcor */
   double Resum=0; /* sum of atom energy corrections: debugging only */
   double U=0; /* as above, concise FT-based formula */
   double virsum=0; /* virial contribution, concise FT-based formula */
-  complex **rho; /* [st][k] FT of z-profile (complex defined in ewald.h) */
+  complex **rho; /* [st][k] FT of z-profile of site type st
+                    denoted as \mathcal{N}_k in the manual
+                    (complex is defined in ewald.h) */
 
-  if (slab.K<2 || slab.K>1024) ERROR(("slabcutcor: slab.K=%d is invalid or out of reasonable range",slab.K))
+  if (slab.K<2 || slab.K>1024)
+    ERROR(("slabcutcor: slab.K=%d is invalid or out of reasonable range",slab.K))
 
   /* FT of the site z-profiles multiplied by V (ss->Skk are divided)*/
   alloc2Darrayzero(rho,nsites,slab.K);
 
-  /* Fourier transform of the particle density multiplied by V (Skk is divided by V) */
+  /* Fourier transform of the particle density multiplied by V
+     (Skk is divided by V) */
   loop (n,FROM,No.N) {
     mn=molec+n;
     f=rof(mn,B->rp);
@@ -487,22 +491,24 @@ void slabcutcor(ToIntPtr B, ToIntPtr A)  /********************** slabcutcor */
     f=rof(mn,B->rp);
     r=rof(mn,A->rp);
     si=spec[mn->sp]->si;
+
     loop (i,0,mn->ns) {
       int st=si[i].st;
       int jst;
       double fsum=0;
       double a=2*PI/box.L[2]*r[i][2];
-      complex q={cos(a),sin(a)},x=q;
+      complex q={cos(a),sin(a)},x;
 
       loop (jst,0,nsites) {
         sitesite_t *ss=&sstab[st][jst];
 
         if (ss->Skk) {
+          x=q;
           if (measure) {
             Resum+=ss->Skk[0].E*rho[jst][0].re;
             Resum+=ss->Skk[1].E*(rho[jst][1].re*x.re-rho[jst][1].im*x.im); }
           fsum+=ss->Skk[1].E*(rho[jst][1].re*x.im+rho[jst][1].im*x.re);
-
+          
           loop (k,2,slab.K) {
             a=x.re*q.re-x.im*q.im;
             x.im=x.re*q.im+x.im*q.re;
@@ -510,17 +516,13 @@ void slabcutcor(ToIntPtr B, ToIntPtr A)  /********************** slabcutcor */
             if (measure) Resum+= ss->Skk[k].E*(rho[jst][k].re*x.re-rho[jst][k].im*x.im);
             fsum+=k*ss->Skk[k].E*(rho[jst][k].re*x.im+rho[jst][k].im*x.re); } } }
 
-      //      if (option('v')&256) put2(r[i][2],Resum)
+#if 0 // DEBUG ONLY - see /home/jiri/projects/tests/slabcorr/
+      if (n==0 && i==0) prt("%.8g %.8g %.8g #f0 Df0",r[i][2],f[i][2],4*PI/box.L[2]*fsum);
+#endif
+      
       f[i][2]+=4*PI/box.L[2]*fsum; } }
 
   if (measure) {
-#  if 0
-    /* verbose debug prints */
-    if (option('v')&256) {
-      loop (st,0,nsites) loop (k,0,slab.K)
-        prt("rho[%d][%d] = %g %g",st,k,rho[st][k].re/box.V,rho[st][k].im/box.V); }
-#  endif /*# 0 */
-
     /* concise energy and virial formulas */
     loop (k,0,slab.K) {
       int i,j;
@@ -529,8 +531,6 @@ void slabcutcor(ToIntPtr B, ToIntPtr A)  /********************** slabcutcor */
         loop (j,0,nsites) if (sstab[i][j].Skk) {
           U     +=(rho[i][k].re*rho[j][k].re+rho[i][k].im*rho[j][k].im)*sstab[i][j].Skk[k].E;
           virsum+=(rho[i][k].re*rho[j][k].re+rho[i][k].im*rho[j][k].im)*sstab[i][j].Skk[k].D; } }
-
-    //prt("E Ecorr=%.9g Resum=%.8g\n",U,Resum);
 
     En.pot+=U;
 

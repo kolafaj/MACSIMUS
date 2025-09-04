@@ -6,7 +6,9 @@
 
 #define LINELEN 512 /* for line[LINELEN], not quite widely used... (increased) */
 
-extern int nsites,nspec,ngroups,nbfixes,n14;
+extern int nsites, /* number of site types */
+  nspec, /* number of species */
+  ngroups; /* groups of species to calculate J and M, see group[3] in input data */
 
 /* site type group (support for distinguishing site types for rdf) */
 typedef struct stitem_s {

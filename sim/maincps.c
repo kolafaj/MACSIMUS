@@ -6,10 +6,11 @@
    - statistics of (some) variables added here
 */
 #ifdef ANCHOR
-loop (i,0,anchor.col) {
-  anchor.rec[i].var=anchor.rec[i].sum/noint;
-  anchor.rec[i].sum=0; }
+      loop (i,0,anchor.col) {
+      anchor.rec[i].var=anchor.rec[i].sum/noint;
+      anchor.rec[i].sum=0; }
 #endif /*# ANCHOR */
+
       {
         struct ssd_s *ssd;
 #ifdef FREEBC

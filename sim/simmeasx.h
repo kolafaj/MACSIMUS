@@ -1,13 +1,10 @@
-
-// void diffSF(double dt,double dtcp,int no,int n0,int nspec);
-
 void initSF(void);
 void calculateSF(void);
 void printfSF(void);
 
-void initdiff(double dtplb);
+void initMSD(double dtplb);
 void calculateMSD(int n,int no);
-void printdiff(void);
+void printMSD(void);
 
 #ifdef XSECTION
 double mXsection(ToIntPtr A);

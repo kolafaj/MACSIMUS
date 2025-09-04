@@ -1310,7 +1310,7 @@ void initparallel(void) /************************************** initparallel */
 #  endif /*# PARALLEL==1 */
 
 #  if PARALLEL==2
-  if (No.th!=2) ERROR(("PARALLEL==2: the number of threads (%d) is not 2",No.th))
+  if (No.th!=2) ERROR(("PARALLEL==2: the number of threads (%d) is not 2.\n*** Check env variable NSLOTS.",No.th))
 #  endif /*# PARALLEL==2 */
 
 #  ifdef SERIAL

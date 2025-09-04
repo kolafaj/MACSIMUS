@@ -63,6 +63,7 @@ static struct unit_s unitlist[] = {
   {"a_T",31556925.216,{0,0,1}}, /* annus = mean tropical year */
   {"a_J",31557600,{0,0,1}}, /* annus = Julian year */
   {"a_G",31556952,{0,0,1}}, /* annus = Gregorian year */
+  {"cy",3155760000.,{0,0,1}}, /* Julian century */
   {"Bq",1,{0,0,-1}},
   {"L",1e-3,{3}},
   {"gal",3.785411784e-3,{3}}, /* 231 in^3 = USgal */
