@@ -163,7 +163,7 @@ int conserved=-1;     /* number of conserved degrees of freedom; -1=auto */
             -1: never remove drift of momentum
             0,2,-2: the same for rotations and angular momentum */
 
-struct center_s center;
+struct center_s center={0,0x7fffffff};
 
 #ifdef SLAB
 /*                    grid max  out, outc, torem, geom, sp         sym,       mode prt  T  Tz0  Tz1   range K */

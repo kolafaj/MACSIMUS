@@ -137,8 +137,8 @@ void help(void)
   H("",       "none / autorepeat from start / forward-backward");
   H(", .",    "goto to beginning/end of the playback file");
   H("{ }",    "go by 5% of the file (or as set by option -[)");
-  H("[ PgUp;<",   "go by 1 frame (file*) backwards    *applies if PLBNAME");
-  H("] PgDn  ;>", "go by 1 frame (file*) forward       contains int-format");
+  H("[ PgUp;<",   "go by 1 frame (file*) backwards   *except []: applies if PLBNAME");
+  H("] PgDn  ;>", "go by 1 frame (file*) forward      contains int-format");
   H("n",      "show/hide frame number info");
   H("F4",     "goto frame (enter number in the terminal); = i in presenter mode");
   H(":",      "set bookmark position");

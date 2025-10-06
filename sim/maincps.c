@@ -213,6 +213,7 @@
         StaAdd("Tkin",En.T); issta=1;
         StaAdd("Tin",En.T_in);
         StaAdd("Ttr",En.T_tr);
+        StaAdd("Ttr-Tin",En.T_tr-En.T_in);
 #ifdef LOG
         StaAdd("Ein [J/mol]",En.intra*Eunit);
         if (No.first) StaAdd(string("Epot0 (<%d) [J/mol]",No.first),En.pot0*Eunit);

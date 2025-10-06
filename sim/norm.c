@@ -361,7 +361,7 @@ int normalize(int m) /******************************************** normalize */
  * It is assumed that no more than one L must be added or subtracted.
  * No nearest-image convention needs to be applied to calculate distances
    within one molecule.
- * A molecule must not extend over [0,3/2*L] ([0,5/2*L] if WORM is #defined)
+ * A molecule must not extend over [0,3/2*L] ([0,5/2*L] if WORM is #defined).
  * m=-2: Normalizes all molecules, verbose.
    m=-1: Normalizes all molecules, quiet.
    m>=0: Normalizes molecule m.
@@ -406,19 +406,15 @@ int normalize(int m) /******************************************** normalize */
   if (m>=0) from=m,to=m+1;
   if (m<-1) { VO(RMIN,=9e9) VO(RMAX,=-9e9) }
 
-  //  if (!a[0]->dep) {
-  //    static int pass;
-  //    depend_r(a[0]);
-  //    if (pass<30) WARNING(("internal: normalization without dependants, pls report this incident!"))
-  //    pass++; }
-
   loop (n,from,to) {
     r=rof(molec+n,rp);
     ns=molec[n].ns;
     VO(rmin,=9e9)
     VO(rmax,=-9e9)
     si=spec[molec[n].sp]->si;
-    /* WARNING: only for masses sites (dependant may be unknown)
+    /* WARNING: only for sites with masses
+       The dependant position may be unknown:
+         reconsider call to depend_r() for dependants with masses!
        NB: L-dependants require box.rmin set */
     loop (i,0,ns) if (si[i].mass) loop (k,0,dim) {
       if (r[i][k]<rmin[k]) rmin[k]=r[i][k];
@@ -820,7 +816,6 @@ void homogeneity(int corr) /************************************ homogeneity */
   if (suma>HOMOGENEITY && corr&3) WARNING(("The system is inhomogeneous (index>%g) and corr=%d is set.\n\
 *** Doublecheck whether the homogeneous cutoff corrections are appropriate!\n\
 *** In the SLAB version, consider slab.K and slab.range.",HOMOGENEITY,corr))
-
 }
 
 #if defined(SLAB) && SLAB & 2
@@ -908,8 +903,7 @@ double cleaverescale(ToIntPtr A,int mode,double q0,double q1)
 
 double rescalecfg(ToIntPtr A,int mode, double q1,double *q)
                                               /****************** rescalecfg */
-/*
-   Rescale the whole configuration according to bits set in mode.
+/* Rescale the whole configuration according to bits set in mode.
    q==NULL: use factor q1 for all coordinates the bits set in mode.
    q!=NULL: use the respective q[i] for all coordinates the bits set in mode
             (i.e., for mode=2 and q[]={2,2,2}, only y is rescaled)
@@ -930,7 +924,8 @@ double rescalecfg(ToIntPtr A,int mode, double q1,double *q)
     8  256   rescale also corresponding L (RESCALE_L)
              (e.g., mode=17 = rescale x of all sites and also L[0])
     9* 512   REMOVED
-   10* 1024  SLAB: for surface-tension by virtual area change (densprof.slab&2)
+   10* 1024  SLAB: for surface-tension by virtual area change
+             (constrd.mode&RESCALE_SLAB)
              scaling factors qy:=qx, qz:=1/qx^2
              ERROR if RESCALE_L not set (RESCALE_SLAB)
     ========================================================================
@@ -1020,7 +1015,7 @@ double rescalecfg(ToIntPtr A,int mode, double q1,double *q)
 } /* rescalecfg */
 
 int rhorescale(int rescale,double tau_rho,vector finalL,double halftcyc)
-/* rescaling to reach given rho */                /************** rhorescale */
+/* rescaling to reach given rho                    ************** rhorescale */
 /* 1 returned if the target box has been reached */
 {
   vector rscale;
@@ -1065,7 +1060,7 @@ double scaling(double tau,int noint,double factor,double maxscale)
   return s;
 }
 
-void distancecheck(void) /********************************** distancecheck */
+void distancecheck(void) /************************************ distancecheck */
 /*
   debugging tool
   finds min and max distance of sites in different b.c.
@@ -1131,7 +1126,7 @@ loop (i,0,No.s) {
 #endif /*# GOLD */
 }
 
-void zeroEn(void) /************************************************* zeroEn */
+void zeroEn(void) /************************************************** zeroEn */
 {
 #if PRESSURETENSOR&PT_VIR
   memset(En.Pvir,0,sizeof(En.Pvir));
@@ -1154,225 +1149,6 @@ void zeroEn(void) /************************************************* zeroEn */
 #if SLAB
   En.Pwall[0]=En.Pwall[1]=0;
 #endif /*# SLAB */
-}
-
-/*** dependants ***/
-
-void depend_r(ToIntPtr A,int always) /***************************** depend_r */
-/*
-  calculate positions of dependent sites
-  always=1 : always
-  always=0 : only if not A->dep (this is marked during simulation)
-*/
-{
-  molecule_t *mn;
-  int n,sp;
-  depend_t *d;
-  vector *r;
-  vector xx,yy,zz;
-  int i,k;
-  double rr;
-  struct depitem_s *dep;
-  real *depr;
-
-  if (always) A->dep=0;
-
-  if (A->dep) return;
-
-  loop (n,FROM,No.N) {
-    mn=molec+n;
-    sp=mn->sp;
-    r=rof(mn,A->rp);
-
-    looplist (d,spec[sp]->dependants) {
-      depr=r[d->indx];
-
-      if (d->type<=DEP_M) {
-        /* "Middle" (linear) dependant */
-        VO(depr,=0)
-        for (dep=d->dep; dep<d->dep+d->n; dep++)
-          VV(depr,+=dep->w*r[dep->i]) }
-
-      else if (d->type==DEP_R) {
-        /* "Rowlinson" dependant: L-D0 is perpendicular to plane (D0,D1,D2)
-            (as in Rowlinson flexible water)
-            bonds/angles in D0-D1-D2 may be flexible
-            L            d->indx
-            |            |
-            D0---D1      dep[0].i---dep[1].i
-              \           \
-               D2          dep[2].i                   */
-        vector h1,h2,l;
-        double norm;
-
-        dep=d->dep;
-        VVV(h1,=r[dep[1].i],-r[dep[0].i])
-        VVV(h2,=r[dep[2].i],-r[dep[0].i])
-        VECT(l,h1,h2)
-        norm=d->wz/sqrt(SQR(l));
-        VVV(depr,=r[dep[0].i],+norm*l) }
-
-      else {
-        /* "Lone" (out-of-plane) dependant, (D0,D1,D2) must be rigid */
-        dep=d->dep;
-        VVO(xx,=yy,=0)
-        VO(depr,=0)
-
-        loop (k,0,3) {
-          i=dep[k].i;
-          VV(depr,+=dep[k].w*r[i])
-          VV(xx,+=d->x[k]*r[i])
-          VV(yy,+=d->y[k]*r[i]) }
-
-        VECT(zz,xx,yy)
-        rr=d->wz/sqrt(SQR(zz));
-
-        VV(depr,+=rr*zz) } } }
-
-  A->dep=1; /* dependants calculated */
-}
-
-#if PRESSURETENSOR&PT_VIR
-#  if PRESSURETENSOR&PT_OFF
-#    if PRESSURETENSOR&PT_OFF_TR
-/* tranposed to the standard version (debug only: all versions are equivalent) */
-#      define CALCULATEPRESSURETENSOR(Q,G,F) \
-    En.Pvir[0]+=Q*G[0]*F[0]; \
-    En.Pvir[1]+=Q*G[1]*F[1]; \
-    En.Pvir[2]+=Q*G[2]*F[2]; \
-    En.Pvir[3]+=Q*G[2]*F[1]; \
-    En.Pvir[4]+=Q*G[0]*F[2]; \
-    En.Pvir[5]+=Q*G[1]*F[0];
-#    elif PRESSURETENSOR&PT_OFF_AV
-/* average of both version (debug only: all versions are equivalent) */
-#      define CALCULATEPRESSURETENSOR(Q,F,G) \
-    En.Pvir[0]+=Q*G[0]*F[0]; \
-    En.Pvir[1]+=Q*G[1]*F[1]; \
-    En.Pvir[2]+=Q*G[2]*F[2]; \
-    En.Pvir[3]+=Q/2*(G[2]*F[1]+G[1]*F[2]); \
-    En.Pvir[4]+=Q/2*(G[0]*F[2]+G[2]*F[0]); \
-    En.Pvir[5]+=Q/2*(G[1]*F[0]+G[0]*F[1]);
-#    else  /*#!PRESSURETENSOR&PT_OFF_TR!PRESSURETENSOR&PT_OFF_AV */
-/* standard version (equivalent to the above versions) */
-#      define CALCULATEPRESSURETENSOR(Q,F,G) \
-    En.Pvir[0]+=Q*G[0]*F[0]; \
-    En.Pvir[1]+=Q*G[1]*F[1]; \
-    En.Pvir[2]+=Q*G[2]*F[2]; \
-    En.Pvir[3]+=Q*G[1]*F[2]; \
-    En.Pvir[4]+=Q*G[2]*F[0]; \
-    En.Pvir[5]+=Q*G[0]*F[1];
-// prt("%g %g %g  %g %g %g PTyz",G[1],F[2],G[1]*F[2], F[1],G[2],F[1]*G[2]);
-#    endif  /*#!PRESSURETENSOR&PT_OFF_TR!PRESSURETENSOR&PT_OFF_AV */
-#  else /*# PRESSURETENSOR&PT_OFF */
-#    define CALCULATEPRESSURETENSOR(Q,G,F) \
-    En.Pvir[0]+=Q*G[0]*F[0]; \
-    En.Pvir[1]+=Q*G[1]*F[1]; \
-    En.Pvir[2]+=Q*G[2]*F[2];
-#  endif /*#!PRESSURETENSOR&PT_OFF */
-#else /*# PRESSURETENSOR&PT_VIR */
-#  define CALCULATEPRESSURETENSOR(Q,G,F) /* empty */
-#endif /*#!PRESSURETENSOR&PT_VIR */
-
-void depend_f(ToIntPtr A,ToIntPtr B) /***************************** depend_f */
-/* distribute forces from dependent to independent sites */
-/* Lagrange only */
-{
-  molecule_t *mn;
-  depend_t *d;
-  int n,sp;
-  vector *r,*f,dr;
-  real *depr,*depf; /* dependant position, force to distribute */
-  int k;
-  double rr;
-  struct depitem_s *dep;
-
-  loop (n,FROM,No.N) {
-    mn=molec+n;
-    sp=mn->sp;
-    r=rof(mn,A->rp);
-    f=rof(mn,B->rp);
-
-    looplist (d,spec[sp]->dependants) {
-
-      depf=f[d->indx];
-
-      if (d->type<=DEP_M) {
-        /* "Middle" (linear) dependant (old and new versions) */
-        for (dep=d->dep; dep<d->dep+d->n; dep++)
-          VV(f[dep->i],+=dep->w*depf) }
-
-      else if (d->type==DEP_R) {
-        /* "Rowlinson" dependant: L-D0 is perpendicular to plane (D0,D1,D2)
-            (as in Rowlinson flexible water)
-            bonds/angles in D0-D1-D2 may be flexible
-            L            d->indx                L
-            |            |                      l
-            D0---D1      dep[0].i---dep[1].i    O---h1--H1
-              \           \                      h2
-               D2          dep[2].i               H2      */
-        vector h1,h2,l,M,Mp;
-        double h1h1,h2h2,h1h2,det,a1,a2;
-
-        dep=d->dep;
-        VVV(h1,=r[dep[1].i],-r[dep[0].i])
-        VVV(h2,=r[dep[2].i],-r[dep[0].i])
-        VVV(l,=r[d->indx],-r[dep[0].i])
-        VECT(M,l,depf)
-        VECT(Mp,l,M)
-        h1h1=SQR(h1);
-        h2h2=SQR(h2);
-        h1h2=SCAL(h1,h2);
-        det=(h1h1*h2h2-Sqr(h1h2))*SQR(l);
-        a1=(SCAL(Mp,h1)*h2h2-SCAL(Mp,h2)*h1h2)/det;
-        a2=(SCAL(Mp,h2)*h1h1-SCAL(Mp,h1)*h1h2)/det;
-        VVV(f[dep[0].i],+=depf,-(a1+a2)*l)
-        VV(f[dep[1].i],+=a1*l)
-        VV(f[dep[2].i],+=a2*l)
-        /* triangle components */
-        CALCULATEPRESSURETENSOR(a1,l,h1)
-        CALCULATEPRESSURETENSOR(a2,l,h2)
-
-        CALCULATEPRESSURETENSOR(-1,l,depf) /* correction for moving f from L to O */
-        En.vir-=SCAL(l,depf); }
-      else {
-        /* "Lone" (out-of-plane) dependant, (D0,D1,D2) must be rigid */
-        vector xx,yy,zz; /* local orthonormal molecule coordinate system */
-        double fx,fy,fz; /* f_dependant=(fx,fy,fz) in the local system */
-        double alpha;
-
-        dep=d->dep;
-        VVO(xx,=yy,=0)
-
-        loop (k,0,3) {
-          VV(xx,+=d->x[k]*r[dep[k].i])
-          VV(yy,+=d->y[k]*r[dep[k].i]) }
-        VECT(zz,xx,yy)
-
-        /* another 1/sqrt(SQR(zz)) because will be multiplied by zz */
-        /* this is a small correction anyway */
-        rr=SQR(zz);
-        fx=SCAL(xx,depf)/sqrt(SQR(xx)*rr);
-        fy=SCAL(yy,depf)/sqrt(SQR(yy)*rr);
-        fz=SCAL(zz,depf)/rr;
-
-        depr=r[d->indx];
-        rr=sqrt(rr);
-        loop (k,0,3) {
-          alpha=fx*d->tx[k]+fy*d->ty[k];
-
-          VVV(f[dep[k].i],+=dep[k].w*depf,+alpha*zz)
-          VVV(dr,=r[dep[k].i],-depr)
-          /* sum=Tr(Pt)=0 => we omit the virial contribution */
-          //          En.vir += alpha*SCAL(dr,zz);
-          /* DEBUG!: check OFF order */
-          CALCULATEPRESSURETENSOR(alpha,zz,dr) }
-        En.vir-=d->wz/rr*fz; // nonzero contribution; divide by rr? (~1)
-        CALCULATEPRESSURETENSOR(-d->wz/rr,depf,zz) }
-
-      /* not needed: */
-      /*  VO(depf,=0) */
-    }
-  }
 }
 
 int iscube(void) /*************************************************** iscube */
@@ -1566,7 +1342,6 @@ void bounddr(double drmax) /* ************************************** bounddr */
 
 } /* bounddr */
 
-
 void sortmolecules(int sort) /******************************** sortmolecules */
 /***
   sorts molecular positions (not velocities etc.) according to the
@@ -1619,4 +1394,230 @@ void sortmolecules(int sort) /******************************** sortmolecules */
     if (nspec>1) prt("NOTE: each species is sorted separately"); }
   else
     prt("configuration has already been sorted");
+}
+
+/*** dependants ***/
+
+void depend_r(ToIntPtr A,int always) /***************************** depend_r */
+/*
+  Calculate positions of dependent sites
+  always=1 : always
+  always=0 : only if !A->dep (this is marked during simulation)
+*/
+{
+  molecule_t *mn;
+  int n,sp;
+  depend_t *d;
+  vector *r;
+  vector xx,yy,zz;
+  int i,k;
+  double rr;
+  struct depitem_s *dep;
+  real *depr;
+
+  if (always) A->dep=0;
+  if (A->dep) return; /* already calculated */
+
+  loop (n,FROM,No.N) {
+    mn=molec+n;
+    sp=mn->sp;
+    r=rof(mn,A->rp);
+
+    looplist (d,spec[sp]->dependants) {
+      depr=r[d->indx];
+
+      switch (d->type) {
+        case DEP_M: {
+          /* Middle dependants */
+          VO(depr,=0)
+            for (dep=d->dep; dep<d->dep+d->n; dep++)
+          VV(depr,+=dep->w*r[dep->i])
+          break; }
+        case DEP_R: {
+        /* Rowlinson dependant: L-D0 is perpendicular to plane (D0,D1,D2)
+           (as in Rowlinson flexible water)
+           bonds/angles in D0-D1-D2 may be flexible
+           L            d->indx
+           |            |
+           D0---D1      dep[0].i---dep[1].i
+             \           \
+              D2          dep[2].i                   */
+          vector h1,h2,l;
+          double norm;
+
+          dep=d->dep;
+          VVV(h1,=r[dep[1].i],-r[dep[0].i])
+          VVV(h2,=r[dep[2].i],-r[dep[0].i])
+          VECT(l,h1,h2)
+          norm=d->wz/sqrt(SQR(l));
+          VVV(depr,=r[dep[0].i],+norm*l)
+          break; }
+
+        case DEP_L: {
+          /* Lone (out-of-plane) dependant, (D0,D1,D2) must be rigid */
+          dep=d->dep;
+          VVO(xx,=yy,=0)
+          VO(depr,=0)
+
+          loop (k,0,3) {
+            i=dep[k].i;
+            VV(depr,+=dep[k].w*r[i])
+            VV(xx,+=d->x[k]*r[i])
+            VV(yy,+=d->y[k]*r[i]) }
+
+          VECT(zz,xx,yy)
+          rr=d->wz/sqrt(SQR(zz));
+
+          VV(depr,+=rr*zz) }
+        default:; } }
+  } /* n */
+
+  A->dep=1; /* dependants calculated */
+}
+
+#if PRESSURETENSOR&PT_VIR
+#  if PRESSURETENSOR&PT_OFF
+#    if PRESSURETENSOR&PT_OFF_TR
+/* tranposed to the standard version (debug only: all versions are equivalent) */
+#      define CALCULATEPRESSURETENSOR(Q,G,F) \
+    En.Pvir[0]+=Q*G[0]*F[0]; \
+    En.Pvir[1]+=Q*G[1]*F[1]; \
+    En.Pvir[2]+=Q*G[2]*F[2]; \
+    En.Pvir[3]+=Q*G[2]*F[1]; \
+    En.Pvir[4]+=Q*G[0]*F[2]; \
+    En.Pvir[5]+=Q*G[1]*F[0];
+#    elif PRESSURETENSOR&PT_OFF_AV
+/* average of both version (debug only: all versions are equivalent) */
+#      define CALCULATEPRESSURETENSOR(Q,F,G) \
+    En.Pvir[0]+=Q*G[0]*F[0]; \
+    En.Pvir[1]+=Q*G[1]*F[1]; \
+    En.Pvir[2]+=Q*G[2]*F[2]; \
+    En.Pvir[3]+=Q/2*(G[2]*F[1]+G[1]*F[2]); \
+    En.Pvir[4]+=Q/2*(G[0]*F[2]+G[2]*F[0]); \
+    En.Pvir[5]+=Q/2*(G[1]*F[0]+G[0]*F[1]);
+#    else  /*#!PRESSURETENSOR&PT_OFF_TR!PRESSURETENSOR&PT_OFF_AV */
+/* standard version (equivalent to the above versions) */
+#      define CALCULATEPRESSURETENSOR(Q,F,G) \
+    En.Pvir[0]+=Q*G[0]*F[0]; \
+    En.Pvir[1]+=Q*G[1]*F[1]; \
+    En.Pvir[2]+=Q*G[2]*F[2]; \
+    En.Pvir[3]+=Q*G[1]*F[2]; \
+    En.Pvir[4]+=Q*G[2]*F[0]; \
+    En.Pvir[5]+=Q*G[0]*F[1];
+// prt("%g %g %g  %g %g %g PTyz",G[1],F[2],G[1]*F[2], F[1],G[2],F[1]*G[2]);
+#    endif  /*#!PRESSURETENSOR&PT_OFF_TR!PRESSURETENSOR&PT_OFF_AV */
+#  else /*# PRESSURETENSOR&PT_OFF */
+#    define CALCULATEPRESSURETENSOR(Q,G,F) \
+    En.Pvir[0]+=Q*G[0]*F[0]; \
+    En.Pvir[1]+=Q*G[1]*F[1]; \
+    En.Pvir[2]+=Q*G[2]*F[2];
+#  endif /*#!PRESSURETENSOR&PT_OFF */
+#else /*# PRESSURETENSOR&PT_VIR */
+#  define CALCULATEPRESSURETENSOR(Q,G,F) /* empty */
+#endif /*#!PRESSURETENSOR&PT_VIR */
+
+void depend_f(ToIntPtr A,ToIntPtr B) /***************************** depend_f */
+/* Distribute forces from dependent to independent sites */
+{
+  molecule_t *mn;
+  depend_t *d;
+  int n,sp;
+  vector *r,*f,dr;
+  real *depr,*depf; /* dependant position, force to distribute */
+  int k;
+  double rr;
+  struct depitem_s *dep;
+
+  loop (n,FROM,No.N) {
+    mn=molec+n;
+    sp=mn->sp;
+    r=rof(mn,A->rp);
+    f=rof(mn,B->rp);
+
+    looplist (d,spec[sp]->dependants) {
+
+      depf=f[d->indx];
+
+      switch (d->type) {
+        case DEP_M: {
+          /* Middle dependant (old and new versions) */
+          for (dep=d->dep; dep<d->dep+d->n; dep++)
+            VV(f[dep->i],+=dep->w*depf)
+          break; }
+
+        case DEP_R: {
+        /* Rowlinson dependant: L-D0 is perpendicular to plane (D0,D1,D2)
+           (as in Rowlinson flexible water)
+           bonds/angles in D0-D1-D2 may be flexible
+           L            d->indx
+           |            |
+           D0---D1      dep[0].i---dep[1].i
+             \           \
+              D2          dep[2].i                   */
+
+          vector h1,h2,l,M,Mp;
+          double h1h1,h2h2,h1h2,det,a1,a2;
+
+          dep=d->dep;
+          VVV(h1,=r[dep[1].i],-r[dep[0].i])
+          VVV(h2,=r[dep[2].i],-r[dep[0].i])
+          VVV(l,=r[d->indx],-r[dep[0].i])
+          VECT(M,l,depf)
+          VECT(Mp,l,M)
+          h1h1=SQR(h1);
+          h2h2=SQR(h2);
+          h1h2=SCAL(h1,h2);
+          det=(h1h1*h2h2-Sqr(h1h2))*SQR(l);
+          a1=(SCAL(Mp,h1)*h2h2-SCAL(Mp,h2)*h1h2)/det;
+          a2=(SCAL(Mp,h2)*h1h1-SCAL(Mp,h1)*h1h2)/det;
+          VVV(f[dep[0].i],+=depf,-(a1+a2)*l)
+          VV(f[dep[1].i],+=a1*l)
+          VV(f[dep[2].i],+=a2*l)
+          /* triangle components */
+          CALCULATEPRESSURETENSOR(a1,l,h1)
+          CALCULATEPRESSURETENSOR(a2,l,h2)
+
+          CALCULATEPRESSURETENSOR(-1,l,depf) /* correction for moving f from L to O */
+          En.vir-=SCAL(l,depf);
+          break; }
+
+      case DEP_L: {
+        /* Lone (out-of-plane) dependant, (D0,D1,D2) must be rigid */
+          vector xx,yy,zz; /* local orthonormal molecule coordinate system */
+          double fx,fy,fz; /* f_dependant=(fx,fy,fz) in the local system */
+          double alpha;
+
+          dep=d->dep;
+          VVO(xx,=yy,=0)
+
+          loop (k,0,3) {
+            VV(xx,+=d->x[k]*r[dep[k].i])
+            VV(yy,+=d->y[k]*r[dep[k].i]) }
+          VECT(zz,xx,yy)
+
+          /* another 1/sqrt(SQR(zz)) because will be multiplied by zz */
+          /* this is a small correction anyway */
+          rr=SQR(zz);
+          fx=SCAL(xx,depf)/sqrt(SQR(xx)*rr);
+          fy=SCAL(yy,depf)/sqrt(SQR(yy)*rr);
+          fz=SCAL(zz,depf)/rr;
+
+          depr=r[d->indx];
+          rr=sqrt(rr);
+          loop (k,0,3) {
+            alpha=fx*d->tx[k]+fy*d->ty[k];
+
+            VVV(f[dep[k].i],+=dep[k].w*depf,+alpha*zz)
+            VVV(dr,=r[dep[k].i],-depr)
+            /* sum=Tr(Pt)=0 => we omit the virial contribution */
+            //          En.vir += alpha*SCAL(dr,zz);
+            /* DEBUG!: check OFF order */
+            CALCULATEPRESSURETENSOR(alpha,zz,dr) }
+          En.vir-=d->wz/rr*fz; // nonzero contribution; divide by rr? (~1)
+          CALCULATEPRESSURETENSOR(-d->wz/rr,depf,zz)
+          break; }
+        default:; }
+      /* not needed: VO(depf,=0) */
+    }
+  }
 }

@@ -122,7 +122,7 @@ static char Pexpr[]="\n\
 EXPRESSIONS:\n\
 Unary operators, cf. (f)unctions: + - \\(sqrt) not(bitwise) `(logical not)\n\
   parentheses may be omitted after a unary operator/function\n\
-Binary real: + - * / ^(power) **(power) (modulo)\n\
+Binary real: + - * / ^(power) **(power) `(modulo)\n\
   as the 1st character of an expression they are prepended by #(last result)\n\
 Binary bitwise: &(and) |(or)  $(xor)  (&& || not supported, cf. `` & |)\n\
 Boolean (give 0=false, 1=true):  < > <= >= == <>\n\

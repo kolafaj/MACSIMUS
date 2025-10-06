@@ -141,7 +141,7 @@ The MACSIMUS plb-file is a binary file consisting of 4-byte floats:\n\
     else
       plb=fopen(fn,"rb");
     if (!plb) {
-      fprintf(stderr,"plbinfo: cannot open %s (too long?)\n",arg[iarg]);
+      fprintf(stderr,"plbinfo: cannot open %s (too long on 32b system?)\n",arg[iarg]);
       ret++;
       continue; }
 

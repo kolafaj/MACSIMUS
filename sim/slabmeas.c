@@ -389,7 +389,8 @@ void printdpr(int slabmode,int slabprt,double dV,char *PdVname) /* printdpr */
       if (dprz->n<0)
         fprintf(f,"# accumulated in [0,Lz], using <Lz>=%.9g, dz=%.9g\n",dprz->Lz/dprz->nmeas,DZ);
 
-      fprintf(f,"#   z|r  ");
+      fprintf(f,"# For z-profiles, consider utility shiftzprof to periodically shift\n\
+#   z|r  ");
       loop (sp,0,nspec) fprintf(f,"  %c=%-7s",sp+'B',dpr[sp]->name);
       fprintf(f,"    SUM\n");
 
@@ -420,6 +421,7 @@ void printdpr(int slabmode,int slabprt,double dV,char *PdVname) /* printdpr */
       fprintf(f,"# %s DENSITY PROFILES BY SITES\n\
 # calculated from %s\n\
 # SUM(all)=sum over all sites, SUM(atoms)=only sites with nonzero mass\n\
+# For z-profiles, consider utility shiftzprof to periodically shift\n\
 # z|r is in AA, density profiles are in %s\n",
               geom,Fn("dpr"),number?"AA-3":"kg.m-3");
       if (dprz->n<0) fprintf(f,"# accumulated in [0,Lz], using <Lz>=%.9g, dz=%.9g\n",dprz->Lz/dprz->nmeas,DZ);
@@ -464,7 +466,9 @@ void printdpr(int slabmode,int slabprt,double dV,char *PdVname) /* printdpr */
       f=fopen(Fn("q.eAA-3.z"),"wt");
       fprintf(f,"# z-CHARGE DENSITY PROFILE BY MOLECULES\n\
 # calculated from %s\n\
-# z is in AA, density profile is in e.AA-3\n",Fn("dpr"));
+# z is in AA, density profile is in e.AA-3\n\
+# For z-profiles, consider utility shiftzprof to periodically shift\n\
+",Fn("dpr"));
     if (dprz->n<0) fprintf(f,"# accumulated in [0,Lz], using <Lz>=%.9g, dz=%.9g\n",dprz->Lz/dprz->nmeas,DZ);
 
     fprintf(f,"#    z   ");

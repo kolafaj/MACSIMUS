@@ -81,6 +81,7 @@
         getvec(group,,nspec)
         getvec(center.K,,DIM)
         getvec(center.r0,,DIM)
+        get(center.sp)  
         get(el.Perr)
 
 #ifdef SLAB

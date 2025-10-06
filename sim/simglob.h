@@ -109,19 +109,21 @@ the differential equations.
 The input information on interaction sites is stored in array of type
 `sitedef_t' - see "cook/simdef.h"
 
-9/96: dependants:
-   these are auxiliary sites whose positions are defined as linear
+9/1996:
+   Dependants are auxiliary sites whose positions are defined as linear
    combinations of other sites.
    Let
      depend_t *d;
-     struct depitem_s *dep=d->dep;
-
+     struct depitem_s *dep=d->dep; # and in a list, see depend_r()
    then
-     r[d] =       SUM       r[dep[j].i] * dep[j].w
-                j<d->n
+     r[d->indx] =   SUM  r[dep[j].i] * dep[j].w
+                  j<d->n
 
-   and analogously for the forces
-9/2010: dependants extended to out-of-plane and code changed
+   and analogously for the forces, depend_f()
+9/2010:
+  Dependants extended to out-of-plane and code changed
+9/2025:
+  Dependants may have mass now (used to be massless only)
 */
 
 /* WARNING: this differs from blend: NBFIX solved there */
@@ -182,14 +184,14 @@ struct depitem_s {
 typedef struct depend_s {
   struct depend_s *next;   /* next in the list */
   int indx;                /* the dependent site */
-  int n;                   /* number of reference sites (parents) */
-  enum deptype_e { DEP_OLDM, DEP_M, DEP_R, DEP_L , DEP_N} type;
-  /* DEP_OLDM = old syntax of DEP_M; No.depend[0] = total # of all dependants
-     DEP_M = "Middle" (linear combination) dependants
-     DEP_R = "Rowlinson", site perpendicular to a (generally flexible) triangle
-     DEP_L = "Lone", general rigid triangle, dependant out of plane
+  int n;                   /* number of reference sites (parents), max 4 */
+  enum deptype_e { DEP_M, DEP_R, DEP_L, DEP_N} type;
+  /* DEP_M = Middle (linear combination) dependants
+     DEP_R = Rowlinson, site perpendicular to a (generally flexible) triangle
+     DEP_L = Lone, general rigid triangle, dependant out of plane
+     DEP_N = number of dependants
      NB: order significant, operators < > used */
-  struct depitem_s dep[3]; /* [n]
+  struct depitem_s dep[4]; /* [n]
                               indices and weights of the parents
                               assumed: SUM dep[].w = 1 */
   /* DEP_L, for n=3 only (wz for DEP_R):
@@ -950,6 +952,7 @@ extern int conserved; /* number of conserved degrees of freedom */
 
 extern struct center_s {
   int on;              /* flag: 2=to box center, 1=z-pos */
+  int sp;              /* only for species < center.sp */
   vector K,K2;         /* force constant to center-of-box */
   vector r0;           /* range (force starts at center+-r0) */
   vector cmK;          /* global force of the center-of-mass to (box) center */

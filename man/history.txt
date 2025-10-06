@@ -108,6 +108,14 @@ HISTORY
   * feature changed
   - feature removed
 
+cook 3.7g:
+  + center.sp added
+show 2.2m:
+  + [] always goes by a frame, PhDn,PgUp in the %-mode changes files
+
+cook 3.7e:
+  + variable Ttr-Tin added (returned) to the statistics
+
 cook 3.7d:
   !! slab cutoff correction was wrong for more LJ sites than 1 - fixed
   

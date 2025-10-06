@@ -153,10 +153,16 @@ void centerforces(ToIntPtr B, ToIntPtr A) /******************** centerforces */
         double dr=r[i][k]-box.Lh[k];
 #endif /*#!FREEBC */
 
-        if (fabs(dr)>center.r0[k]) {
-          if (dr<0) dr+=center.r0[k]; else dr-=center.r0[k];
-          En.pot+=center.K[k]*Sqr(dr);
-          f[i][k]-=center.K2[k]*dr; } }
+        if (center.sp<0) {
+          if (fabs(dr)>center.r0[k]) {
+            if (dr<0) dr+=center.r0[k]; else dr-=center.r0[k];
+            En.pot+=center.K[k]*Sqr(dr);
+            f[i][k]-=center.K2[k]*dr; } }
+        else {
+          if ( (mn->sp==center.sp) == (fabs(dr)>center.r0[k]) ) {
+            if (dr<0) dr+=center.r0[k]; else dr-=center.r0[k];
+            En.pot+=center.K[k]*Sqr(dr);
+            f[i][k]-=center.K2[k]*dr; } } }
 
 #ifdef SLAB
       /* z (slab) forces */
@@ -508,7 +514,7 @@ void slabcutcor(ToIntPtr B, ToIntPtr A)  /********************** slabcutcor */
             Resum+=ss->Skk[0].E*rho[jst][0].re;
             Resum+=ss->Skk[1].E*(rho[jst][1].re*x.re-rho[jst][1].im*x.im); }
           fsum+=ss->Skk[1].E*(rho[jst][1].re*x.im+rho[jst][1].im*x.re);
-          
+
           loop (k,2,slab.K) {
             a=x.re*q.re-x.im*q.im;
             x.im=x.re*q.im+x.im*q.re;
@@ -519,7 +525,7 @@ void slabcutcor(ToIntPtr B, ToIntPtr A)  /********************** slabcutcor */
 #if 0 // DEBUG ONLY - see /home/jiri/projects/tests/slabcorr/
       if (n==0 && i==0) prt("%.8g %.8g %.8g #f0 Df0",r[i][2],f[i][2],4*PI/box.L[2]*fsum);
 #endif
-      
+
       f[i][2]+=4*PI/box.L[2]*fsum; } }
 
   if (measure) {

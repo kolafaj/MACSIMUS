@@ -278,7 +278,7 @@ void makemenu(int which) /***************************************** makemenu */
   makebutton(ATX[2],aty,'L'&31,"reset","while playback: reset delay to zero and set step to 1\nwire mode still image: redraw the configuration\nhotkey=[Ctrl-L], redraw also [n][n]\n(to cancel tracing, use button trace or key [t])");
 
   atx=atxb0; aty+=dybutt;
-  atx+=makebutton(atx,aty,'[',"<","go by 1 frame backward\nif FILENAME contains format, go by -1 file\nhotkey=[[] or [PgUp]\nbetween < and > buttons there is a slider\nsee also hot keys [,] [.] [{] [}]");
+  atx+=makebutton(atx,aty,'[',"<","go by 1 frame backward\nif FILENAME contains format, go by -1 file\nhotkey=[PgUp]\nhotkey=[[] always by -1 frame\nbetween < and > buttons there is a slider\nsee also hot keys [,] [.] [{] [}]");
   makeslider(atx+3,aty,getmaxx()-2*xfont.width-maxxn-34,&sliderpos);
-  atx+=makebutton(getmaxx()-xfont.width-5,aty,']',">","go by 1 frame forward\nif FILENAME contains format, go by +1 file\nhotkey=[]] or [PgDn]\nbetween < and > buttons there is a slider\nsee also hot keys [,] [.] [{] [}]");
+  atx+=makebutton(getmaxx()-xfont.width-5,aty,']',">","go by 1 frame forward\nif FILENAME contains format, go by +1 file\nhotkey=[PgDn]\nhotkey=[]] always by +1 frame\nbetween < and > buttons there is a slider\nsee also hot keys [,] [.] [{] [}]");
 }

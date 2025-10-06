@@ -24,6 +24,7 @@
 #include "simmeas.h"
 #include "units.h"
 
+/* arccos(-1/3) */
 #define TETRAHEDRAL 1.9106332362490184
 
 /* global variables */
@@ -322,16 +323,19 @@ static void zerofix(real *x,char *info) /*************************** zerofix */
 static void readdependants(int ndependants,depend_t **head)
                                                        /***** readdependants */
 /*
-  dependants table line format (example)
-  !site  ndep dep1 w   dep2 w  dep3  w
-  [M] 2 M     3   1 O     0.73612449  0 H     0.13193776  3 H     0.13193776  err=2e-17
-  L  (as above without err) + X[3], Y[3], wz, fx[3], fy[3]
-  R  (as above without err) + l
-
-  the err=3e-9 field is info only
-  M = "Middle" (old version: M is missing)
-  L = "Lone" (general 3D)
-  R = "Rowlinson"
+  Nonzero masses of dependants allowed since V3.7f (keyword C)
+  Dependants table line format (example):
+    !  site   ndep  dep1  w          dep2      w        dep3  w
+    [M] 2 M     3   1 O  0.73612449   0 H  0.13193776   3 H   0.13193776  err=2e-17
+    L  (as above without err) + X[3], Y[3], wz, fx[3], fy[3]
+    R  (as above without err) + l
+    ! i atom weight        #  i atom weight...
+    C 1 CCO2 0.2728451938  2  0 OCO2 0.3635774031  2 OCO2 0.36357740310 e
+    the err=3e-9 field is info only
+    M = "Middle" (old version: M is missing)
+    L = "Lone" (general 3D)
+    R = "Rowlinson"
+    C = Center = middle except that the central atom may have (weight for forces added)
 */
 {
   int i,idep,n,k;
@@ -345,35 +349,38 @@ static void readdependants(int ndependants,depend_t **head)
   *head=NULL;
 
   loop (i,1,DEP_N) No.depend[i]=0;
+
   loop (idep,0,ndependants) {
     key=tok(__LINE__);
-    if (toupper(key[0])=='M') {
-      indx=atoi(tok(__LINE__));
-      deptype=DEP_M; }
-    else if (toupper(key[0])=='R') {
-      deptype=DEP_R;
-      indx=atoi(tok(__LINE__)); }
-    else if (toupper(key[0])=='L') {
-      deptype=DEP_L;
-      indx=atoi(tok(__LINE__)); }
-    else if (!isdigit(key[0]))
-      ERROR(("unknown key %s in the table of dependants",key))
-    else {
-      deptype=DEP_OLDM;
-      prt("NOTE: Old dependant format, \"Middle\" (linear) assumed for compatibility");
-      indx=atoi(key); }
+    switch (toupper(key[0])) {
+      case 'M':
+        indx=atoi(tok(__LINE__));
+        deptype=DEP_M;
+        break;
+      case 'R':
+        deptype=DEP_R;
+        indx=atoi(tok(__LINE__));
+        break;
+      case 'L':
+        deptype=DEP_L;
+        indx=atoi(tok(__LINE__));
+        break;
+      default:
+        ERROR(("Unknown key %s in the table of dependants.\n\
+*** If you mean the old Middle type, prepend M and append e.",key)) }
 
     No.depend[deptype]++;
 
     checkatomn(tok(__LINE__),indx); /* check and skip atom name */
+
+    /* number of parents */
     n=atoi(tok(__LINE__));
 
-    if (deptype>=DEP_R) {
+    if (deptype>=DEP_R)
       if (n!=3) ERROR(("out-of-plane dependant requires 3 parents (%d given)",n))
-      alloc(d,sizeof(depend_t)); }
-    else {
-      depend_t *aux; /* to calculate size only */
-      alloc(d,(char*)&aux->dep[0]-(char*)aux+n*sizeof(struct depitem_s)); }
+    if (n<2 || n>4) ERROR(("dependant: number of parents %d not 2,3,4",n))
+
+    allocone(d);
 
     d->type=deptype;
     d->n=n;
@@ -387,7 +394,7 @@ static void readdependants(int ndependants,depend_t **head)
       sum += d->dep[i].w=atof(tok(__LINE__)); }
 
     /* normalize to sum of weights = 1 */
-    if (fabs(sum-1)>1e-5) WARNING(("sum of dependant weights=%g (should be 1) - fixed",sum))
+    if (fabs(sum-1)>1e-6) prt("sum of dependant weights %g normalized to sum=1",sum);
     loop (i,0,n) d->dep[i].w/=sum;
 
     if (deptype==DEP_R) {
@@ -405,13 +412,11 @@ static void readdependants(int ndependants,depend_t **head)
       zerofix(d->ty,"ty"); }
 
     key=strtok(NULL," \n\r\t");
-    if (!key || key[0]!='e')
-      if (deptype!=DEP_OLDM) WARNING(("key 'e' (marking end of data) expected in the following line of dependants:\n%s",copyofline))
+    if (!key || key[0]!='e') WARNING(("key 'e' (marking end of data) expected in the following line of dependants:\n%s",copyofline))
 
-    if (option('v')&4) {
-      char *depinfo[DEP_L+1]= {
-        "Middle (linear), old format",
-        "Middle (linear)",
+    if (option('v')&2) {
+      char *depinfo[DEP_N]= {
+        "Middle (massless dependant)",
         "Rowlinson (perpendicular to a flexible triangle)",
         "Lone (general 3D position to a rigid triangle)"};
       prt("\nDependant type %s: %d parents", depinfo[deptype],d->n);
@@ -430,24 +435,6 @@ static void readdependants(int ndependants,depend_t **head)
 
  /* NB: in initNo(), No.depend[0]=total # if dependants */
   No.depend[1]+=No.depend[0];
-}
-
-int depmassmoved;
-
-static void depmass(int i,int ns,depend_t *dep) /* ----------------- depmass */
-{
-  struct depitem_s *di;
-  siteinfo_t *si=specsp->si;
-
-  while (dep) {
-    if (dep->indx==i) {
-      for (di=dep->dep; di->i>=0; di++) {
-        if (di->i<0 || di->i>=ns)
-          ERROR(("depmass: wrong dependant table (check masses of sites)"))
-        si[di->i].mass+=di->w*si[i].mass; }
-      depmassmoved++;
-      si[i].mass=0; }
-    dep=dep->next; }
 }
 
 static struct {
@@ -1196,7 +1183,6 @@ NOTE: water Oxygen parameters changed by nbfixes\n\
       if (wall.minz<0) WARNING(("GOLD: not config and wall.minz=%f<=0",wall.minz))
 #endif /*# GOLD */
 
-
     find("bonds");
 
     loop (i,0,nc) {
@@ -1271,6 +1257,7 @@ NOTE: water Oxygen parameters changed by nbfixes\n\
         si->pair[0]=i; si->pair[1]=j;
         si->bondq=Sqr(length);
         specsp->nc++;
+        /* this is BAD PROGRAMMING STYLE, cf. si=specsp->si below */
         si++; }
 #ifdef LINKCELL
       /* since V2.4k, this serves for the initial check only - see update14() */
@@ -1326,17 +1313,10 @@ NOTE: water Oxygen parameters changed by nbfixes\n\
     if (ndependants>=0) readdependants(ndependants,&specsp->dependants);
     else specsp->dependants=NULL;
 
-    /* New: what if some dependants have nonzero mass? redistribute! */
-    depmassmoved=0;
-    si=specsp->si; /* (bug found by Brian Kinnear) */
-    loop (i,0,ns)
-      if (si[i].mass!=0) depmass(i,ns,specsp->dependants);
-    if (depmassmoved)
-      WARNING(("Mass of %d dependants in species %d redistributed to neighbors.\n\
-*** Kinetic properties will be affected!",depmassmoved,sp))
+    si=specsp->si; /* (bug found by Brian Kinnear), cf. si++ above */
 
     /* molecule-based equalization */
-      if (equalize.mol && (sp==equalize.sp || (equalize.sp<0 && sp<=-equalize.sp)) && ns>1) {
+    if (equalize.mol && (sp==equalize.sp || (equalize.sp<0 && sp<=-equalize.sp)) && ns>1) {
       /* equalize.mol masses */
       double M=0;
       int nm=0;
@@ -1356,6 +1336,14 @@ WARNING: Kinetic quantities are affected!",sp,equalize.mol);
           if (option('v')&2) prt_("%2d: %.4f", i, si[i].mass*Munit);
           si[i].mass=equalize.mol*M+(1-equalize.mol)*si[i].mass;
           if (option('v')&2) prt(" -> %.4f g/mol", si[i].mass*Munit); } } }
+
+    /* report dependants with nonzero mass */
+
+    if (specsp->dependants) {
+      depend_t *d;
+
+      looplist (d,specsp->dependants)
+        if (si[d->indx].mass) prt("WARNING: dependant %d in species %d has mass %g",d->indx,i,si[d->indx].mass*Munit); }
 
     specsp->zero_energy=eunit*zero_energy;
 
@@ -1467,7 +1455,6 @@ rdf group support: %d atom types in bonds, angles, torsions\n\
                    replaced by their group copies",isss-1);
 
   if (!nspec) DISASTER(("no species - nothing to do"))
-
 }
 
 vector *initr(int sp) /*********************************************** initr */

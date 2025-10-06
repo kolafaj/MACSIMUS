@@ -182,6 +182,7 @@ echo "===== Select DETAILS of boundary conditions:"
 echo "> p = Plain version (DEFAULT)"
 echo "  s = Slab: z-forces (incl. walls), dens.profiles, surf.tension, NPzzE melting"
 echo "      also more geometries (droplet, trickle, cavities)"
+echo "  m = Slab: as above and NPzzE melting"
 echo "  c = Cleaving (with most Slab features)"
 echo "      (see cook/generic/simopt.h for more SLAB options)"
 # echo "  g = Gold (conducting) wall, charge inversion method"
@@ -196,6 +197,11 @@ fi
 case "$SV" in
 s )
   PROJECT=$PROJECT"-slab"
+  NAME=$NAME"s"
+  echo "#define SLAB 0" >> simopt.h
+  ;;
+m )
+  PROJECT=$PROJECT"-melt"
   NAME=$NAME"s"
   echo "#define SLAB 1" >> simopt.h
   ;;

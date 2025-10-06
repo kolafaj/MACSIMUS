@@ -71,10 +71,10 @@ void initNo(void) /************************************************** initNo */
       el.epsq=pow(No.eps,0.75); // guess nonpolar
 #endif /*#!POLAR */
     }
-    prt("machine precision=%.3g, el.epsq=%.3g (for charge neutrality test)",No.eps,el.epsq);
+    prt("Machine precision=%.3g, el.epsq=%.3g (for charge neutrality test).",No.eps,el.epsq);
     prt("\n\
 The following initialization is based on the numbers of molecules\n\
-defined optionally in the blend-file and typically in the def-file"); }
+defined optionally in the blend-file and typically in the def-file."); }
   else
     prt("\n\
 The following re-initialization is based on the numbers of molecules possibly\n\

@@ -226,7 +226,7 @@
 /*
   Enable/disable SHAKE which appears as method with order=2 (-m2 option) in
   the Lagrangian formalism; Gear+constraint dynamics is still available.
-  Disabling SHAKE is not recommended because -mě is the default and most
+  Disabling SHAKE is not recommended because -m2 is the default and most
   methods are bound to it.
 
   Undefined: SHAKE not available.
@@ -268,9 +268,8 @@
 
 /*
 #define WIDOM
-  WARNING: have not been tested recently, WALL removed
   Widom insertion particle method
-  there are two versions: for WALL and plain (bulk)
+  WARNING: The version for WALL was removed
 */
 
 /*

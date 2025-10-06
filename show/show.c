@@ -1,7 +1,7 @@
 /* make show
  */
 
-#define VERSION "2.2l"
+#define VERSION "2.2m"
 
 /* Notes on raytracing:
 
@@ -2448,14 +2448,14 @@ int main(int narg,char **arg) /**************************************** main */
         case '{': pos-=fastmove; reread=1; redrawmenu=step; break;
         case '}': pos+=fastmove; reread=1; redrawmenu=step; break;
         case PGUP:
-        case '[':
           if (percent) { newplb(-1); goto reinit; }
+        case '[':
           pos--; reread=1;
           redrawmenu=step;
           break;
         case PGDN:
-        case ']':
           if (percent) { newplb(1);  goto reinit; }
+        case ']':
           pos++; reread=1;
           redrawmenu=step;
           break;

@@ -1216,11 +1216,11 @@ void measureP(int pass) /***************************************** measureP */
   simulation box.  These include: total pressure, pressures in x,y,z (see
   variable `rescale').
 
-  If densprof.slab&2 (=constrd.mode&RESCALE_SLAB), then x,y,z are rescaled so
-  that volume does not change (virtual area change by Gloor GJ, Jackson G, Blas
-  FJ, de Miguel E: "Test-area simulation method for the direct determination of
-  the interfacial tension of systems with continuous or discontinuous
-  potentials", JCP, 123, 134703 (2005))
+  If constrd.mode&RESCALE_SLAB, then x,y,z are rescaled so that volume does
+  not change (virtual area change by Gloor GJ, Jackson G, Blas FJ, de Miguel
+  E: "Test-area simulation method for the direct determination of the
+  interfacial tension of systems with continuous or discontinuous potentials",
+  JCP, 123, 134703 (2005))
 
   Limitations:
   - Only one rescaling in one call (i.e., cannot calculate all components of

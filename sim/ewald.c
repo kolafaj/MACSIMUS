@@ -206,7 +206,7 @@ void *parEwald(void *arg) /**************************************** parEwald */
   int iqt0,iqt1;
   vector ek;
 #  if PRESSURETENSOR&PT_VIR
-  double ptf,E1,E1x;
+  double ptf,E1; /* E1x removed - unused? */
 #  endif /*# PRESSURETENSOR&PT_VIR */
   int pass=par1_ew.pass;
   int ith=(pthread_t*)arg-No.thread;

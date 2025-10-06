@@ -1,4 +1,4 @@
-#define VERSION "3.7d"
+#define VERSION "3.7g"
 
 #if defined(LINKCELL) && defined(FREEBC)
 #  error "LINKCELL not supported for FREEBC"
@@ -464,7 +464,7 @@ int main(int narg,char **arg) /**************************************** main */
   simils.simname=simils.sysname;
   in=fopen(Fn("ble"),"rt");
   simils.simname=mark; /* normal sysname/simname again */
-  if (!in) ERROR(("open system ble-file %s",simils.sysname))
+  if (!in) ERROR(("Cannot open system ble-file %s[.ble]",simils.sysname))
   readblend();
   fclose(in);
 
