@@ -320,39 +320,52 @@ static void zerofix(real *x,char *info) /*************************** zerofix */
   VO(x,-=sum)
 }
 
-static void readdependants(int ndependants,depend_t **head)
-                                                       /***** readdependants */
+static void readdependants(int ndependants,            /***** readdependants */
+                           siteinfo_t *si,
+                           depend_t **head, Cdepend_t **Chead)
 /*
   Nonzero masses of dependants allowed since V3.7f (keyword C)
-  Dependants table line format (example):
-    !  site   ndep  dep1  w          dep2      w        dep3  w
-    [M] 2 M     3   1 O  0.73612449   0 H  0.13193776   3 H   0.13193776  err=2e-17
+  Dependants table line format (example), structure depend_s:
+    !  site   ndep  dep1  w           dep2      w       dep3  w
+    M  2 M     3    1 O  0.73612449   0 H  0.13193776   3 H   0.13193776  err=2e-17
     L  (as above without err) + X[3], Y[3], wz, fx[3], fy[3]
     R  (as above without err) + l
     ! i atom weight        #  i atom weight...
-    C 1 CCO2 0.2728451938  2  0 OCO2 0.3635774031  2 OCO2 0.36357740310 e
     the err=3e-9 field is info only
-    M = "Middle" (old version: M is missing)
+    M = "Middle" (old version: M is missing: REMOVED)
     L = "Lone" (general 3D)
     R = "Rowlinson"
+  In structure Cdepend_s:
+    C 1 CCO2 0.2728451938  2  0 OCO2 0.3635774031  2 OCO2 0.36357740310 e
     C = Center = middle except that the central atom may have (weight for forces added)
 */
 {
   int i,idep,n,k;
   int indx=0;
-  depend_t *d;
+  depend_t *d=NULL;
+  Cdepend_t *Cd=NULL; /* type DEP_C */
+  struct depitem_s *dep;
   real sum;
-  char *key;
-  enum deptype_e deptype=0;
+  char *key,*lasttok;
+  deptype_t deptype=DEP_M;
+
+  *head=NULL;
+  *Chead=NULL;
+
+  if (ndependants<0) return;
 
   find("dependants");
-  *head=NULL;
 
-  loop (i,1,DEP_N) No.depend[i]=0;
+  loopto (i,0,DEP_N) No.depend[i]=0;
 
   loop (idep,0,ndependants) {
     key=tok(__LINE__);
     switch (toupper(key[0])) {
+      case 'C':
+        if (option('m')>2) ERROR(("C-dependants require Verlet, change option -m"))
+        deptype=DEP_C;
+        indx=atoi(tok(__LINE__));
+        break;
       case 'M':
         indx=atoi(tok(__LINE__));
         deptype=DEP_M;
@@ -369,7 +382,9 @@ static void readdependants(int ndependants,depend_t **head)
         ERROR(("Unknown key %s in the table of dependants.\n\
 *** If you mean the old Middle type, prepend M and append e.",key)) }
 
-    No.depend[deptype]++;
+    //    if (deptype==DEP_C) No.depend[deptype]+=3;    else
+    No.depend[deptype]++;                                                       
+    No.depend[DEP_N]++; /* total number of types (used for tests) */
 
     checkatomn(tok(__LINE__),indx); /* check and skip atom name */
 
@@ -378,24 +393,50 @@ static void readdependants(int ndependants,depend_t **head)
 
     if (deptype>=DEP_R)
       if (n!=3) ERROR(("out-of-plane dependant requires 3 parents (%d given)",n))
+
     if (n<2 || n>4) ERROR(("dependant: number of parents %d not 2,3,4",n))
 
-    allocone(d);
-
-    d->type=deptype;
-    d->n=n;
-    d->indx=indx;
-    d->next=*head; *head=d;
+    if (deptype==DEP_C) {
+      allocone(Cd);
+      Cd->n=n;
+      Cd->indx=indx;
+      Cd->next=*Chead; *Chead=Cd;
+      dep=Cd->dep; }
+    else {
+      allocone(d);
+      d->type=deptype;
+      d->n=n;
+      d->indx=indx;
+      d->next=*head; *head=d;
+      dep=d->dep; }
 
     sum=0;
     loop (i,0,n) {
-      d->dep[i].i=atoi(tok(__LINE__));
-      checkatomn(tok(__LINE__),d->dep[i].i); /* check and skip atom name */
-      sum += d->dep[i].w=atof(tok(__LINE__)); }
+      dep[i].i=atoi(tok(__LINE__));
+      checkatomn(tok(__LINE__),dep[i].i); /* check and skip atom name */
+      lasttok=tok(__LINE__);
+      if (strcmp(lasttok,"M")) 
+        dep[i].w=atof(lasttok);
+      else
+        dep[i].w=si[dep[i].i].mass;
+      sum += dep[i].w; }
 
     /* normalize to sum of weights = 1 */
-    if (fabs(sum-1)>1e-6) prt("sum of dependant weights %g normalized to sum=1",sum);
-    loop (i,0,n) d->dep[i].w/=sum;
+    if (fabs(sum-1)>1e-6) prt("sum of dependant weights=%g normalized to sum=1",sum);
+    loop (i,0,n) dep[i].w/=sum;
+
+    if (deptype==DEP_C) {
+      double summ=0,mi=si[indx].mass;
+      double werr=0; /* implementation limitation check */
+      
+      loop (i,0,n) summ+=si[dep[i].i].mass;
+      loop (i,0,n) Max(werr,fabs(dep[i].w-si[dep[i].i].mass/summ))
+      if (werr>1e-6) ERROR(("C-dependants implementation limitation:\n\
+*** Weights must be proportional to atomic masses, max err=%g.\n\
+*** Use M instead of weights in the C-line to uses atomic masses.",werr))
+      
+      Cd->mi=summ/(summ+mi);
+      Cd->mj=mi/(summ+mi); }
 
     if (deptype==DEP_R) {
       /* one extra parm d->wz==LO length (w.sign) */
@@ -416,15 +457,19 @@ static void readdependants(int ndependants,depend_t **head)
 
     if (option('v')&2) {
       char *depinfo[DEP_N]= {
+        "Central dependant with mass (-> SHAKE)",
         "Middle (massless dependant)",
         "Rowlinson (perpendicular to a flexible triangle)",
         "Lone (general 3D position to a rigid triangle)"};
-      prt("\nDependant type %s: %d parents", depinfo[deptype],d->n);
-      loop (i,0,d->n)
+      prt("\nDependant i=%d type=%d=%s: %d parents", indx,deptype,depinfo[deptype],n);
+      if (deptype==DEP_C) {
+        loop (i,0,n)
+          prt("  i=%d w=%.8f",Cd->dep[i].i,Cd->dep[i].w); }
+      else loop (i,0,n)
         prt("  i=%d w=%.8f",d->dep[i].i,d->dep[i].w);
-      if (d->type==DEP_R) {
+      if (deptype==DEP_R) {
         prt("  LO=%11.8f",d->wz);  }
-      if (d->n==DEP_L) {
+      if (deptype==DEP_L) {
         prt("  x =%11.8f %11.8f %11.8f",VARG(d->x));
         prt("  y =%11.8f %11.8f %11.8f",VARG(d->y));
         prt("  wz=%11.8f",d->wz);
@@ -433,8 +478,8 @@ static void readdependants(int ndependants,depend_t **head)
 
     mygetline(); }
 
- /* NB: in initNo(), No.depend[0]=total # if dependants */
-  No.depend[1]+=No.depend[0];
+  prt_("Dependant summary by types Central Middle Lone Rowlinson Total:");
+  loopto (i,0,DEP_N) prt_(" %d",No.depend[i]); _n
 }
 
 static struct {
@@ -804,7 +849,7 @@ expected SS_PARMS=%d but nparms=%d",SS_PARMS,nparms))
     int water=0,config=0;
     int nc=0,nangles=0,ndihedrals=0,nimpropers=0,naromatics=0;
     double zero_energy=0;
-    int ndependants=-1; /* compatibility: does not search for the table at all */
+    int ndependants=0;
     int nvb=0;
 
     ns=0; /* see checkatomn */
@@ -1255,6 +1300,7 @@ NOTE: water Oxygen parameters changed by nbfixes\n\
       else {
         /* constraint bond: K>option -u or K==0 */
         si->pair[0]=i; si->pair[1]=j;
+        si->bond2=2*length;
         si->bondq=Sqr(length);
         specsp->nc++;
         /* this is BAD PROGRAMMING STYLE, cf. si=specsp->si below */
@@ -1310,10 +1356,9 @@ NOTE: water Oxygen parameters changed by nbfixes\n\
     specsp->intra=specsp->bond || specsp->angle
       || specsp->dihedral || specsp->improper || specsp->aromatics;
 
-    if (ndependants>=0) readdependants(ndependants,&specsp->dependants);
-    else specsp->dependants=NULL;
-
     si=specsp->si; /* (bug found by Brian Kinnear), cf. si++ above */
+
+    readdependants(ndependants,si,&specsp->dependants,&specsp->Cdependants);
 
     /* molecule-based equalization */
     if (equalize.mol && (sp==equalize.sp || (equalize.sp<0 && sp<=-equalize.sp)) && ns>1) {

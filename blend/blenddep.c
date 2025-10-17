@@ -242,7 +242,7 @@ void prtdependants(void) /*********************************** prtdependants */
 
   _n
   prts("dependants");
-  prts("!i atom   #   i atom  weight...");
+  prts("!T i atom   #   i atom  weight...");
 
   for (d=dep0; d; d=d->next) 
     loop (idep,0,d->ndep) 
@@ -293,6 +293,7 @@ ww[0]=1-2*ww[1];rad=1e-20;
 
         if (rad>1e-8) ERROR(("cannot calculate dependants (rad=%g)",rad))
 
+        prt_("M "); /* added in V2.4g because cook since V3.7h requires M */
 	prtatom(d->dep[idep]);
 	prt_(" %d ",nnbr);
 	loop (i,0,nnbr) {

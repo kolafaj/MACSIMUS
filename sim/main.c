@@ -1,4 +1,4 @@
-#define VERSION "3.7g"
+#define VERSION "3.7h"
 
 #if defined(LINKCELL) && defined(FREEBC)
 #  error "LINKCELL not supported for FREEBC"

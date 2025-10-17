@@ -108,8 +108,17 @@ HISTORY
   * feature changed
   - feature removed
 
+blend V2.4g:
+  * M-dependant new format
+  
+cook 3.7h:
+  + C-dependants added, tested on C of CO2
+  - M-dependants must have key M prepended (old format no longer supported)
+  * test SHAKE length is now in AA
+
 cook 3.7g:
   + center.sp added
+
 show 2.2m:
   + [] always goes by a frame, PhDn,PgUp in the %-mode changes files
 

@@ -168,7 +168,7 @@ int prtatomoffset; /* global, offset of a cluster (if option -n-1) */
 
 void prtatom(int i) /********************************************* prtatom */
 {
-  prt_("%3i %-4s ",i-prtatomoffset,atom[T(i)].name);
+  prt_("%2d %-4s ",i-prtatomoffset,atom[T(i)].name);
 }
 
 static void prt4atoms(int i,int j,int k,int l) /**************** prt4atoms */

@@ -23,8 +23,8 @@ void normalmodes(void) /**************************************** normalmodes */
 
   if (No.c) ERROR(("nm: No.c=%d: constraints not implemented\n\
 *** try nm.method=1 or 3",No.c))
-  if (No.depend[0]) ERROR(("nm: No.depend=%d: dependants not implemented\n\
-*** try nm.method=1 or 3",No.depend))
+  if (No.depend[DEP_N]) ERROR(("nm: dependants not implemented\n\
+*** try nm.method=1 or 3"))
 
 #define D(X) ((double*)(X[0]))
   if (FROM) ERROR(("normalmodes and FROM=%d: not implemented"))

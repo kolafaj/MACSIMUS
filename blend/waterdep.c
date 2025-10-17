@@ -2,17 +2,17 @@
  */
 #include "../gen/include.h"
 
-double dsin(double x)
+double dsin(double x) /************************************************ dsin */
 {
   return sin(PI/180*x);
 }
 
-double dcos(double x)
+double dcos(double x) /************************************************ dcos */
 {
   return cos(PI/180*x);
 }
 
-char *getsite(char *site,int n,char *from)
+char *getsite(char *site,int n,char *from) /************************ getsite */
 {
   *site++=n+'0';
   *site++=' ';
@@ -23,7 +23,7 @@ char *getsite(char *site,int n,char *from)
   return from;
 }
 
-int main(int narg,char **arg)
+int main(int narg,char **arg) /**************************************** main */
 {
   double OH,HOH,MO,LO,LOL=180;
   double xH,yH,wM,wH,zL,xL;
@@ -61,6 +61,8 @@ Examples):\n\
   waterdep L6NE,H6NE,O6NE,M6NE,L6NE,H6NE 0.98 108 L 0.8892 111 # NE6:L1,2\n\
   waterdep LFQ4,HFQ4,OFQ4,LFQ4,HFQ4 0.98 108 L 0.2 330         # FQ4:L1,2\n\
   waterdep L54D,H54D,O54D,L54D,H54D 0.98 108 L 0.525 180       # POL4D:L1,2\n\
+See also:\n\
+  makedep\n\
 ");
     exit(0); }
 

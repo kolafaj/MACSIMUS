@@ -40,23 +40,21 @@ static double machprec(void) /************************************* machprec */
 
 void initNo(void) /************************************************** initNo */
 /*
-  Calculates No.s, No.N, and No.mass
+  Calculates No.s, No.N, No.mass, etc.
   To be called (in pass=1) after spec[sp]->N and spec[sp]->ns
-  have been read from sysname.def
+  have been read from SYSNAME.def.
 */
 {
   int sp,nd;
   int downN=FROM,jN,nq=0,nnq; // NB: FROM=0 unless #define LOG
   double molmass,molcharge,sumq=0,molq,err;
   double molalpha; /* POLAR or ECC */
-
 #ifdef POLAR
   int npol;
 
   No.A=0;
 #endif /*# POLAR */
-
-  No.s=No.free_s=No.N=No.free_N=No.depend[0]=No.free_depend=0;
+  No.s=No.free_s=No.N=No.free_N=No.ndep=No.free_depend=0;
   No.mass=No.free_mass=0;
   No.charge=0;
   No.minmass=3e33;
@@ -85,6 +83,7 @@ changed in the configuration initializer or read from the cfg-file\n\
     int ns=spec[sp]->ns;
     int N=spec[sp]->N,i;
     depend_t *d;
+    Cdepend_t *Cd;
 
     molalpha=0;
 #ifdef POLAR
@@ -134,21 +133,20 @@ changed in the configuration initializer or read from the cfg-file\n\
     /* dependants */
     nd=0;
     looplist (d,spec[sp]->dependants) nd++;
+    looplist (Cd,spec[sp]->Cdependants) nd++;
     if (nd && fixsites0) WARNING(("dependants + fixed sites"))
-    No.depend[0] += nd*N;
+    No.ndep += nd*N;
     No.free_depend += nd*jN;
 
     downN -= N; } /* loop sp */
 
   prt("No.N=%d molecules  No.s=%d sites (of these, %d dependants)",
-            No.N,              No.s,               No.depend[0]);
+            No.N,              No.s,               No.ndep);
   prt("total mass of configuration M = %.4f g/mol = %g kg",
                                    No.mass*Munit,No.mass*massunit);
   prt("total charge Q = %g prog.u. = %g e",No.charge,No.charge/electron);
   prt("sum q^2 = %g prog.u. = %g e^2",sumq,sumq/Sqr(electron));
-  prt("No.bonded=%d",No.bonded);
-
-  put3(No.depend[1],No.depend[2],No.depend[3])
+  prt("total # of bonded terms=No.bonded=%d",No.bonded);
 
   err=No.charge/sqrt(sumq);
   if (fabs(err)>el.epsq) {
@@ -494,6 +492,7 @@ void initmolecules(int corr) /******************************** initmolecules */
         m->sp=sp;
         m->ns=s->ns;
         m->nc=s->nc;
+        m->nCdep=s->nCdep;
         m->ir=sizeof(vector)*irp;
         m->ig=No.c;
 
@@ -501,7 +500,8 @@ void initmolecules(int corr) /******************************** initmolecules */
         irp += m->ns;
         Max(No.maxc,m->nc)
         No.c += m->nc;
-        if (n>=FROM) No.free_c += m->nc;
+        No.Cdep += m->nCdep;
+        if (n>=FROM) No.free_c += m->nc+m->nCdep;
         n++; } }
     if (option('v')&2)
       prt("%6d %6d %6d %6d %6d", sp,s->N,s->ns,s->nc,Mlen); }
@@ -519,6 +519,7 @@ void initmolecules(int corr) /******************************** initmolecules */
    ^^^^^^^^^^^^^^^^^^
    No.f = DIM*No.s
          -No.c  constraints
+         -3*No.Cdep C-dependants
          +1     additional degree of freedom for Nose
          -1     energy (Hamiltonian) conservation
          -DIM*(# of dependants) for all sites lin. dependent on other sites
@@ -599,7 +600,8 @@ INFO: corr&64 set (for %s):\n\
   put3(No.s,No.c,No.f)
   put3(No.s*3,No.eq,No.nreal)
   put3(No.free_N,No.f_tr,No.f_in)
-  put3(No.conserved,No.f0,No.f0_tr)
+  put2(No.f0,No.f0_tr)
+  put2(No.ndep,No.conserved)
 
   No.fx=No.f;
 

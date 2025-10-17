@@ -1,4 +1,4 @@
-#define VERSION "2.4f"
+#define VERSION "2.4g"
 /* max 4 characters:
    from 2.3a: new GUI
    from 2.4a: .gol files removed

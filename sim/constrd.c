@@ -376,7 +376,7 @@ void constraintdynamics(ToIntPtr B, ToIntPtr A, ToIntPtr V)
     case T_LANGEVIN: case T_LANGEVIN_CM:
       /* WARNING: for better interpretation of tau.T, Vlogs=1/tau.T should be here
          and the random force should be doubled */
-      Vlogs=0.5/tau.T; 
+      Vlogs=0.5/tau.T;
       break;
     case T_TR: /* friction thermostat - intermolecular only */
       Vlogs_mol=blogT(En.kin_tr/No.f_tr,T)/tau.T;
@@ -629,9 +629,10 @@ void Shake(double eps, double prob) /********************************* Shake */
          thermostats, see verlet.c
   omega (see omegac) = relaxation parameter (omega=1: direct iteration)
   data:
-    rof(molecule*,cfg[0]->rp) ->r = r(t)
-    rof(molecule*,cfg[1]->rp) ->r1= r(t)-r(t-h) = h*v(t-h/2)
-    rof(molecule*,cfg[2]->rp) ->p = forces; used to keep r(t+h) during shaking
+    rof(molecule*,cfg[0]->rp) .. r = r(t)
+    rof(molecule*,cfg[1]->rp) .. r1= r(t)-r(t-h) = h*v(t-h/2)
+    rof(molecule*,cfg[2]->rp) .. p = f(t) replaced by r(t+h) in verlet.c,
+                                     then iterated during shaking
 
   POLAR:
     polarrof(molecule*,cfg[0]->rp) = dr(t) (rel.aux.site of ind. dipole)
@@ -640,14 +641,15 @@ void Shake(double eps, double prob) /********************************* Shake */
 
   Compile-time versions:
     SHAKE>0: simplified formula, equivalent upto h^2,
-             usu more efficient for complex systems
+             usually more efficient for complex systems
     SHAKE<0: `exact' formula using the scalar product,
-             perhaps better for diatomics
+             perhaps better for diatomics (deprecated)
     |SHAKE|=1: update in sweeps (generally better)
     |SHAKE|=2: update for unprecise bonds only
                (better for e.g. mixture of complex molecule + diatomics)
 
   History:
+    2025 C-dependants
     2012 MTK barostat
     2010 Nose-Hoover, several VERLET versions
     2008 pressure tensor, automatic omega optimization
@@ -669,6 +671,7 @@ void Shake(double eps, double prob) /********************************* Shake */
   double hh=h*h,Thh=T*hh,hhh=hh/2,hscale;
   double omega; /* = omegac/2 */
   int CMbasedthermostat=thermostat==T_ANDERSEN_CM || thermostat==T_MAXWELL_CM;
+  Cdepend_t *Cd; /* for massy C-dependants */
 
   /* Nose-Hoover; arrays are allocated forever
      indices: [0] = logs (= denoted also xi in the algorithms)
@@ -687,7 +690,7 @@ void Shake(double eps, double prob) /********************************* Shake */
 #if SHAKE==1 || SHAKE==-1
   int ifit=eps>=1;
   int maxit = (int)eps;
-  double maxsq;
+  double maxerr; /* max bond or C-dependant error, in AA */
 #else /*# SHAKE==1 || SHAKE==-1 */
   int *moved=NULL,*moving,done;
 #endif /*#!SHAKE==1 || SHAKE==-1 */
@@ -809,7 +812,7 @@ void Shake(double eps, double prob) /********************************* Shake */
 
     it=0;
     do { it++;
-      maxsq=0;
+      maxerr=0;
 
 #  ifdef ANCHOR
       /* anchor site: */
@@ -818,13 +821,38 @@ void Shake(double eps, double prob) /********************************* Shake */
 #    include "anchorg.c"
 #  endif /*# ANCHOR */
 
+      // C-dependants: possible optimization:
+      // - mn->Cdependants instead of spec[mn->sp]->Cdependants ?
+      // - prepare the sums of masses in advance
+      looplist (Cd, spec[mn->sp]->Cdependants) {
+        //        prt_("n=%d Cd->indx=%d",n,Cd->indx);
+        vector pj={0,0,0}; // the dependant position at time t+h
+        int nn=Cd->n,k;
+
+        i=Cd->indx;
+        loop (k,0,nn) {
+          j=Cd->dep[k].i;
+          // VV(pj,+=si[j].mass*p[j])
+          // Cd->dep[k].w should be derived from masses (not tested if not)
+          VV(pj,+=Cd->dep[k].w*p[j]) }
+        VVV(pij,=p[i],-pj)
+        sq = SQR(pij); // bondq=0 (could be extended?): for error only
+        //        prt("%g pij%dx",sqrt(sq),n);
+        Max(maxerr,sqrt(sq)) // V3.7h: this is in AA
+
+        mi=Cd->mi; mj=Cd->mj;
+        VV(p[i],-=mi*pij)
+        loop (k,0,nn) {
+          j=Cd->dep[k].i;
+          VV(p[j],+=mj*pij) } }
+
       loop (al,0,nc) {
         i=si[al].pair[0]; j=si[al].pair[1];
         sq=bondq=si[al].bondq;
         VVV(pij,=p[i],-p[j])
         VV(pij,*=scale) // @7 INEFFICIENT - should optimize
         sq -= SQR(pij);
-        Max(maxsq,fabs(sq/bondq))
+        Max(maxerr,fabs(sq/si[al].bond2))
 
         VVV(rij,=r[i],-r[j])
         CALCULATE_RXP
@@ -836,7 +864,7 @@ void Shake(double eps, double prob) /********************************* Shake */
         VV(p[i],+=mi*rij)
         VV(p[j],-=mj*rij) } /*al*/
 
-    } while ((ifit || maxsq>eps) && it<maxit);
+    } while ((ifit || maxerr>eps) && it<maxit);
 
 #  ifdef ANCHOR
     /* constrain CM, axes, and print site/cm constraint force */
@@ -847,10 +875,10 @@ void Shake(double eps, double prob) /********************************* Shake */
      int ii;
 
      ERROR(("Shake: species=%d molecule=%d: too many iterations (%d)\n\
-*** maxsq=%g eps=%g omega/2=%g\n\
+*** maxerr=%g eps=%g omega/2=%g\n\
 *** (selecting (i)gnore in interactive run will dump the molecule)",
             mn->sp,n,it,
-            maxsq,eps,omega))
+            maxerr,eps,omega))
      prt("%d\n",mn->ns);
      loop (ii,0,ns) prt("%4s %g %g %g",sitedef[spec[mn->sp]->si[ii].st].name,VARG(r[ii])); }
 

@@ -141,6 +141,7 @@ typedef struct siteinfo_s {
   real imass;     /* 1/mass of site */
   real charge;    /* charge of site */
   real bondq;     /* squared lengths of constraints (bonds) */
+  real bond2;     /* 2*lengths of constraints (bonds) */
   pair_t pair;    /* site1 and site2 of constraint */
 #  if COULOMB<-2 && defined(SLAB)
   real esig;      /* GAUSSIANCHARGES: sqrt(2)*sigma (POLAR: the same sigmas) */
@@ -178,31 +179,47 @@ typedef struct siteinfo_s {
 
 struct depitem_s {
   int i;   /* independent site in species */
-  real w;  /* weight */
+  real w;  /* weight to define the dependant (not necessarily ~mass) */
 };
+
+typedef enum { DEP_C, DEP_M, DEP_R, DEP_L, DEP_N} deptype_t;
+/* DEP_M = Middle (linear combination) dependants
+   DEP_R = Rowlinson, site perpendicular to a (generally flexible) triangle
+   DEP_L = Lone, general rigid triangle, dependant out of plane
+   DEP_N = number of dependants
+   DEP_C = DEP_M except that the dependant can have mass (solved by SHAKE)
+           DEP_C are stored in Cdepend_s
+   NB: order significant, operators < > used */
 
 typedef struct depend_s {
   struct depend_s *next;   /* next in the list */
   int indx;                /* the dependent site */
+  deptype_t type;          /* one of {DEP_M, DEP_R, DEP_L} */
   int n;                   /* number of reference sites (parents), max 4 */
-  enum deptype_e { DEP_M, DEP_R, DEP_L, DEP_N} type;
-  /* DEP_M = Middle (linear combination) dependants
-     DEP_R = Rowlinson, site perpendicular to a (generally flexible) triangle
-     DEP_L = Lone, general rigid triangle, dependant out of plane
-     DEP_N = number of dependants
-     NB: order significant, operators < > used */
   struct depitem_s dep[4]; /* [n]
                               indices and weights of the parents
                               assumed: SUM dep[].w = 1 */
   /* DEP_L, for n=3 only (wz for DEP_R):
      local coord. system = (X,Y,Z), Z=X x Y (x=cross product)
      f_x=X.f, etc. */
+  real wz;                 /* DEP_L: z-component of the site
+                              DEP_R: LO distance */
   vector x;                /* X from 3 sites: X=sum_i x[i] r[i] */
   vector y;                /* Y from 3 sites: Y=sum_i y[i] r[i] */
-  real wz;                 /* z-component of the site; DEP_R: LO distance */
   vector tx;               /* tx[a]*f_x added to f[a]_z */
   vector ty;               /* ty[a]*f_y added to f[a]_z */
 } depend_t;
+
+/* applies for DEP_C: the same as DEP_M except that the dependant can have mass (solved by SHAKE) */
+typedef struct Cdepend_s {
+  struct Cdepend_s *next;  /* next in the list */
+  int indx;                /* the dependent site */
+  int n;                   /* number of reference sites (parents), max 4 */
+  double mi,mj;            /* weights for movements ~ inverse masses */
+  struct depitem_s dep[4]; /* [n]
+                              indices and weights of the parents
+                              assumed: SUM dep[].w = 1 */
+} Cdepend_t;
 
 #  if defined(POLAR) && POLAR&32
 /* fluctuating charge for water */
@@ -225,8 +242,11 @@ typedef struct {
   int pot;          /* 0=default, 3=TIP3P, 4=TIP4P, 5=ST2 (optimized code) */
   bond_t *bond;     /* bonds [external constraints] table head */
   angle_t *angle;   /* angle table head */
-  torsion_t *dihedral,*improper,*aromatics; /* heads of torsion tables */
-  depend_t *dependants; /* table of lin. dependent sites */
+  torsion_t *dihedral,*improper,*aromatics;
+                    /* heads of torsion tables */
+  depend_t *dependants;   /* table of massless dependent sites */
+  Cdepend_t *Cdependants; /* table of C-dependants (with mass) */
+  int nCdep;        /* number of C-dependants (=3*nCdep constraints) */
 #  if defined(POLAR) && POLAR&32
   fq4_t *fq4;       /* fluctuating charge */
 #  endif /*# defined(POLAR) && POLAR&32 */
@@ -241,6 +261,7 @@ typedef struct {
   int sp;    /* species */
   int ns;    /* # of sites */
   int nc;    /* # of constraints */
+  int nCdep; /* number of C-dependants */
   int ir;    /* relative address of 1st site in rp - in bytes (use rof) */
   int ig;    /* relative address of 1st g[amma] in gs */
 #  ifdef ANCHOR
@@ -382,7 +403,8 @@ typedef struct No_s {
   int N;          /* total # of molecules */
   int s;          /* total number of sites (sum over all molecules) */
   int massy_s;    /* total number of massy sites (i.e., excl. dependants) */
-  int c;          /* total # of constraints */
+  int c;          /* total # of bond constraints */
+  int Cdep;       /* total # of C-dependants (# of constraints=3*Cdep) */
   int bonded;     /* if there are bonded terms: for 1-4 logic of linked-cell list */
   int free_N;     /* # of movable molecules */
   int free_s;     /* # of sites in movable molecules */
@@ -404,7 +426,8 @@ typedef struct No_s {
   int first;      /* # of molecules to be included in En.first */
 #  endif /*# LOG */
   int pred;       /* option('p')%10 : predictor of constraints or velocity */
-  int depend[DEP_N]; /* total # of dependants of given type */
+  int depend[DEP_N+1]; /* # of dependants of given type; [DEP_N]=sum */
+  int ndep;       /* # of all dependants (over all molecules, former No.depend[0]) */
   int ion;        /* number of ions */
 } No_t;
 extern No_t No;   /* # of sites, constraints, degrees of freedom etc. */

@@ -146,11 +146,12 @@ static struct {
 } *laststd;
 
 static enum {TCF,COV,NONE,ONE,STA,PRECSTA} statics; /* do not change order! */
-  /*  ONE=one line of summary statistics to out
-      STA=standard verbose table to out
-      PRECSTA=more precise standard verbose table to out
-      TCF=time correlation function, to out or file
-      COV=covariances, to out or file */
+/* TCF=time correlation function, to out or file
+   COV=covariances, to out or file
+   ONE=one line of summary statistics to out
+   STA=standard verbose table to out
+   PRECSTA=more precise standard verbose table to out
+ */
 
 static double StaPrtBlk(StaType *q, unsigned n, unsigned lag, unsigned blk)
 {
@@ -159,6 +160,8 @@ static double StaPrtBlk(StaType *q, unsigned n, unsigned lag, unsigned blk)
   double t,ti,cor=1,lastcor=1,vari,varn,mx=0;
   unsigned i,m=n/3;
 
+  if (statics<=COV) m=n-1; /* the last correlation extremely inaccurate */
+  
   if (n<2) return 0;
   blk /= n;
   if (m>lag) m=lag;

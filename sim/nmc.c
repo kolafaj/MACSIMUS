@@ -51,7 +51,9 @@ void normalmodesc(void) /**************************************** normalmodes */
     WARNING(("nmc: masses of atoms have been equalized\n\
 *** normal modes and frequences are affected"))
 
-  N=(No.s-No.depend[0])*DIM; /* vector size, 3* number of sites */
+  if (No.depend[DEP_N]!=No.depend[DEP_M]) ERROR(("Other dependants than M not supported"))
+      
+  N=(No.s-No.ndep)*DIM; /* vector size, 3* number of sites */
   Ni=N-No.c;
   mem=(sizeof(double))/1073741824.*(Sqr((double)N)*(6+!!nm.modes)+Sqr((double)No.c)+2*Sqr((double)Ni));
   prt("nmc: memory needed by matrices (excl. O(N) terms) = %g GiB",mem);
@@ -61,7 +63,7 @@ void normalmodesc(void) /**************************************** normalmodes */
   ralloc2Darrayzero(Ai,Ni,Ni);
   ralloc2Darrayzero(Ai0,Ni,Ni);
   rallocarray(ra,No.maxc);
-  rallocarrayzero(imass,No.s-No.depend[0]);
+  rallocarrayzero(imass,No.s-No.ndep);
   ralloc2Darrayzero(B,N,N);
   ralloc2Darrayzero(B1,N,N);
   ralloc2Darrayzero(B2,N,N);
@@ -103,7 +105,7 @@ void normalmodesc(void) /**************************************** normalmodes */
   rallocarray(S2M,No.s);
   loop (i,0,No.s) S2M[i]=-1;
   /* M2S[j] is the site number of M2S[j]-th mass site */
-  rallocarray(M2S,No.s-No.depend[0]);
+  rallocarray(M2S,No.s-No.ndep);
 
   j=inum=0;
   loop (n,FROM,No.N) {
@@ -114,16 +116,16 @@ void normalmodesc(void) /**************************************** normalmodes */
     nc=mn->nc;
     loop (i,0,mn->ns) {
       if (si[i].mass) {
-        if (inum>=No.s-No.depend[0]) ERROR(("internal: number of dependants"))
+        if (inum>=No.s-No.ndep) ERROR(("internal: number of dependants"))
         M2S[inum]=j; /* inum = consecutive mass site number */
         S2M[j]=inum;
         imass[inum]=si[i].imass; /* numbered by mass sites */
         inum++; }
       j++; } }
 
-  if (j!=No.s || inum!=No.s-No.depend[0])
+  if (j!=No.s || inum!=No.s-No.ndep)
     ERROR(("internal: sites: %d != %d, mass sites: %d != %d",
-           j,No.s,inum,No.s-No.depend[0]))
+           j,No.s,inum,No.s-No.ndep))
 
   measure=1;
 
@@ -398,7 +400,7 @@ Hint: scf.epsx=2*<maxerr>  or so may be more efficient than scf.epsx=0,\n\
      ...                                                        } Ni vectors
      line N-1:    last perpendicular vector, orthonormalized   /
 
-     S2M[No.s] : range=No.s-No.depend[0]=N/3
+     S2M[No.s] : range=No.s-No.ndep=N/3
      M2S[N/3] : range=No.s
   */
 
