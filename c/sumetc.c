@@ -12,12 +12,13 @@ double sum[M],sumq[M],sumg[M],x[M],first[M];
 int N[M];
 struct opt_s {
   struct opt_s *next;
-  enum op_e { ISUM, XSUM, RSUM, NSUM, PROD, MIN, MAX, AV, GEOMAV, STDEV, ABSSTDEV, STDERR, VAR, ABSVAR, EQ,NE,LT,LE,GT,GE } op;
-  double power; /* or relation */
+  enum op_e { ISUM, XSUM, RSUM, NSUM, PROD, MIN, MAX, RANGE, AV, GEOMAV, STDEV, ABSSTDEV, STDERR, VAR, ABSVAR, EQ,NE,LT,LE,GT,GE } op;
+  double power;  /* or relation */
   int ipower;
   char *fmt;
-  double sum[M]; /* sum or other operation result */
-  unsigned i[M];   /* for min/Max, the line # */
+  double sum[M]; /* sum or other operation result excl. MAX */
+  double MAX[M]; /* for -M (MAX) and -r (RANGE) */
+  unsigned i[M]; /* for min/Max, the line # */
 } *head,*last;
 int maxn=0,printnline=0;
 unsigned nline=0;
@@ -29,7 +30,7 @@ int main(int narg, char **arg) /*************************************** main */
   int n,i,iarg,sg=1;
   FILE *f;
   struct opt_s *one;
-  char *SEP=" ";
+  char *SEP="  ";
 
   FMT=getenv("FMT");
   if (!FMT || !strchr(FMT,'%')) FMT="%.8g";
@@ -52,13 +53,14 @@ OPTIONS:\n\
   -g       = geometric average, (prod X_i)^(1/n)\n\
   -gt# -ge# -lt# -le# -ne# -eq#\n\
            = # of data > >= < <= != == given number #\n\
-  -i       = print also the line number (1st instance) of min/max (-m,-M) in ()\n\
+  -i       = print the line number (1st instance) of min/max (-m,-M) in ()\n\
   -m       = minimum\n\
-  -M       = maximum\n\
+  -M       = MAXIMUM\n\
   -n       = number of data (the same as -0)\n\
   -p       = product\n\
+  -r       = MAXIMUM - minimum (-i does not apply)\n\
   -s       = sum\n\
-  -SSEP    = separator between outputs from 1 input column [1 space]\n\
+  -SSEP    = separator between outputs from 1 input column [\"  \"]\n\
   -x       = alternating sum (1st-2nd+3rd...)\n\
   -v       = sample variance (aka Bessel corrected), sum(X_i-<X>)^2/(n-1)\n\
   -V       = variance of the data set, sum(X_i-<X>)^2/n\n\
@@ -126,10 +128,15 @@ See also:\n\
 
           case 'M':
 	    one->op=MAX;
-	    loop (i,0,M) one->sum[i]=-9e99;
+	    loop (i,0,M) one->MAX[i]=-9e99; // WARNING: MAX[]
 	    break;
           case 'm':
 	    one->op=MIN;
+	    loop (i,0,M) one->sum[i]=9e99;
+	    break;
+          case 'r':
+	    one->op=RANGE;
+	    loop (i,0,M) one->MAX[i]=-9e99; // WARNING: MAX[]
 	    loop (i,0,M) one->sum[i]=9e99;
 	    break;
           case 'n':
@@ -170,8 +177,12 @@ See also:\n\
         case NSUM: loop (i,0,n) one->sum[i]+=1; break;
         case RSUM: loop (i,0,n) one->sum[i]+=pow(x[i],one->power); break;
         case PROD: loop (i,0,n) one->sum[i]*=x[i]; break;
-        case MAX: loop (i,0,n) if (x[i]>one->sum[i]) one->sum[i]=x[i],one->i[i]=nline; break;
+        case MAX: loop (i,0,n) if (x[i]>one->MAX[i]) one->MAX[i]=x[i],one->i[i]=nline; break;
         case MIN: loop (i,0,n) if (x[i]<one->sum[i]) one->sum[i]=x[i],one->i[i]=nline; break;
+        case RANGE: loop (i,0,n) {
+          if (x[i]>one->MAX[i]) one->MAX[i]=x[i];
+          if (x[i]<one->sum[i]) one->sum[i]=x[i]; }
+          break;
         case EQ: loop (i,0,n) one->sum[i]+=(x[i]==one->power); break;
         case NE: loop (i,0,n) one->sum[i]+=(x[i]!=one->power); break;
         case GT: loop (i,0,n) one->sum[i]+=(x[i]> one->power); break;
@@ -193,10 +204,12 @@ See also:\n\
         case ABSSTDEV: printf(one->fmt,sqrt((sumq[i]-Sqr(sum[i])/N[i])/(N[i]))); break;
         case VAR: printf(one->fmt,(sumq[i]-Sqr(sum[i])/N[i])/(N[i]-1)); break;
         case ABSVAR: printf(one->fmt,(sumq[i]-Sqr(sum[i])/N[i])/(N[i])); break;
-        case MAX:
+        case MAX: printf(one->fmt,one->MAX[i]); goto indx;
         case MIN: printf(one->fmt,one->sum[i]);
-          if (printnline) printf("(%u)",one->i[i]);
+        indx:
+          if (printnline) printf("(%u)",one->i[i]+1);
           break;
+        case RANGE: printf(one->fmt,one->MAX[i]-one->sum[i]); break;
         default: printf(one->fmt,one->sum[i]); }
 
       if (one->next)

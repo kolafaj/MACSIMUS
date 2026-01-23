@@ -119,12 +119,15 @@
         prt("K%c = %g  ==> tau = %g ps (oscillation period=%g ps)",i+'x',
             center.cmK[i],tau,2*PI*tau); } }
 
+    if (center.cmn || center.on) {
 #ifndef FREEBC
-    if (center.cmn || center.on)
       prt("WARNING: the above forces violate periodic b.c.\n");
-#endif /*# FREEBC */
+#endif
+      WARNING(("The above forces are not taken into account in calculating\n\
+*** variables drift and conserved. Set them manually!"))
+    }
 
-    /* electric field */
+/* electric field */
 
     /* conversion of V/m to internal prog. units */
     /*  NB: (chargeunit/forceunit)=1./352259391.) */

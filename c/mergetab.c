@@ -143,7 +143,7 @@ will print columns 1 and 2 of st2.g and column 2 of tip4p.g shifted so that\n\
 it matches column 1. If tip4p.g has finer grid, extra data are omitted,\n\
 if st2.g has finer grid, missing data in tip4p.g are n.a.\n\
 See also:\n\
-  datablock hcat tabproc transtab field shifttab maketab selcol mergeg\n",FMT);
+  datablock hcat tabproc transtab field shifttab maketab mergekey.sh mergeg\n",FMT);
   exit(0); }
 
   if (getenv("MERGEFMT")) FMT=getenv("MERGEFMT");

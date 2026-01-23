@@ -94,7 +94,7 @@ struct xwindowhints_s xwindowhints = {
   "#000000",      /* background color (passed from -bg option) */
   "JK X-draw",    /* X window name */
   "X-draw",       /* X icon name */
-  128,96,         /* min window size */
+  120,120,        /* min window size */
   0,              /* fullscreen status */
   0,0,            /* fullscreen size */
   ""              /* lastgeometry */

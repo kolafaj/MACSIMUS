@@ -144,7 +144,6 @@ void centerforces(ToIntPtr B, ToIntPtr A) /******************** centerforces */
       ns=mn->ns;
       r=rof(mn,A->rp);
       f=rof(mn,B->rp);
-
       /* forces to box center */
       if (center.on&2) loop (i,0,ns) loop (k,0,DIM) {
 #ifdef FREEBC

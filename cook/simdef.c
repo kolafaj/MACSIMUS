@@ -66,7 +66,7 @@ nbfix_t *fixij(int i,int j) /**************************************** nbfixi */
 
 static char *line,*copyofline;
 
-static char *realname(char *name)
+static char *realname(char *name) /******************************** realname */
 /* strip leading ? or lowercase group name */
 {
   if (name[0]=='?') return name+1; /* water recognizer support */
@@ -578,9 +578,15 @@ NOTE: Your ble-file contains parameter sqrt_rule, which has been renamed\n\
       to comb_rule. I am assuming comb_rule=sqrt_rule.");
     comb_rule=sqrt_rule; }
 
-  if (nparms!=SS_PARMS)
+  if (nparms!=SS_PARMS) {
+#ifdef POW
+    char *powinfo=string("POW=%d",POW);
+#else
+    char *powinfo="POW undefined";
+#endif
+
     ERROR(("ble-file has wrong number of extra parameters\n\
-expected SS_PARMS=%d but nparms=%d",SS_PARMS,nparms))
+expected SS_PARMS=%d but (%s) nparms=%d",SS_PARMS,powinfo,nparms)) }
 
   if (polar<0) prt("WARNING: obsolete ble-file");
 

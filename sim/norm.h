@@ -53,3 +53,5 @@ void addshift(int key,int nshift,vector shift);
 #if defined(SLAB) && SLAB & 2
 void cleavescaling(double *Pscale,double tau,int noint,double factor,double maxscale);
 #endif
+
+void vofdependants(int pass);

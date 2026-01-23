@@ -200,7 +200,8 @@ OPTIONS (#=integer or real number):\n\
   -f#  fit Mean Square (Charge) Displacements (MSD, MSCD) to [2]\n\
          2=a+b*t, incl. error estimates [default]\n\
          3=a+b*t+c/sqrt(t) (hydrodynamic tail, no error estimates)\n\
-  -F#  box.follow for cook [default=0]\n\
+  -F#  box.follow for cook [default=0]: try 3e-7 for small NVT boxes, 1e-7 NPT,\n\
+       increase with caution on ERROR \"Sorry, the fixup failed.\"\n\
   -g#x# plot geometry (size without position) [800x600]\n\
   -k   keep all temporary files [default=remove]\n\
   -m#  calculate mass diffusivity by species [0=do not calculate]\n\

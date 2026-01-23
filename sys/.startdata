@@ -121,7 +121,7 @@ a	ar tv "%s.%s" | less
 sh	sh "%s.%s"
 rpm	rpm -q -i -p "%s.%s"
 deb	dpkg -I	dpkg -c
-py	python
+py	py.sh
 ipynb	jupyter-lab
 tex	e
 

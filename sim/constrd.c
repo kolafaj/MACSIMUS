@@ -810,6 +810,7 @@ void Shake(double eps, double prob) /********************************* Shake */
 
     if (!ifit) maxit=maxit0*(nc+4);
 
+    /* the SHAKE (version 1) loop */
     it=0;
     do { it++;
       maxerr=0;
@@ -900,6 +901,7 @@ void Shake(double eps, double prob) /********************************* Shake */
 
     loop (i,0,ns) { moving[i]=0; moved[i]=1; }
 
+    /* the SHAKE (version 2) loop */
     done=it=0;
     do {
       done=1;
@@ -964,7 +966,7 @@ void Shake(double eps, double prob) /********************************* Shake */
     r1=rof(mn,rp1);
     si=spec[mn->sp]->si;
 #endif /*# ANCHOR */
-
+    
 /*
   Kinetic energy, pressure tensor (if measure),
   and final cfg[0], cfg[1] update (except rescaling for T_NPT and tau.rho<0)
@@ -996,8 +998,10 @@ void Shake(double eps, double prob) /********************************* Shake */
 #endif /*#!VERLET==0!VERLET==1!VERLET==2!VERLET==3!VERLET==4!VERLET==5!VERLET==6!VERLET==30 */
 #undef V1
   } /* ANCHOR: end of 2nd n-loop, not ANCHOR: of the Shake n-loop */
-
+  
 #include "anchork0.c"
+
+/* end of SHAKE (oth versions) incl. ANCHOR */
 
   //prt("%d %g %g %g",n,VARG(rof(molec+1,rp)[0]));
   cfg[0]->dep=0;

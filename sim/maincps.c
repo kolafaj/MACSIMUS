@@ -156,7 +156,7 @@
           /*7*/ recordCP(En.T_tr)
 
           /* additional columns over "standard" 7 columns */
-          /*8*/ /* used to be for COULOMB only, now also for FREE */
+          /*8*/ /* used to be for COULOMB only, now also for FREE; cf. SIMNAME.cpi */
             if (Eext.isE<0) {
               if (No.ion) recordCP(En.J[Eext.isE+3])
 #ifndef FREEBC

@@ -108,6 +108,12 @@ HISTORY
   * feature changed
   - feature removed
 
+cook 3.7j:
+  ! bad velocities of dependants: they are now derived from r(t-h) and r(t) only if measure and No.ndep
+    Not clear how to treat the same issue for Gear
+cook 3.7i:
+  ! fix COS+r^-12
+
 blend V2.4g:
   * M-dependant new format
   

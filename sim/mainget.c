@@ -13,14 +13,16 @@
 
       if (pass==0) {
         allocarray(N,nspec);
-        allocarray(group,nspec);
+        allocarray(group,nspec); /* this is maximum */
         loop (i,0,nspec) {
           /* numbers of molecules (because spec[i]->N might have been set in the ble-file) */
           N[i]=spec[i]->N;
           /* groups of species */
-          group[i]=i; } }
+          /* group[i]=i; this default removed in V3.7i */
+          group[i]=-1; /* the default since V3.7i is no group predefined */
+        } }
 
-      if (pass==1) {
+      else if (pass==1) {
         loop (i,0,nspec) spec[i]->N=N[i];
         free(N);
 

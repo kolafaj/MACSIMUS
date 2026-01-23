@@ -41,7 +41,7 @@
                       setss and charge profile assume that sigma_i is the last parameter
 
   NOTE:
-  - rho_i<0 is interpreted so that rho_ij=0 for any atom j, 
+  - rho_i<0 is interpreted so that rho_ij=0 for any atom j,
     which is useful, e.g., for a bare charge
   - EvdW_i=0 (rho_i=0) and R_i=0 still can combine with other atoms
 
@@ -163,7 +163,7 @@ typedef struct pairaux_s {
 #    elif POW==8
 
 /* site-site energy and forces (called after SS_MEASURE_rep) */
-//  double zz;             
+//  double zz;
 #      define SS_MEASURE { \
   z=Cub(rr); \
   zz=ss->a.D/(z*rr); \
@@ -201,7 +201,7 @@ typedef struct pairaux_s {
 
 /* site-site energy and forces */
 #      define SS_MEASURE { \
-//    double zz;         
+  double zz; /* needed only for some combination of switches */ \
   if (ss->a.eps) { \
     x=sqrt(rr); \
     y=ss->a.Aij*exp(ss->a.iBij*x); \

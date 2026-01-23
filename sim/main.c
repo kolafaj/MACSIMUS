@@ -1,4 +1,4 @@
-#define VERSION "3.7h"
+#define VERSION "3.7j"
 
 #if defined(LINKCELL) && defined(FREEBC)
 #  error "LINKCELL not supported for FREEBC"
@@ -482,8 +482,8 @@ int main(int narg,char **arg) /**************************************** main */
     /* CAVEAT: a check missing for changing groups for init=0,1 */
     ngroups=0;
     loop (i,0,nspec) {
-      prt("species %d is in group %d",i,group[i]);
-      if (group[i]<0 || group[i]>=nspec) ERROR(("group[%d] out of range",i))
+      prt("species %d is in group %d%s",i,group[i],group[i]<0?" (none)":"");
+      if (group[i]>=nspec) ERROR(("group[%d]=%d out of range\n*** To mark that the species is not in any group, use -1.",i,group[i]))
       spec[i]->group=group[i];
       Max(ngroups,group[i]) }
     ngroups++;
@@ -1007,7 +1007,7 @@ slab.mode specified, but slab.grid not given:\n\
 *** corrections for replicated cell (e.g., with PERSUM)"))
 
     Hamaker();
-                   
+
 #include "mainkinc.c"
 
 #ifdef COULOMB
@@ -1546,13 +1546,20 @@ final drift = %d = %s",DRIFT_START,drift,int2sumbin(drift)))
         measure=iint==noint;
 
         if (gear.order==2) {
+          vofdependants(0);
+
           /* Verlet + SHAKE */
           if (thermostat==T_LANGEVIN_CM || thermostat==T_LANGEVIN)
             ERROR(("Verlet+Langevin not implemented (yet)"))
 
           Shake(epsc,
                 thermostat==T_MAXWELL||thermostat==T_MAXWELL_CM ? (double)justnow(tau.T,h/2) :
-                thermostat==T_ANDERSEN||thermostat==T_ANDERSEN_CM ? h/tau.T : 0); }
+                thermostat==T_ANDERSEN||thermostat==T_ANDERSEN_CM ? h/tau.T : 0);
+
+          vofdependants(1);
+
+        } /* Verlet/leap-frog */
+
         else {
           /* Gear integration */
 #  ifdef POLAR
@@ -1560,7 +1567,15 @@ final drift = %d = %s",DRIFT_START,drift,int2sumbin(drift)))
 #  else /*# POLAR */
           Gear(No.eq,cfg);
 #  endif /*#!POLAR */
-          CPUtime("Gear"); }
+          CPUtime("Gear");
+          /* PROBLEM: velocities and higher derivatives for dependants? */
+          if (measure) {
+            static int warning;
+            if (No.ndep && !warning) {
+              WARNING(("The issue of the velocities of dependants has not been solved. Use SHAKE."))
+              warning++; }
+
+            depend_r(cfg[0],0); } }
 
 #  if defined(COULOMB) && COULOMB<0
         /*
@@ -1781,7 +1796,7 @@ final drift = %d = %s",DRIFT_START,drift,int2sumbin(drift)))
         if (icyc==0) {
           if (tau.sig) header("   t/ps    Tkin/K   Epot/K    Etot/K   sigvdE/AA P/MPa  polerr polit  cerr1 ");
           else header("   t/ps    Tkin/K   Epot/K    Etot/K  rho/kgm^-3 P/MPa  polerr polit  cerr1 ");
-          fflush(out); }                                                                    
+          fflush(out); }
         if (tau.sig)
           prt("%9.3f %6.1f %9.0f %12.2f %7.4f %8.3f%9.2e%2.0f%10.2e",
                 t,    En.T,En.pot,En.tot,*sigvdWptr,
@@ -1856,7 +1871,7 @@ Explanation: The box size is variable in NPT simulation while the cutoff is\n\
 
       if (sig==5) break; /* 2nd attempt */
 
-      depend_r(cfg[0],0); /* correct r for measurements (e.g., dipole moment) */
+      // depend_r(cfg[0],0); moved above
 
 #  include "maincps.c"
 
@@ -1934,15 +1949,16 @@ Explanation: The box size is variable in NPT simulation while the cutoff is\n\
     } /* >>>>>>>>>>>> icyc (# of cycles=no, or until ^C) >>>>>>>>>>>>> */
 
 #  ifdef POLAR
+    /* scf.omega autoset */
     if (sig==99) {
+      double newomega;
       sig=0;
-      if (scf.margin>0)
-        WARNING(("scf.margin was positive, set to %g",scf.margin=-scf.margin))
-        prt("SCF AUTOSET divergence for omega=%g => scf.omega:=%g\n\
+      if (scf.margin>0) newomega=(scf.omega-scf.domega)*(1-scf.margin);
+      else newomega=(scf.omega-scf.domega)+scf.margin;
+      prt("SCF AUTOSET divergence for omega=%g => scf.omega:=%g\n\
 scf.domega:=0 (no autoset in the next sweep)",
-            scf.omega,scf.omega+scf.margin);
-      fprintf(stderr,"SCF AUTOSET divergence for omega=%g => scf.omega:=%g\n",scf.omega,scf.omega+scf.margin);
-      scf.omega+=scf.margin;
+            scf.omega,newomega);
+      scf.omega=newomega;
       scf.domega=0; }
 #  endif /*# POLAR */
 

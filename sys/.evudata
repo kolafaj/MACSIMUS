@@ -62,6 +62,8 @@ to N/m
 to L0.5 mol-0.5
 to J
 to kg m-3
+to mol/L bar
+to mol/kg bar
 ! Celsius to Kelvin; e.g., 25 oC -> 298.15 [K]
 def oC *1[K]+TC
 ! Fahrenheit to Kelvin; e.g., 0 oF -> 255.37222 [K]

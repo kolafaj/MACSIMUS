@@ -20,7 +20,7 @@ int main(int narg, char **arg)
     fprintf(stderr,"\
 Select range of values from a table. Call by:\n\
   filttab [+OPT] [-]COLUMN:FROM[:TO[:BY[:BY0]]] [...] < DATA > SELECTED\n\
-  filttab [+OPT] [-]COLUMN:VALUE:+ERROR[:BY[:BY0]]] [...] < DATA > SEL.\n\
+  filttab [+OPT] [-]COLUMN:VALUE:+ERROR[:BY[:BY0]]] [...] < DATA > SELECTED\n\
 Lines with numerical value in given COLUMN in interval [FROM,TO] are selected\n\
 - in front of COLUMN selects data outside the range\n\
 OPT=[length][ ][comment]:\n\

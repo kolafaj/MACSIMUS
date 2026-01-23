@@ -15,7 +15,7 @@ int main(int narg,char **arg)
 Concatenate text files horizontally. Call by:\n\
   [HCAT=] hcat FILE [FILE..] > OUTFILE\n\
 Where\n\
-  HCAT = separator string (default=" ")\n\
+  HCAT = separator string (default=\" \")\n\
 See also:\n\
   cat mergetab\n\
 ");

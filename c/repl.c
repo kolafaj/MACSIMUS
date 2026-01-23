@@ -7,23 +7,25 @@
 int main(int narg,char **arg)
 {
   static char line[N];
-  int nrepl=N,from=1,totrepl=0;
+  int nrepl=N,from=1,totrepl=0,retno=0,ffl=0;
   enum opt_e { ANY,BOL,EOL } opt=ANY;
 
   if (narg<3) {
     fprintf(stderr,"\
 Replace strings in a stream. Call by:\n\
-  repl [OPTION] FROM TO [FROM TO ...] < SOURCE > RESULT\n\
-if the number of args is odd, the 1st arg is OPTION:\n\
-  -NUMBER = max. number of replacements of one type (FROM->TO) per line\n\
+  repl [-OPTION] FROM TO [FROM TO ...] < SOURCE > RESULT\n\
+if the number of args is odd, the 1st arg is -OPTION, starting from NUMBER:\n\
+  NUMBER = max. number of replacements of one type (FROM->TO) per line\n\
             default = all replacements (without recursion)\n\
-  -b = replace only if FROM is at the beginning of line\n\
-  -e = replace only if FROM is at the end of line\n\
-total number of replacements is returned\n\
+  b = replace only if FROM is at the beginning of line\n\
+  e = replace only if FROM is at the end of line\n\
+  n = total number of replacements is returned\n\
+       (default: 0 returned excepr error)\n\
+  f = fflush after each line\n\
 Examples:\n\
   echo ABAA | repl A a  B bb      # -> abbaa\n\
   echo ABAA | repl -2  A a        # -> aBaA\n\
-  echo ABAA | repl -e  A \"\"       # -> ABA\n\
+  echo ABAA | repl -ef A \"\"       # -> ABA\n\
 See also:\n\
   ifrepl binrepl replace lemon texrepl\n");
     exit(0); }
@@ -31,10 +33,12 @@ See also:\n\
   if (!(narg&1)) {
     /* odd number of parameters (excl. arg[0]): 1st is OPTION */
     from=2;
-    if (arg[1][0]!='-') Error("repl: wrong OPTION: must be one of -NUMBER -b -e");
-    if (arg[1][1]=='b') opt=BOL,nrepl=1;
-    else if (arg[1][1]=='e') opt=EOL,nrepl=1;
-    else nrepl=atoi(arg[1]+1); }
+    if (arg[1][0]!='-') Error("repl: OPTION must start with -");
+    if (strchr(arg[1],'b')) opt=BOL,nrepl=1;
+    if (strchr(arg[1],'n')) retno=1;
+    if (strchr(arg[1],'f')) ffl=1;
+    if (strchr(arg[1],'e')) opt=EOL,nrepl=1;
+    if (isdigit(arg[1][1])) nrepl=atoi(arg[1]+1); }
   if (nrepl<=0) Error("repl: wrong OPTION or args not paired");
 
   while (fgets(line,N,stdin)) {
@@ -72,7 +76,8 @@ See also:\n\
 
         if (!replaced) break; } }
 
-    fputs(line,stdout); }
+    fputs(line,stdout);
+    if (ffl) fflush(stdout); }
 
-  return totrepl;
+  return retno*totrepl;
 }

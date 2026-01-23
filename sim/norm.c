@@ -1,4 +1,5 @@
 #include "ground.h"
+#include "sds.h"
 #include "simglob.h"
 #include "simdef.h" /* nspec needed because of constrit stuff... */
 #include "simcg.h"
@@ -551,7 +552,7 @@ subtracted from the number of degrees of freedom used for calculating the\n\
 kinetic temperature and pressure; the automatically determined value can be\n\
 changed by variable \"conserved\".\n\
 \n\
-The automatic setup fails for elliptical harmonic forces (center.K),\n\
+The automatic setup fails for harmonic forces (center.K),\n\
 fixed points, etc.\n\
 \n\
 Conservation of energy (Hamiltonian) is treated in a different module\n\
@@ -1415,6 +1416,8 @@ void depend_r(ToIntPtr A,int always) /***************************** depend_r */
   struct depitem_s *dep;
   real *depr;
 
+  if (!No.ndep) return;
+  
   if (always) A->dep=0;
   if (A->dep) return; /* already calculated */
 
@@ -1528,6 +1531,8 @@ void depend_f(ToIntPtr A,ToIntPtr B) /***************************** depend_f */
   double rr;
   struct depitem_s *dep;
 
+  if (!No.ndep) return;
+
   loop (n,FROM,No.N) {
     mn=molec+n;
     sp=mn->sp;
@@ -1619,5 +1624,40 @@ void depend_f(ToIntPtr A,ToIntPtr B) /***************************** depend_f */
         default:; }
       /* not needed: VO(depf,=0) */
     }
+  }
+}
+
+void vofdependants(int pass) /******************************** vofdependants */
+/*
+  To calculate the velocities of dependants for measurements of the time
+  correlation functions etc.
+
+  Called in main.c after SHAKE so that the the elocities of all sites
+  incl. dependants at t-h/2 are available.
+*/
+{
+  static ToIntPtr last=NULL;
+
+  if (No.ndep && measure) {
+
+    if (pass) {
+      /* calculate velocity of dependants: called after SHAKE */
+      if (measure && No.ndep) {
+        int n;
+
+        depend_r(cfg[0],0);
+        loop (n,FROM,No.N) {
+          molecule_t *mn=molec+n;
+          vector *rlast=rof(mn,last->rp);
+          vector *r=rof(mn,cfg[0]->rp);
+          vector *v=rof(mn,cfg[1]->rp);
+          depend_t *d;
+          
+          looplist (d,spec[mn->sp]->dependants)
+            VVV(v[d->indx],=r[d->indx],-rlast[d->indx]) } } }
+    else {
+      /* store the configuration (INEFFICIENCY: in full, not only dependants) */
+      if (last==NULL) sdsalloc(last,cfg[0]->size);
+      sdscopy(last,cfg[0]); }
   }
 }

@@ -132,6 +132,7 @@ void putrgb(FILE *out) /********************************************* putrgb */
 {
   int k;
   int gray=(rgb2g[0]*rgb[0]+rgb2g[1]*rgb[1]+rgb2g[2]*rgb[2])/rgb2g[3];
+  static char sep='{';
 
   switch (outtype) {
     case '0':
@@ -173,11 +174,16 @@ void putrgb(FILE *out) /********************************************* putrgb */
       break;
 
     case '3':
-      fprintf(out,"%3d %3d %3d\n",rgb[0],rgb[1],rgb[1]);
+      fprintf(out,"%3d %3d %3d\n",rgb[0],rgb[1],rgb[2]);
       break;
 
     case '2':
       fprintf(out," %3d",gray);
+      break;
+
+    case '7':
+      fprintf(out,"%c0x%x\n",sep,(rgb[0]*256+rgb[1])*256+rgb[2]);
+      sep=',';
       break;
 
     default:
@@ -202,8 +208,8 @@ Extract rectangle and/or convert pnm files. Call by:\n\
     [-rSETRED -gSETGREEN -bSETBLUE] [-i] [-#] -POUTTYPE\n\
 ARGUMENTS:\n\
   OUTFILE is the same format as INFILE unless -P\n\
-  supported input formats: P1-P6\n\
-  supported output formats: P1-P6, P0=X bitmap in C\n\
+  input formats: P1-P6\n\
+  output formats: P1-P6, P0=X-bitmap in C, P7=data for X-image\n\
     -Pa/-Pb convert to asc/bin(raw)\n\
   TOX and TOY are not included (C-style)\n\
   negative FROMX or TOX is subtracted from the X-range (-X or width), so is Y\n\
@@ -243,7 +249,8 @@ See also:\n\
   if (strchr("aA",outtype)) {
     outtype=intype;
     if (intype>='4') outtype=intype-3; }
-  if (outtype>'0') fprintf(out,"P%c\n",outtype);
+  if (outtype>'0' && outtype<'7') fprintf(out,"P%c\n",outtype);
+  if (outtype=='7') fprintf(out,"unsigned int data[");
   if (line[0]!='P' || intype<'1' || intype>'6')
     Error("bad header: P1--P6 expected");
   do {
@@ -302,8 +309,9 @@ See also:\n\
 
   fprintf(out,
  	 outtype=='0'
- 	 ?"#define Xbitmap_width %d\n#define Xbitmap_height %d\n"
- 	 :"%d %d\n",
+          ?"#define Xbitmap_width %d\n#define Xbitmap_height %d\n"
+          :outtype=='7'?"%d*%d]=\n"
+          :"%d %d\n",
  	 i=(x1-x0+xstride-1)/xstride,
  	 j=(y1-y0+ystride-1)/ystride);
 
@@ -339,7 +347,7 @@ See also:\n\
     inmask=0; }
 
  end:
-  if (outtype=='0') fprintf(out,"};\n");
+  if (outtype=='0'|| outtype=='7') fprintf(out,"};\n");
 
   fclose(out);
   fclose(in);

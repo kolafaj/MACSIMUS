@@ -1482,8 +1482,9 @@ void measureplus(void) /**************************************** measureplus */
         if (el.centroid) VV(CQ,+=Sqr(qpol)*r[i]) /* ions: sqr charge centroid */
         sumqq+=Sqr(qpol);
         sumq+=qpol; /* NB: sum qpol = sum q */
-        VV(sum[gr].J,+=qpol*v[i])
-        VV(sum[gr].M,+=qpol*r[i])
+        if (gr>=0) {
+          VV(sum[gr].J,+=qpol*v[i])
+          VV(sum[gr].M,+=qpol*r[i]) }
         VV(D,+=q*r[i])
         VV(Dpol,+=(qpol-q)*r[i]) }
       else
@@ -1491,35 +1492,36 @@ void measureplus(void) /**************************************** measureplus */
 #  endif /*# POLAR&32 */
         { /* Drude */
           qpol=si[i].chargepol;
+          q+=qpol;
 
           /* current density */
           if (lastrpols) {
             /* exact incl. the displacement current */
-            VVV(vpol,=rpol[i],-lastrpol[i])
-            VVV(sum[gr].J,+=(q+qpol)*v[i],+qpol*vpol) }
-          else
+            if (gr>=0) {
+              VVV(vpol,=rpol[i],-lastrpol[i])
+              VVV(sum[gr].J,+=q*v[i],+qpol*vpol) } }
+          else {
             /* approximate excl. the displacement current (good enough for NEMD) */
-            VV(sum[gr].J,+=(q+qpol)*v[i])
+            if (gr>=0) VV(sum[gr].J,+=q*v[i]) }
 
           /* permanent dipoles */
-          q+=si[i].chargepol;
           if (el.centroid) VV(CQ,+=Sqr(q)*r[i]) /* ions: sqr charge centroid (w/o Drude) */
           sumqq+=Sqr(q);
           sumpolqq+=Sqr(qpol);
           sumq+=q;
           VV(D,+=q*r[i])
-          VV(sum[gr].M,+=q*r[i])
-
+          if (gr>=0) VV(sum[gr].M,+=q*r[i])
           /* induced dipoles */
           VV(Dpol,+=qpol*rpol[i])
-          VV(sum[gr].M,+=qpol*rpol[i])
+          if (gr>=0) VV(sum[gr].M,+=qpol*rpol[i])
         }
 #else /*# POLAR */
         /* nonpolar */
         if (el.centroid) VV(CQ,+=Sqr(q)*r[i]) /* ions: sqr charge centroid */
         sumqq+=Sqr(q);
-        VV(sum[gr].J,+=q*v[i])
-        VV(sum[gr].M,+=q*r[i])
+        if (gr>=0) {
+          VV(sum[gr].J,+=q*v[i])
+          VV(sum[gr].M,+=q*r[i]) }
         sumq+=q;
         VV(D,+=q*r[i])
 #endif /*#!POLAR */
@@ -1539,33 +1541,37 @@ void measureplus(void) /**************************************** measureplus */
     } /* i */
 
     if (sumqq+sumpolqq) {
-      sum[gr].nD++;
+      if (gr>=0) sum[gr].nD++;
       /* dipole moment for ions to q^2 centroid (w/o Drude charge) */
       if (el.centroid && sumqq!=0) VV(D,-=sumq/sumqq*CQ)
 
       /* permanent dipole (only this one for nonpolarizable models) */
       q=SQR(D);
-      sum[gr].D+=sq=sqrt(q);
+      if (gr>=0) sum[gr].D+=sq=sqrt(q);
       if (sq==0) sq=1; /* to avoid nan */
-      sum[gr].DD+=q;
-      VV(sumD3,+=D)
+      if (gr>=0) {
+        sum[gr].DD+=q;
+        VV(sumD3,+=D) }
 #ifdef POLAR
       /* induced dipole */
       qpol=SQR(Dpol);
-      sum[gr].Dpol+=sqrt(qpol);
-      sum[gr].DDpol+=qpol;
+      if (gr>=0) {
+        sum[gr].Dpol+=sqrt(qpol);
+        sum[gr].DDpol+=qpol; }
       VV(sumD3pol,+=Dpol)
 
       /* projection of the induced dipole to the direction of the permanent one */
       qpol=SCAL(D,Dpol)/sq;
-      sum[gr].Dprj+=qpol; /* bug fixed */
-      sum[gr].DDprj+=Sqr(qpol);
+      if (gr>=0) {
+        sum[gr].Dprj+=qpol; /* bug fixed */
+        sum[gr].DDprj+=Sqr(qpol); }
 
       /* both permanent + induced */
       VV(D,+=Dpol)
       q=SQR(D);
-      sum[gr].Dboth+=sqrt(q);
-      sum[gr].DDboth+=q;
+      if (gr>=0) {
+        sum[gr].Dboth+=sqrt(q);
+        sum[gr].DDboth+=q; }
       VV(sumD3both,+=D)
 #endif /*# POLAR */
     } /* sumqq */
@@ -1592,7 +1598,7 @@ void measureplus(void) /**************************************** measureplus */
         loop (jj,0,3)
           RGa[ii][jj]=RG[ii][jj]/sumM - CM[ii]*CM[jj];
         RGval+=RGa[ii][ii]; }
-      sum[gr].Rgyrq += RGval;
+      if (gr>=0) sum[gr].Rgyrq += RGval;
 
       Jacobi(-3,RGa,NULL,No.eps);
 
@@ -1601,9 +1607,9 @@ void measureplus(void) /**************************************** measureplus */
       if (RGa[1][1]>RGa[2][2]) x=RGa[1][1],RGa[1][1]=RGa[2][2],RGa[2][2]=x;
       if (RGa[0][0]>RGa[1][1]) x=RGa[0][0],RGa[0][0]=RGa[1][1],RGa[1][1]=x;
 
-      loop (ii,0,3) sum[gr].RGm[ii]=RGa[ii][ii];
-
-      sum[gr].nRG++;
+      if (gr>=0) {
+        loop (ii,0,3) sum[gr].RGm[ii]=RGa[ii][ii];
+        sum[gr].nRG++; }
 
       if (sp!=oldsp) {
         if (sp<oldsp) warning=0;
@@ -1621,12 +1627,13 @@ void measureplus(void) /**************************************** measureplus */
         oldsp=sp; }
 
       VVV(CM,=r[End[0]],-r[End[1]])
-      sum[gr].nend++;
-      sum[gr].endend += (endendval=SQR(CM));
+      if (gr>=0)  {
+        sum[gr].nend++;
+        sum[gr].endend += (endendval=SQR(CM)); }
 
       if (I==n) RGret=RGval,endendret=endendval; }
-    else
-      sum[gr].endend=RGret=endendret=0;
+    else {
+      if (gr>=0) sum[gr].endend=RGret=endendret=0; }
 #endif /*# RGYR */
   } /* n */
 
