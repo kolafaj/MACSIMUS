@@ -1,4 +1,4 @@
-#define VERSION "3.7j"
+#define VERSION "3.7k"
 
 #if defined(LINKCELL) && defined(FREEBC)
 #  error "LINKCELL not supported for FREEBC"
@@ -83,7 +83,8 @@ static int justnow(double dt,double half) /* ----------------------- justnow */
   dt=fabs(dt);
   if (dt==0) return 0;
 
-  return (int)((t+half)/dt+1e4) > (int)((t-half)/dt+1e4);
+  //  return (int)((t+half)/dt+1e4) > (int)((t-half)/dt+1e4);
+  return floor((t+half)/dt) > floor((t-half)/dt);
 }
 
 static void prtsfill(char *s) /* ---------------------------------- prtsfill */
@@ -1111,7 +1112,7 @@ Widom insertion or scaling requires a thermostat because\n\
       if (init>=0) {
         loadcfg(-1,NULL); /* 2nd pass */
         if (repl>1 && simils.frommol) ERROR(("cannot replicate and add molecules at once"))
-        if (init==2) t=0;
+        if (init==2 && option('m')>=2) t=0;
         if (stop>0 && t>stop-h/2) sig=3;
         if (simils.frommol) {
 #ifdef COULOMB

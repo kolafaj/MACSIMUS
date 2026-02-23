@@ -58,8 +58,8 @@ Environment variables:\n\
   a b .. j : will be available as variables a b .. j (as in plot)\n\
 See also:\n\
   ev evu (for expression syntax, list of functions, etc.)\n\
-  tab mergetab mergeg field prettab shifttab transtab data2tab\n\
-  derivtab filttab latextab maketab selcol difxmin\n"
+  tab sep mergetab mergeg field prettab shifttab transtab data2tab\n\
+  derivtab filttab latextab maketab selcol difxmin countalt key\n"
           ,N,N);
   exit(0); }
 

@@ -227,7 +227,7 @@ void makemenu(int which) /***************************************** makemenu */
     if (curmode<=BALL) {
       makebutton(ATX[1],aty+dybutt,'P',"PIC","printscreen in PPM (Portable PixMap, P6) format\n+ show with the app registered in .startdata\n+ dump a series of PPMs (for a movie)\n+ make animated GIF (ImageMagick needed)\nhotkey=[P]");
       makebutton(ATX[2],aty,'N',"NFF","NFF file, data for Mark VandeWettering's\nReasonable Intelligent Raytracer\n(use \'ray\' to raytrace)\nhotkey=[N]");
-      makebutton(ATX[2],aty+dybutt,'V',"POV","POV file, data for Persistence of Vision\nraytracer\n(use \'povray\' to raytrace)\nhotkey=[V]");
+      makebutton(ATX[2],aty+dybutt,'V',"POV","POV file, data for Persistence of Vision\nraytracer\n(use \'povray\' to raytrace)\nhotkey=[V]\nWARNING: not tested recently");
       makebutton(ATX[3],aty+dybutt,'L',"PLB","dump shown frame/trajectory in the .plb format\nhotkey=[L]");
       if (curmode>=DUMBELL)
         makebutton(ATX[3],aty,'A',"ATM","ATM file, ASCII file of format:\n#_of_atoms\n{box size | box_x box_y box_z | empty line}\nAt x y z  (repeated)\nhotkey=[A]");

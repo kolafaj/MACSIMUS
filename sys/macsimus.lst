@@ -522,6 +522,7 @@ macsimus/blend/data/trappe.par
 macsimus/blend/data/trappe_ua.par
 macsimus/blend/data/water.par
 macsimus/blend/esstest.c
+macsimus/blend/makedep.c
 macsimus/blend/makepept.c
 macsimus/blend/mendeleyev.c
 macsimus/blend/metamake.mmk
@@ -563,6 +564,9 @@ macsimus/c/fit4plot/fitcode1.c
 macsimus/c/fit4plot/fitcode2.c
 macsimus/c/fit4plot/makemake.sh
 macsimus/c/fit4plot/metamake.mmk
+macsimus/c/fit4plot/makefile.long
+macsimus/c/fit4plot/makefile.high
+macsimus/c/fit4plot/makefile.double
 macsimus/c/fit4plot/myfit.c
 macsimus/c/grouptab.c
 macsimus/c/hcat.c
@@ -738,8 +742,6 @@ macsimus/gen/datetime.c
 macsimus/gen/dihangle.c
 macsimus/gen/drawbit.c
 macsimus/gen/fbgi.c
-macsimus/gen/fc7x13.c
-macsimus/gen/fc9x15.c
 macsimus/gen/fft.c
 macsimus/gen/fft.h
 macsimus/gen/fltprec.h
@@ -1039,9 +1041,9 @@ macsimus/sys/FINISHINST.txt
 macsimus/sys/README.md
 macsimus/sys/bin.lst
 macsimus/sys/compile.mmk
-macsimus/sys/finishinfo.sh
 macsimus/sys/macsimus.lst
 macsimus/sys/mc.ext
+macsimus/sys/mc.ext.ini
 macsimus/util/README.md
 macsimus/util/asc2cfg.c
 macsimus/util/asc2plb.c
@@ -1060,7 +1062,6 @@ macsimus/util/cutprt.c
 macsimus/util/density.c
 macsimus/util/densprof.c
 macsimus/util/filtplb.c
-macsimus/util/frame.c
 macsimus/util/gaussian2plb.c
 macsimus/util/gro2atm.c
 macsimus/util/harmg.c
@@ -1068,7 +1069,6 @@ macsimus/util/hbonds.c
 macsimus/util/intcoord.c
 macsimus/util/lookzba.c
 macsimus/util/m2m.c
-macsimus/util/makeplb.c
 macsimus/util/mergeplb.c
 macsimus/util/metamake.mmk
 macsimus/util/mol2mol.c
@@ -1103,8 +1103,8 @@ macsimus/util/plbtran.c
 macsimus/util/project.c
 macsimus/util/rdfconv.c
 macsimus/util/rdfg.c
-macsimus/util/rdfgv1.c
 macsimus/util/sfourier.c
+macsimus/util/shiftzprof.c
 macsimus/util/showcp.c
 macsimus/util/showcphlp.c
 macsimus/util/shownear.c

@@ -1,0 +1,67 @@
+### this makefile was generated from metamake using the makemake utility ###
+#defined:  unix long gcc linux
+
+# this file defines the MACSIMUS home directory
+# it is !included by all metamake files
+# non-! statements will become a part of the generated makefile files
+
+
+
+
+OPT = $O $(OPTX11) $(EXTOPT)
+
+LIBOPT := $(LIBOPTX11) -lm ${EXTLIBOPT}
+
+CC = undefined-compiler
+
+
+CC := gcc
+OPT = -O2 -ffast-math -Wall $O $(OPTX11) $(EXTOPT)
+
+
+
+
+
+
+# do not export these modules to the list of dependencies for make
+
+D1 = /home/jiri/macsimus/gen
+D2 = /home/jiri/macsimus/c/fit4plot
+
+OPT = -O2 -DPRECISION=2 -Wall
+OBJ1 = fit.lo ground.lo minimize.lo gjlineq.lo qmin.lo
+fit.long : $(OBJ1)
+	$(CC) -o fit.long $(OBJ1) $(LIBOPT)
+
+qmin.lo : $(D1)/qmin.c $(D1)/qmin.h $(D1)/prec.h $(D1)/fltprec.h \
+  $(D1)/longprec.h $(D1)/highprec.h
+	$(CC) -o qmin.lo -I$(D2) -I$(D1) $(OPT) -c $(D1)/qmin.c
+
+gjlineq.lo : $(D1)/gjlineq.c $(D1)/lineq.c $(D1)/gjlineq.h $(D1)/prec.h \
+  $(D1)/fltprec.h $(D1)/longprec.h $(D1)/highprec.h $(D1)/ground.h \
+  $(D1)/calc.h $(D1)/rndgen.h $(D1)/int4.h $(D1)/loop.h $(D1)/fortran.h \
+  $(D1)/func.h
+	$(CC) -o gjlineq.lo -I$(D2) -I$(D1) $(OPT) -c $(D1)/gjlineq.c
+
+minimize.lo : $(D1)/minimize.c $(D1)/gjlineq.h $(D1)/prec.h $(D1)/fltprec.h \
+  $(D1)/longprec.h $(D1)/highprec.h $(D1)/minimize.h $(D1)/rndgen.h \
+  $(D1)/int4.h $(D1)/ground.h $(D1)/calc.h $(D1)/loop.h $(D1)/fortran.h \
+  $(D1)/func.h
+	$(CC) -o minimize.lo -I$(D2) -I$(D1) $(OPT) -c $(D1)/minimize.c
+
+ground.lo : $(D1)/ground.c $(D1)/mygets.c $(D1)/mystring.c $(D1)/rndgeni.c \
+  $(D1)/rndetc.c $(D1)/rndseed.c $(D1)/rndgen.h $(D1)/int4.h $(D1)/fortran.c \
+  $(D1)/question.c $(D1)/calc.c $(D1)/calc1.c $(D1)/calcu.c $(D1)/loop.h \
+  $(D1)/func.c $(D1)/ground.h $(D1)/calc.h $(D1)/fortran.h $(D1)/func.h
+	$(CC) -o ground.lo -I$(D2) -I$(D1) $(OPT) -c $(D1)/ground.c
+
+fit.lo : $(D2)/fit.c $(D2)/fitinc.c $(D1)/ms.h $(D1)/qmin.h $(D1)/prec.h \
+  $(D1)/fltprec.h $(D1)/longprec.h $(D1)/highprec.h $(D1)/minimize.h \
+  $(D1)/ground.h $(D1)/calc.h $(D1)/rndgen.h $(D1)/int4.h $(D1)/loop.h \
+  $(D1)/fortran.h $(D1)/func.h
+	$(CC) -o fit.lo -I$(D2) -I$(D1) $(OPT) -c $(D2)/fit.c
+
+all : fit.long
+
+clean :
+	rm fit.long qmin.lo gjlineq.lo minimize.lo ground.lo fit.lo

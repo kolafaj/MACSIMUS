@@ -11,8 +11,8 @@ TO FINISH INSTALLATION: (MACSIMUS/ denotes the MACSIMUS directory)
     ./configure.sh
   Alternatively, customize files "MACSIMUS/generic/metamake.mmk" and
   "MACSIMUS/generic/simopt.h", then run
-     makemake "$CC"
-     make cook*
+    makemake "$CC"
+    make cook*
 
 * The basic Lennard-Jones version of blend was compiled. To customize other
   versions, follow the instructions in "MACSIMUS/blend/metamake.mmk".

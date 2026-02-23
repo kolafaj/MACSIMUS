@@ -172,7 +172,7 @@ int main(int narg,char **arg) /**************************************** main */
 
   if (narg<2) {
     fprintf(stderr,"\
-*** plb2diff V3.0, compatible with cook V3.0a and later ***\n\
+*** plb2diff V3.1, compatible with cook V3.0a and later ***\n\
 \n\
   Difusivity and conductivity are calculated from stored SIMNAME.plb.\n\
   The trajectory is split into (generally overlapping) blocks, which are\n\
@@ -207,7 +207,7 @@ OPTIONS (#=integer or real number):\n\
   -m#  calculate mass diffusivity by species [0=do not calculate]\n\
        #=factor to multiply, in cook program units ps,AA,K as follows:\n\
          NVT simulation: 1/dt.plb\n\
-         NPT simulation: <V>^(2/3)/dt.plb  NB: use option -P\n\
+         NPT simulation: <V>^(2/3)/dt.plb   (option -P required)\n\
   -n#  # of frames to read [default=0=whole SIMNAME.plb]\n\
   -o#  int: # of frames not used for linear regression at block beginning\n\
        #<1: in the units of block size (see -b) [0.25]\n\
@@ -225,7 +225,7 @@ OPTIONS (#=integer or real number):\n\
   -q#  calculate conductivity [0=do not calculate]\n\
        #=factor to multiply, in cook program units ps,AA,K as follows:\n\
        NVT simulation: 1/(V*T*dt.plb)\n\
-       NPT simulation: 1/(<V>^(1/3)*T*dt.plb)  NB: use option -P\n\
+       NPT simulation: 1/(<V>^(1/3)*T*dt.plb)   (option -P required)\n\
   -s#  # of frames skipped from start [0=none]\n\
        use #>0 if the beginning is unequilibrated\n\
 \n\
@@ -369,7 +369,7 @@ SEE ALSO:\n\
     no=init+BLOCK-1;
     prt("block %-3d: from=%-7d to=%-7d",iblock+1,init,no);
 
-    progress[(int)((double)(iblock+1)/NBLOCKS*78.9)]='%';
+    progress[(int)((double)(iblock+1)/NBLOCKS*78.999)]='%';
     fprintf(stderr,"%s\n",progress);
     fprintf(stderr,"## %.2f%% = %d/%d ## frames %d-%d ##\n",
             (double)(iblock+1)/NBLOCKS*100.,
@@ -735,13 +735,13 @@ max jump over periodic boxes in blocks:\n\
   fprintf(sh,"#!/bin/sh\n");
 
   Setenv("PLOTGEOMETRY",string("%s+15+15",geometry));
-  Setenv("PLOTNAME",string("diffusion %s",arg[2]));
+  Setenv("PLOTNAME",string("diffusion %s %s",arg[2],arg[3]));
   strcat(plotm," &");
   fprintf(sh,"%s\n\n",plotm);
   if (PLOT&1) { system(plotm); sleep(1); }
 
   Setenv("PLOTGEOMETRY",string("%s+30+30",geometry));
-  Setenv("PLOTNAME",string("conductivity %s",arg[2]));
+  Setenv("PLOTNAME",string("conductivity %s %s",arg[2],arg[3]));
   strcat(plotq," &");
   fprintf(sh,"%s\n\n",plotq);
   if (PLOT&2) { system(plotq); sleep(1); }
@@ -751,7 +751,7 @@ max jump over periodic boxes in blocks:\n\
   fn=strend(plotm);
   loop (icp,0,ncp-1) sprintf(strend(plotm),":1:\"%c-b*A:%do\" ",'B'+icp,icp+1);
   Setenv("PLOTGEOMETRY",string("%s+45+45",geometry));
-  Setenv("PLOTNAME",string("<MSD(t)-b*t %s>",arg[2]));
+  Setenv("PLOTNAME",string("<MSD(t)-b*t %s %s>",arg[2],arg[3]));
   Setenv("b",string("%.9g",msdb));
   sprintf(strend(plotm)," %s.msd.fit",SIMNAME);
   loop (icp,0,ncp-1) sprintf(strend(plotm),":1:\"%c-b*A:%d-\" ",'B'+icp,icp+1);
@@ -763,7 +763,7 @@ max jump over periodic boxes in blocks:\n\
   fn=strend(plotm);
   loop (icp,0,ncp) sprintf(strend(plotm),":1:\"%c-b*A:%do\" ",'B'+icp,icp+1);
   Setenv("PLOTGEOMETRY",string("%s+60+60",geometry));
-  Setenv("PLOTNAME",string("<MSCD(t)-b*t %s>",arg[2]));
+  Setenv("PLOTNAME",string("<MSCD(t)-b*t %s %s>",arg[2],arg[3]));
   Setenv("b",string("%.9g",mscdb));
   sprintf(strend(plotm)," %s.mscd.fit",SIMNAME);
   loop (icp,0,ncp) sprintf(strend(plotm),":1:\"%c-b*A:%d-\" ",'B'+icp,icp+1);

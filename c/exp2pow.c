@@ -3,6 +3,7 @@
 #include "../gen/include.h"
 
 #define xDEBUG
+#define LINE 16000
 
 struct items_s {
   struct items_s *next,*prev;
@@ -177,8 +178,7 @@ void log2log (struct items_s *head)
   }
 }
 
-
-void exp2pow(char *expr)
+void exp2pow(char *expr) /****************************************** exp2pow */
 {
   struct items_s *l,*pow,*beg,*end;
 
@@ -282,35 +282,36 @@ void exp2pow(char *expr)
       beg=addbefore(beg,"(",LPAR);
       beg=addbefore(beg,"pow",ID); }
   }
-
 }
 
-char line[16000];
+char line[LINE];
 
-int main(int narg,char **arg)
+int main(int narg,char **arg) /**************************************** main */
 {
   int iarg;
 
-  getsbufsize=16000;
+  getsbufsize=LINE;
   
   if (narg<2) {
-    fprintf(stderr,"Converts expression with power written by ^ into C-syntax. Call by:\n\
+    fprintf(stderr,"\
+Convert expression with ^ (power) into C-syntax. Call by:\n\
   exp2pow \"EXPR\" [\"EXPR\"..]\n\
   exp2pow - < FILE-WITH-EXPR\n\
-EXPR is an arithmetic expression in the usual syntax with power written by ^\n\
-bit operators as & | ! etc. do not have the correct precedence and must be ()\n\
-^ (bit) can be written as ^^\n\
-a^#, where # is a positive decimal number, is translated into multiplications\n\
-other expressions call pow(,)\n\
-In addition, log is translated into log10 and ln to log\n\
+EXPR is an arithmetic expression in the usual syntax with power written by ^.\n\
+Bit operators & | ! do not have the correct precedence and must be ().\n\
+Bit operator ^ should be written as ^^.\n\
+Action on a^#:\n\
+  # = positive decimal number -> series of multiplications\n\
+  # = other -> pow(,#)\n\
+Additional actions:\n\
+  log -> log10\n\
+  ln -> log\n\
 Example:\n\
-  exp2pow \"a+b*A^2+c*A^d\"\n\
-gives\n\
-  a+b*(A*A)+c*pow(A,d)\n\
+  exp2pow \"a+b*A^2+c*A^d\" -> a+b*(A*A)+c*pow(A,d)\n\
 Bugs:\n\
-  the parser is simple, so use parentheses in case of doubts\n\
-  A^-3 is translated to pow(A,-3), use 1/A^3 to emit a more efficient code\n\
-  the output code uses more () than necessary\n");
+  The parser is simple: use parentheses in case of doubts!\n\
+  A^-3 -> pow(A,-3): use 1/A^3 to emit a more efficient code\n\
+  The output code contains more () than necessary.\n");
     exit(0); }
 
   if (strcmp(arg[1],"-")) loop (iarg,1,narg) {

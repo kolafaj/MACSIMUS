@@ -190,7 +190,8 @@ OPTIONs:  +# = print additional # lines after each line containing STRING\n\
 See also:\n\
   grep fgrep head tail unix2dos dos2unix mac2unix\n\
   orange myfgrep itail llemon lgrep strcount count lemonn charhist liat\n\
-  repl replalt binrepl charrepl text line maxline oneline revlines padcutrev\n\
+  repl replalt binrepl charrepl text line maxline oneline onelineetc\n\
+  revlines padcutrev merge\n\
   rndlines dellines excl eqfield extract eddata colorstring\n\
   kostnice kostnice2 utf8txt\n");
     exit(0); }

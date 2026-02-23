@@ -387,12 +387,13 @@ MACSIMUS offers the following commands:
   start - extension-based start (MACSIMUS files and more), e.g.:
           start simul.plb
 Get help to commands by running them without parameters.
-NB: render option in `show' requires `start' installed.
+NB: render options in 'show' require 'start' installed.
 * Installation will copy the executables to ~/bin/
   and initialization .files to ~/.
 * Not-installation will remove the temporary files
   $PWD/bin/{ev,evu,start}.
 * In either case, a testing simulation can be run.
+* You will be asked before overwriting previous files.
 Install ev,evu,start (y/N)?
 EOF
 
@@ -407,63 +408,38 @@ else
   rm bin/ev bin/evu bin/start
 fi
 
-if [ -d ~/.config/mc ] ; then
-  echo
-  echo "INFO: ~/.config/mc found, it looks you are using Midnight Commander"
-  if [ -e ~/.config/mc/mc.ext ] ; then
-    echo "INFO: extension association file ~/.config/mc/mc.ext found!"
-    echo "To activate the MACSIMUS extensions (incl. common graphic files via"
-    echo "display/ImageMagick), you should install macsimus/mc.ext:"
-    echo "  a = Append macsimus/mc.ext to ~/.config/mc/mc.ext"
-    echo "  r = Replace ~/.config/mc/mc.ext by macsimus/mc.ext (with backup~)"
-    echo "> n = Nothing (default)"
-  else
-    echo "INFO: no extension association file ~/.config/mc/mc.ext found!"
-    echo "To activate the MACSIMUS extensions (incl. common graphic files via"
-    echo "display/ImageMagick), you should install macsimus/mc.ext:"
-    echo "  c = Copy macsimus/mc.ext to ~/.config/mc/mc.ext"
-    echo "> n = Nothing (default)"
-  fi
-
-  read
-  case $REPLY in
-    a | A ) cat mc.ext >>  ~/.config/mc/mc.ext ;;
-    c | C | r | R )
-      [ -e  ~/.config/mc/mc.ext ] && mv  ~/.config/mc/mc.ext ~/.config/mc/mc.ext~
-      cp mc.ext ~/.config/mc/mc.ext
-      ;;
-    * ) ;;
-  esac
+echo "----------------------------------------------------------------------------"
+MCV=`mc --version | head -n1`
+if [ $? != 0 ] ; then
+  echo "Midnight Commander not found."
+  echo "Note that MACSIMUS support file extensions within Midnight Commander."
+elif [ ! -d ~/.config/mc ] ; then
+  echo "Midnight Commander found but no configuration directory  ~/.config/mc"
+  echo "Consult files MACSIMUS/sys/mc.ext and MACSIMUS/sys/mc.ext.ini for"
+  echo "possible version problem."
+else
+  cat <<EOF
+Midnight Commander and ~/.config/mc/ found!
+To install MACSIMUS key bindings (association of MACSIMUS file extensions
+with scripts and executables) for Midnight Commander 4.0, do the following:
+  - Find file ~/.config/mc/mc.ext.ini
+  - If it does not exist, copy it:
+    cp /etc/mc/mc.ext.ini ~/.config/mc/
+  - Open it and check that it has header:
+    # Midnight Commander 4.0 extension file
+       ... E.g., use the 'nano' editor:
+       nano ~/.config/mc/mc.ext.ini
+  - Find line "######### Includes #########" in it
+       ... Within the 'nano' editor, use Ctrl-W to search
+  - Insert file MACSIMUS/sys/mc.ext.ini before the above line
+       ... Within the 'nano' editor, use Ins or Ctrl-R to insert a file
+  - Save the file and exit the editor)
+       ... Within the 'nano' editor, use Ctrl-X and confirm
+EOF
 fi
 
-if [ -d ~/.mc ] ; then
-  echo
-  echo "INFO: ~/.mc found, it looks you are using an OBSOLETE Midnight Commander"
-  if [ -e ~/.mc/bindings ] ; then
-    echo "INFO: extension association file ~/.mc/bindings found!"
-    echo "To activate the MACSIMUS extensions (incl. common graphic files via"
-    echo "display/ImageMagick), you should install macsimus/mc.ext:"
-    echo "  a = Append macsimus/mc.ext to ~/.mc/bindings"
-    echo "  r = Replace ~/.mc/bindings by macsimus/mc.ext (with backup~)"
-    echo "> n = Nothing (default)"
-  else
-    echo "INFO: no extension association file ~/.mc/bindings found!"
-    echo "To activate the MACSIMUS extensions (incl. common graphic files via"
-    echo "display/ImageMagick), you should install macsimus/mc.ext:"
-    echo "  c = Copy macsimus/mc.ext to ~/.mc/bindings"
-    echo "> n = Nothing (default)"
-  fi
-
-  read
-  case $REPLY in
-    a | A ) cat sys/mc.ext >>  ~/.mc/bindings ;;
-    c | C | r | R )
-      [ -e  ~/.mc/bindings ] && mv ~/.mc/bindings ~/.mc/bindings~
-      cp sys/mc.ext ~/.mc/bindings
-      ;;
-    * ) ;;
-  esac
-fi
+echo "Type Enter to continue"
+read
 
 echo "MACSIMUS directory: ${PWD}"
 cat sys/FINISHINST.txt

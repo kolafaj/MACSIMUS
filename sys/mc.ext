@@ -1,18 +1,19 @@
-# Key bindings for MACSIMUS for Midnight Commander
-# See also start and .startdata
-# NB: Midnight Commander cannot handle stderr :(, so "2>&1" redirection...
-# old version of mc: ~/.mc/bindings
-# new version of mc: ~/.config/mc/mc.ext
+# MACSIMUS key bindings (association of MACSIMUS file extensions with scripts
+# and executables) for Midnight Commander (older versions).
+# See file mc.ext.ini for new Midnight Commander (versions >=4.8 or >=4.0: I do
+# not know the exact version when the Midnight Commander file format changed).
+#
+# This file should be appended to or copied to:
+#   ~/.mc/bindings (old version of Midnight Commander)
+#   ~/.config/mc/mc.ext (newer versions, not clear whether <4.8 or <4.0)
 
 # common graphics files opened by ImageMagic utility "display":
 regex/\.(ppm|pgm|pbm|pnm|jpg|JPG|gif|GIF|png|PNG|bmp|BMP)$
 	Open=display %f
 
-# WARNING: since Midnight Commander V4.8, this must be appended to or 
-# pasted into ~/.config/mc/mc.ext
+# NB: Midnight Commander cannot handle stderr, so "2>&1" redirections below
 
 # basic MACSIMUS extensions
-# former .mc/bindings copied here
 
 # MACSIMUS che-file (input): process by helper che.sh
 # CHE=0 che.sh NAME.che -> blend -g5 -r2 NAME.che

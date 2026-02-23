@@ -102,15 +102,23 @@ other:
 
 HISTORY
 ^^^^^^^
-  !! serious/dangerous bug fixed
+  # serious/dangerous bug fixed
   ! bug fixed
   + feature added
   * feature changed
   - feature removed
 
+cook 3.7k:
+  ! print line to protocol if dt.prt very short
+  ! t=0 for init=>=2 not performed in the reread mode (to be changed?)
+  * default center.sp changed to -1 (as in old versions)
+  + new format of extension associations for Midnight Commander
+
 cook 3.7j:
-  ! bad velocities of dependants: they are now derived from r(t-h) and r(t) only if measure and No.ndep
-    Not clear how to treat the same issue for Gear
+  # Bad velocities of dependants:
+    They are now derived from r(t-h) and r(t) only if measure and No.ndep.
+    Not clear how to treat the same issue for Gear.
+
 cook 3.7i:
   ! fix COS+r^-12
 
@@ -132,7 +140,7 @@ cook 3.7e:
   + variable Ttr-Tin added (returned) to the statistics
 
 cook 3.7d:
-  !! slab cutoff correction was wrong for more LJ sites than 1 - fixed
+  # slab cutoff correction was wrong for more LJ sites than 1 - fixed
   
 cook 3.7c:
   + box.follow added
@@ -331,7 +339,7 @@ cook 3.6a:
     equalized, the former default (0) equalized only species 0
 
 cook 3.5i:
-  !! missing initialization of shift,vshift (results undefined):
+  # missing initialization of shift,vshift (results undefined):
      (just by chance they contained numbers << 0)
   + Ewald background added, el.bg and el.epsq added
   * negative option -q now denotes negative charge scaling,
@@ -514,7 +522,7 @@ cook 3.3p:
     added?)
 
 cook 3.3o:
-  !! malloc(0) bug fixed: result of malloc(0) used => overflow for >3 species
+  # malloc(0) bug fixed: result of malloc(0) used => overflow for >3 species
 
 cook 3.3n:
   ! CPmark error fixed
