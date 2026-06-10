@@ -139,6 +139,7 @@ che	che.sh "%s.%s"
 mol	blend -g5 "%s.%s"
 3db	view3db
 atm	showatm "%s"
+xyz	showxyz "%s"	avogadro	showhs
 rsd	rsd "%s"
 cp	showcp -p	showcp -a	cppak
 cpz	showcp -p	showcp -a	cppak
@@ -164,7 +165,6 @@ sim	simolant
 sf3d	sf3d.sh
 sfr	plot "%s.%s":1:2 :3 :4 :5
 nmf	shownmf.sh
-xyz	showhs
 
 # NSK extensions
 img	nsk "%s"
@@ -183,3 +183,4 @@ iso	kostnice2 -u -8 < "%s.%s" | less
 sh3d	sweethome3d
 url	runlines firefox < %s.%s
 json	heartrate.sh "%s.%s"
+inp	orca.sh

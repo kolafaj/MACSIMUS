@@ -8,6 +8,8 @@
     cc -o evu -O2 -Wall -DCALC=1 ev.c -I../gen -lm -lncurses
 
 History:
+03/2026:
+  bug environment variable FMT not active fixed
 06/2024:
   character '!' now recognized (! was treated as comment even in '!')
   ` as 'logical not' was added (bitwise not is function not())
@@ -1159,22 +1161,23 @@ void calculate(char *expr) /************************************** calculate */
     myprintf("BAD FORMAT (for modulo use @)\n");
     return; }
 
- {
-   /* prevent macro expansion within commands def,undef,expand */
-   char x[8],*c;
+  {
+    /* prevent macro expansion, M(), m() within commands def,undef,expand */
+    char x[8],*c;
 
-   x[7]=0;
-   memcpy(x,expr,7);
-   for (c=x; *c; c++) if (!isalpha(*c)) *c=0;
-   /* ? - def,undef,expand should not appear here... */
-   if (strcmp(x,"def") && strcmp(x,"undef") && strcmp(x,"expand"))
-     expmacro(expr);
- }
+    x[7]=0;
+    memcpy(x,expr,7);
+    for (c=x; *c; c++) if (!isalpha(*c)) *c=0;
 
-  /* molar mass, e.g. M(H2O) */
-  key='A'; /* A,B,..*/
-  for (c=expr; *c; c++) if (toupper(*c)=='M' && c[1]=='(') molarmass(key++,c);
+    if (strcmp(x,"def") && strcmp(x,"undef") && strcmp(x,"expand")) {
+      expmacro(expr);
 
+      /* molar mass, e.g. M(H2O) */
+      key='A'; /* A,B,..*/
+      for (c=expr; *c; c++)
+        if (toupper(*c)=='M' && c[1]=='(') molarmass(key++,c); }
+  }
+   
   /* looking for id=expr */
   c=expr;
 
@@ -1701,7 +1704,7 @@ int main(int narg,char **arg) /**************************************** main */
   if (getenv("FMT")) {
     strcpy(fmt,getenv("FMT"));
     strcat(fmt,"\n"); }
-  if (getenv("EVFMT")) {
+  else if (getenv("EVFMT")) {
     strcpy(fmt,getenv("EVFMT"));
     strcat(fmt,"\n"); }
   else
@@ -1712,7 +1715,8 @@ int main(int narg,char **arg) /**************************************** main */
 #endif
 
   loop (iarg,1,narg)
-    if (arg[iarg][0]=='-' && arg[iarg][1]=='-') switch(arg[iarg][2]) {
+    if (arg[iarg][0]=='-' && arg[iarg][1]=='-')
+      switch(arg[iarg][2]) {
       case 'c': {
         mode=PROMPT;
         evgetline=mygetline;

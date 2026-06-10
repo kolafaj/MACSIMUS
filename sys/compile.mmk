@@ -46,7 +46,7 @@ EXTLIBOPT := -static
 !if pthread & static
 EXTLIBOPT := -lpthread -static
 !endif
-LIBOPT := $(LIBOPTX11) -lm ${EXTLIBOPT}
+LIBOPT := $(LIBOPTX11) -lm $(EXTLIBOPT)
 
 !! cancel the default for CC to force a user to select a compiler
 CC = undefined-compiler

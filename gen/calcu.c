@@ -81,8 +81,8 @@ static struct unit_s unitlist[] = {
   {"in",0.0254,{1}},
   {"ft",12*0.0254,{1}},
   {"yd",36*0.0254,{1}},
+  {"nmi",1852,{1}}, /* thus. nmi is NOT nano mi */
   {"mi",1760*36*0.0254,{1}},
-  {"nmi",1852,{1}},
   {"BTU",1055.056,{2,1,-2}},
   {"HP",745.69987158227,{2,1,-3}}, /* mechanical, imperial */
   //  {"HPe",746,{2,1,-3}}, /* electric */
@@ -99,6 +99,7 @@ static struct unit_s unitlist[] = {
   {"torr",101325./760,{-1,1,-2}},
   {"foe",1e44,{2,1,-2}}, /* 10 to fifty-one erg */
 
+  {"tex",1e-6,{-1,1}}, /* g/km */
   {"t",1e3,{0,1}}, /* metric ton - must be after "ft", "ct" */
   {"erg",1e-7,{2,1,-2}},
   {"dyn",1e-5,{1,1,-2}},

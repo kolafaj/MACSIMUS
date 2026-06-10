@@ -530,7 +530,7 @@ void testSCF(void) /************************************************ testSCF */
   En.Fstderr=En.Fmaxerr=0;
 
   if (option('v')&32) {
-    char *fmode=init<2 || (init_append&2) ? "at" : "wt";
+    char *fmode=(init==0 || init==1) || (init_append&2) ? "at" : "wt";
 
     frun=fopen(Fn("run.pol"),fmode);
     fex=fopen(Fn("ex.pol"),fmode);

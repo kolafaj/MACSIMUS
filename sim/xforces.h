@@ -7,7 +7,11 @@ void elstforces(ToIntPtr B, ToIntPtr A);
 #ifdef SLAB
 void slabcutcor(ToIntPtr B, ToIntPtr A);
 void wallforces(ToIntPtr B, ToIntPtr A);
-#endif
+#endif /*# SLAB */
+
+#ifdef WL
+void WangLandau(ToIntPtr B, ToIntPtr A);
+#endif /*# WL */
 
 void userforces(ToIntPtr B, ToIntPtr A);
 

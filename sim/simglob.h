@@ -775,7 +775,7 @@ extern struct lag_s {
 #  ifdef SPCTCF
   int tcf;           /* for special project SPC time correlation functions: individual */
   int TCF;           /* for special project SPC time correlation functions: sums */
-#  endif
+#  endif /*# SPCTCF */
 } lag;
 
 extern double E;     /* total energy in [J/mol] (=Eunit) to be kept constant */
@@ -1160,5 +1160,26 @@ extern struct anchor_s {
 #    endif /*#!SERIAL */
 
 #  endif /*# PARALLEL */
+
+#  ifdef WL
+extern struct wl_s {
+  /* public */
+  double cutoff;/* to range (cutoff) */
+  double r0;    /* from range approximately R[i]+R[j] */
+  int n;        /* pre-bias weight function is 1/r^n */
+  int grid;     /* number of grid points per 1 AA  */
+  int i,j;      /* sites (abs. from cfg->rp) */
+  double Awall; /* wall height outside 0..cutoff [K] (not scaled) */
+  double update;/* the update coefficient [K]
+                   negative: initialize and change sign
+                   positive: read SIMNAME.wl */
+  /* private */
+  double dr;    /* 1/wl.grid */
+  double UPDATE;/* update scaled */
+  int nA;       /* size of A[] */
+  double *A;    /* [-1..nA+3] (incl.) The coeficients of the bias "flooding"
+                   potential scaled grid^2 times */
+} wl;
+#  endif /*# WL */
 
 #endif /*# SIMGLOB_INCLUDED */

@@ -114,7 +114,7 @@ static struct CPItab_s {
   {"fix", "potential energy of forces fixing sites in place (-k) [J/mol]",&En.fix},
 
 #ifdef ECC
-#error TO BE UPDATED  
+#  error TO BE UPDATED  
   {"Pvir","virial pressure except epsf(V) dependence [Pa]",&En.ECC_Pvir},
   {"PECC","ECC pressure, the same as ECC P [Pa]",&En.P},
   {"Psc","conventional pressure w/o any epsf-based ECC terms [Pa]",&En.ECC_Pscaled},
@@ -503,7 +503,7 @@ void initCP(int no,int nbit,char *col4, char *col5,int corr) /******* initCP */
     Min(NCP,option('e'))
     prt(">>> because of option -e, only %d columns recorded",option('e')); }
 
-  if (init<2) {
+  if ((init==0 || init==1)) {
 
     if (!(CP=fopen(Fn(CPnbit?"cpz":"cp"),"rb")))
       ERROR(("Cannot open %s (CPnbit=%d) for reaading",Fn(CPnbit?"cpz":"cp"),CPnbit))

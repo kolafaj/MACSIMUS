@@ -196,3 +196,8 @@ int measuredrift=0; /* see simglob.h for info */
 #  ifdef SHARPCUTOFF
 double globalLJshift;
 #  endif
+
+# ifdef WL
+struct wl_s wl = {0,1,1}; /* cutoff,r0,n */
+#  endif
+

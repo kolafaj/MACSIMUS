@@ -88,4 +88,4 @@ void dipmom(ToIntPtr A,char *info);
 #ifdef POLAR
 /* because polarrof(mn,cfg[1]->rp) is NOT velocity */
 extern vector *lastrpols;
-#endif
+#endif /*# POLAR */

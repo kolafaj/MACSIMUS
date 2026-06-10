@@ -83,7 +83,7 @@
         getvec(group,,nspec)
         getvec(center.K,,DIM)
         getvec(center.r0,,DIM)
-        get(center.sp)  
+        get(center.sp)
         get(el.Perr)
 
 #ifdef SLAB
@@ -165,7 +165,7 @@
         get(lag.CM) get(lag.LM) get(lag.AM)
 #ifdef SPCTCF
         get(lag.tcf) get(lag.TCF)
-#endif
+#endif /*# SPCTCF */
         /* now always autoset:        getvec(box.center,,DIM) */
 
         get(gear.init)
@@ -243,7 +243,7 @@
             case 98:
             case 99:
               if (option('v')&4) fprintf(stderr,"key=97,98,99 postponed after ;\n");
-              break;              
+              break;
             case 9:
               goto TheEnd; }
           //  97,98,99 postponed to main
@@ -285,6 +285,12 @@
         getvec(rg.end,,2) get(rg.cp)
         get(lag.v) get(lag.nv) get(lag.dim)
 #endif /*# RGYR */
+
+#ifdef WL
+        get(wl.grid) get(wl.r0) get(wl.cutoff)
+        get(wl.i) get (wl.j) get(wl.n)
+        get(wl.update) get(wl.Awall)
+#endif /*# WL */
 
         /* auxiliary variables */
         get(aux)

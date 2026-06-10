@@ -5,7 +5,7 @@
   Change 02/2022: small change of output
 
   Change 09/2021: higher derivatives, optionally 4th order formulas
-  
+
   Change 12/2020: small change of output
 
   Change 09/2017: environment variable FIT =
@@ -353,6 +353,7 @@ int main(int narg,char **arg) /**************************************** main */
       double SUMd=0,SUMdq=0;
       double SUMs=0,SUMsq=0;
       double SUMf=0,SUMfq=0;
+      int OK=1;
 
       allocarrayzero(yav,n);
       allocarrayzero(yavq,n);
@@ -362,6 +363,7 @@ int main(int narg,char **arg) /**************************************** main */
       outf=fopen("fit.err","wt");
 
       loop (ierr,0,nerr) {
+        
         loop (i,0,N) A[i]=A0[i];
         loop (i,0,n) y[i]=yfit[i]+rndgauss()*dy[i];
 
@@ -445,111 +447,124 @@ int main(int narg,char **arg) /**************************************** main */
 
         if (fitkey==SOLVE) {
           REAL X=x0,Y=yy;
+          int nit=100;
 
-          MS_BEGIN(X,1e-10)
+          MS_BEGIN(X,1e-9)
             MS_f=funcexpr(A,X)-Y;
-          MS_END(X,1)
+            if (nit--<0) {
+              fprintf(outf,"### solve failed\n");
+              prt("*** solve failed");
+              OK=0;
+              break; }
+            MS_END(X,1)
 
           SUMs+=Val(X);
           SUMsq+=Sqr(Val(X)); }
 
+        if (!OK) {
+          SUMs=SUMsq=0;
+          break; }
+        
       } /* ierr */
 
       loop (i,0,n) y[i]=y_0[i];
 
-      prt("\n#     the_fit        stderr    <perturbed_fits> (nerr=%d)",nerr);
-      fprintf(outf,"# i   parm[i]   stderr\n");
+      prt("\n#     the_fit        stderr    <perturbed_fits> (nerr=%d%s)",
+          nerr,OK?"":" FAILED");
+      fprintf(outf,"# i   parm[i]   stderr (nerr=%d%s)\n",
+          nerr,OK?"":" FAILED");
 
-      loop (i,0,N) {
-        A[i]=A0[i];
+      if (OK) {
+      
+        loop (i,0,N) {
+          A[i]=A0[i];
+          if (nerr) {
+            REAL Aerr=xsqrt((Acsum[i][i]-Sqr(Asum[i])/nerr)/(nerr-1));
+            prt("%c=%14.11f %14.11f %14.11f",
+                  i+'a', Val(A[i]), Val(Aerr), Val(Asum[i]/nerr));
+            fprintf(outf,"# %d %14.11f %14.11f\n",
+                            i,Val(A[i]),   Val(Aerr)); } }
+
         if (nerr) {
-          REAL Aerr=xsqrt((Acsum[i][i]-Sqr(Asum[i])/nerr)/(nerr-1));
-          prt("%c=%14.11f %14.11f %14.11f",
-                 i+'a', Val(A[i]), Val(Aerr), Val(Asum[i]/nerr));
-          fprintf(outf,"# %d %14.11f %14.11f\n",
-                  i,Val(A[i]),   Val(Aerr)); } }
-
-      if (nerr) {
-        prt_("\n# covariance matrix:");
-        fprintf(outf,"# covariance matrix:");
-        loop (i,0,N)
-          loop (j,0,N) {
-            REAL Aerr=(Acsum[i][j]-Asum[i]*Asum[j]/nerr)/(nerr-1);
-            prt_("%c%17.11g", " \n"[j==0],Val(Aerr));
-            if (j==0) fprintf(outf,"\n#%c", i+'a');
-            fprintf(outf," %16.11g", Val(Aerr)); }
-        _n _n
-        fprintf(outf,"\n\n"); }
-
-      fprintf(outf,"# nu=%d ### s=%g ###",n-N,(double)sigma);
-      fprintf(outf,"# errors based on %d*sampled data\n",nerr);
-      fprintf(outf,"\n#      x          y_fit           y_stdev       <y_sampled>\n");
-
-      loop (i,0,n)
-        fprintf(outf,"%10.6g  %13.9g %12.6g %13.9g\n",
-                x[i],
-                yfit[i],
-                Val(sqrt((yavq[i]-Sqr(yav[i])/nerr)/(nerr-1))),
-                yav[i]/nerr);
-
-      if (fitkey==EXPR) {
-        fprintf(outf,"# %s(%g) = %.9g %.6g %.9g\n",
-                feinfo,
-                xfunc,
-                funcx,
-                Val(sqrt((SUMfq-Sqr(SUMf)/nerr)/(nerr-1))),
-                SUMf/nerr);
-        prt("%s(%g) = %.9g %.6g %.9g",
-            feinfo,
-            xfunc,
-            funcx,
-            Val(sqrt((SUMfq-Sqr(SUMf)/nerr)/(nerr-1))),
-            SUMf/nerr); }
-
-      if (fitkey==INTEG) {
-        fprintf(outf,"# integral_%s[%g,%g]_%d = %.9g %.6g %.9g\n",
-                feinfo,
-                xfrom,xto,nint,
-                integx,
-                /* Val because sqrt is cast to REAL: */
-                Val(sqrt((SUMiq-Sqr(SUMi)/nerr)/(nerr-1))),
-                SUMi/nerr);
-        prt("integral_%s[%g,%g]_%d = %.9g %6g %.9g",
-            feinfo,
-            xfrom,xto,nint,
-            integx,
-            Val(sqrt((SUMiq-Sqr(SUMi)/nerr)/(nerr-1))),
-            SUMi/nerr); }
-
-      if (fitkey==DERIV) {
-        fprintf(outf,"# %s_derivative_%s(%g)_%g,%d = %.9g %.6g %.9g\n",
-                Order[abs(order)],
-                feinfo,
-                xderiv,dxderiv,order<0?4:2,
-                derivx,
-                Val(sqrt((SUMdq-Sqr(SUMd)/nerr)/(nerr-1))),
-                SUMd/nerr);
-        prt("%s_derivative_%s(%g)_%g,%d = %.9g %.6g %.9g",
-            Order[abs(order)],
-            feinfo,
-            xderiv,dxderiv,order<0?4:2,
-            derivx,
-            Val(sqrt((SUMdq-Sqr(SUMd)/nerr)/(nerr-1))),
-            SUMd/nerr); }
-
-      if (fitkey==SOLVE) {
-        fprintf(outf,"# %g = %s(%.9g %.6g %.9g)\n",
-                yy, feinfo, x0,
-                Val(sqrt((SUMdq-Sqr(SUMd)/nerr)/(nerr-1))),
-                SUMd/nerr);
-        prt("%g = %s(%.9g %.6g %.9g)",
-            yy, feinfo, x0,
-            Val(sqrt((SUMsq-Sqr(SUMs)/nerr)/(nerr-1))),
-            SUMs/nerr); }
-
+          prt_("\n# covariance matrix:");
+          fprintf(outf,"# covariance matrix:");
+          loop (i,0,N)
+            loop (j,0,N) {
+              REAL Aerr=(Acsum[i][j]-Asum[i]*Asum[j]/nerr)/(nerr-1);
+              prt_("%c%17.11g", " \n"[j==0],Val(Aerr));
+              if (j==0) fprintf(outf,"\n#%c", i+'a');
+              fprintf(outf," %16.11g", Val(Aerr)); }
+          _n _n
+          fprintf(outf,"\n\n"); }
+  
+        fprintf(outf,"# nu=%d ### s=%g ###",n-N,(double)sigma);
+        fprintf(outf,"# errors based on %d*sampled data\n",nerr);
+        fprintf(outf,"\n#      x          y_fit           y_stdev       <y_sampled>\n");
+  
+        loop (i,0,n)
+          fprintf(outf,"%10.6g  %13.9g %12.6g %13.9g\n",
+                  x[i],
+                  yfit[i],
+                  Val(sqrt((yavq[i]-Sqr(yav[i])/nerr)/(nerr-1))),
+                  yav[i]/nerr);
+  
+        if (fitkey==EXPR) {
+          fprintf(outf,"# %s(%g) = %.9g %.6g %.9g\n",
+                  feinfo,
+                  xfunc,
+                  funcx,
+                  Val(sqrt((SUMfq-Sqr(SUMf)/nerr)/(nerr-1))),
+                  SUMf/nerr);
+          prt("%s(%g) = %.9g %.6g %.9g",
+              feinfo,
+              xfunc,
+              funcx,
+              Val(sqrt((SUMfq-Sqr(SUMf)/nerr)/(nerr-1))),
+              SUMf/nerr); }
+  
+        if (fitkey==INTEG) {
+          fprintf(outf,"# integral_%s[%g,%g]_%d = %.9g %.6g %.9g\n",
+                  feinfo,
+                  xfrom,xto,nint,
+                  integx,
+                  /* Val because sqrt is cast to REAL: */
+                  Val(sqrt((SUMiq-Sqr(SUMi)/nerr)/(nerr-1))),
+                  SUMi/nerr);
+          prt("integral_%s[%g,%g]_%d = %.9g %6g %.9g",
+              feinfo,
+              xfrom,xto,nint,
+              integx,
+              Val(sqrt((SUMiq-Sqr(SUMi)/nerr)/(nerr-1))),
+              SUMi/nerr); }
+  
+        if (fitkey==DERIV) {
+          fprintf(outf,"# %s_derivative_%s(%g)_%g,%d = %.9g %.6g %.9g\n",
+                  Order[abs(order)],
+                  feinfo,
+                  xderiv,dxderiv,order<0?4:2,
+                  derivx,
+                  Val(sqrt((SUMdq-Sqr(SUMd)/nerr)/(nerr-1))),
+                  SUMd/nerr);
+          prt("%s_derivative_%s(%g)_%g,%d = %.9g %.6g %.9g",
+              Order[abs(order)],
+              feinfo,
+              xderiv,dxderiv,order<0?4:2,
+              derivx,
+              Val(sqrt((SUMdq-Sqr(SUMd)/nerr)/(nerr-1))),
+              SUMd/nerr); }
+  
+        if (fitkey==SOLVE) {
+          fprintf(outf,"# %g = %s(%.9g %.6g %.9g)\n",
+                  yy, feinfo, x0,
+                  Val(sqrt((SUMdq-Sqr(SUMd)/nerr)/(nerr-1))),
+                  SUMd/nerr);
+          prt("%g = %s(%.9g %.6g %.9g)",
+              yy, feinfo, x0,
+              Val(sqrt((SUMsq-Sqr(SUMs)/nerr)/(nerr-1))),
+              SUMs/nerr); }
+      }  /* OK */
       fclose(outf);
-    } // nerr
-
+    } /* nerr */
   }
 
   return 0;

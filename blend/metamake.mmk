@@ -30,15 +30,15 @@
 
 !dir = gen sim blend
 
-OREP = -DPOW=0
+OREP := -DPOW=0
 !if rep12
-OREP = -DPOW=12
+OREP := -DPOW=12
 !endif
 !if rep8
-OREP = -DPOW=8
+OREP := -DPOW=8
 !endif
 
-# preprocessor conditionals (use in statement O = -DXXX before !dir):
+# preprocessor conditionals (use in statement O := -DXXX before !dir):
 #   -DPOLAR : force field with polarizability
 #   -DPOW={0,8,12} : [do not] add term D/r^POW to the exp6/Buckingham/Busing FF
 #   -DSCR : extra code for scrolling screens of output (internal `less')
@@ -51,7 +51,7 @@ OREP = -DPOW=8
 # see MACSIMUS/sim/lj
 !dir = sim/lj
 !if polar
-O = -DPOLAR
+O := -DPOLAR
 !blendpol : blend blendpar blendmed blendedt blendgen blendimp blendmin \
   blenddep intrapot sitesite ground varfile xdraw
 !else
@@ -64,11 +64,11 @@ O = -DPOLAR
 # see MACSIMUS/sim/buck
 !dir = sim/buck
 !if polar
-O = -DPOLAR $(OREP)
+O := -DPOLAR $(OREP)
 !blendpolbuck   : blend blendpar blendmed blendedt blendgen blendimp blendmin \
   blenddep intrapot sitesite ground varfile xdraw
 !else
-O = $(OREP)
+O := $(OREP)
 !blendbuck      : blend blendpar blendmed blendedt blendgen blendimp blendmin \
   blenddep intrapot sitesite ground varfile xdraw
 !endif
@@ -78,11 +78,11 @@ O = $(OREP)
 # see MACSIMUS/sim/exp6
 !dir = sim/exp6
 !if polar
-O = -DPOLAR $(OREP)
+O := -DPOLAR $(OREP)
 !blendpolexp6   : blend blendpar blendmed blendedt blendgen blendimp blendmin \
   blenddep intrapot sitesite ground varfile xdraw
 !else
-O = $(OREP)
+O := $(OREP)
 !blendexp6      : blend blendpar blendmed blendedt blendgen blendimp blendmin \
   blenddep intrapot sitesite ground varfile xdraw
 !endif
@@ -91,11 +91,11 @@ O = $(OREP)
 !if busing
 !dir = sim/busing
 !if polar
-O = -DPOLAR $(OREP)
+O := -DPOLAR $(OREP)
 !blendpolbus : blend blendpar blendmed blendedt blendgen blendimp blendmin \
   blenddep intrapot sitesite ground varfile xdraw
 !else
-O = $(OREP)
+O := $(OREP)
 !blendbus : blend blendpar blendmed blendedt blendgen blendimp blendmin \
   blenddep intrapot sitesite ground varfile xdraw
 !endif

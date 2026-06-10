@@ -44,7 +44,7 @@ Quit if interactive: quit exit Ctrl-D +--------------------------------------+\n
 * \'047\' = 39 (leading 0 = octal number)\n\
 * \'2^3^4\' = (2^3)^4 (left-associated)\n\
   \' -2^2\' = -(2^2) (unary +,- have the same precedence as binary)\n\
-  \' --2\' = 4 (unary +,- are left-associated)\n\
+  \' --2\' = 2 (unary +,- are left-associated)\n\
 * leading space prevents commands to be recognized: try \'deg=1;deg; deg\'\n\
 * macros cannot be used with ;-separated statements (except the last one)\n"
 
@@ -204,7 +204,7 @@ M(FORMULA) returns molar mass in g/mol, m(FORMULA) returns mass in kg:\n"
 #endif
 "  M(Ar) m(H2SO4) ! correct\n\
   M(CuSO4.5H2O)  ! M(Cu)+M(S)+4.5*M(O)+M(H2O)  (NOT WHAT YOU MAY EXPECT)\n\
-  M(Ca(CN)2)     ! ERROR - no () in chemical formula allowed\n\
+  M(Ca(CN)2)     ! ERROR because no () in chemical formula allowed\n\
 rnd(X) returns a random number according to integer argument X:\n\
   X<-1: set the seed\n\
   X=-1: return a uniformly distributed random number in [-1,1)\n\

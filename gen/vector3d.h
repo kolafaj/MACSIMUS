@@ -8,8 +8,24 @@ typedef real vector[DIM];
 
 /* NOTE: 
   typedef real vector[DIM+1]; 
-gives better fit of cache line and by about 1% faster performance of cook
-However, polarizability does not work in this way ...
+  gives better fit of cache line and by about 1% faster performance of cook
+  However, polarizability does not work in this way ...
+
+  EXAMPLES OF USAGE:
+    vector v1,v2;
+    VO(v1,*=2) // multiply vector v1 by 2
+    VV(v1,=2*v2) // assignement v1:=2*v2
+    printf("%g %g %g\n",VARG(V1)); // print vector, see also putv()
+    sscanf(line,"%lf%lf%lf",AVARG(v1)); // read vector from string
+  
+  WARNING:  
+  Arguments are not parenthesizes; therefore, VV(A,=B) works as expected
+  However, extra parentheses must be sometimes used. Example:
+    vector *ri,*rj; // pointers to vectors
+    vector dr;
+    VVV(dr,=(*rj),-(*ri)) // difference of vectors
+    VVV(dr,=rj[5],-ri[2]) // difference of vectors
+    VVV(dr,*rj,*ri)       // SOMETHING ELSE
 */
 
 #define VO(A,O) { A[0] O; A[1] O; A[2] O; }

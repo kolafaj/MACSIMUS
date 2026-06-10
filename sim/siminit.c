@@ -1155,7 +1155,7 @@ void initanchor(char *fn,int init,double drmax) /**************** initanchor */
     _n }
 
   if ((-option('k'))&4) {
-    anchor.f=fopen(Fn("anc"),init<2?"at":"wt");
+    anchor.f=fopen(Fn("anc"),(init==0 || init==1)?"at":"wt");
     if (!anchor.f) ERROR(("cannot write to %s",lastFn)) }
   else
     anchor.f=NULL;

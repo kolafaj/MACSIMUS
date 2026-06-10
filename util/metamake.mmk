@@ -1,9 +1,10 @@
 !! makemake linux gcc
 !include "../home.mmk"
 
-# -DReverse causes some utilities to support reversed endian, now rarely needed
-# -DSCR extra code for scrolling screens of output (internal `less')
-# O = -DSCR -DReverse
+# Obsolete:
+# -DReverse causes some utilities to support reversed endian
+# -DSCR includes extra code for scrolling screens of output (internal `less')
+# O := -DSCR -DReverse
 
 !dir = gen sim util
 

@@ -1,13 +1,13 @@
 if (scf.eps>0) {
-  int N=StaN("no of iter");
-  int iter=(int)(N*StaMean("no of iter"));
+  int N=StaN("polar no of iter");
+  int iter=(int)(N*StaMean("polar no of iter"));
 
   if (option('p')/10%10>=2) {
     if (iter>N+2)
       WARNING(("ASPC and by %d more iterations than MD steps (%d)!\n\
 *** Small surplus at start, esp. if far from equilibrium, is acceptable.\n\
 *** Check variables =polar one-step maxerr=, =polar one-step stderr=\n\
-*** =no of iter=, and =selffield maxdr=.\n\
+*** =polar no of iter=, and =selffield maxdr=.\n\
 *** To monitor, use keywords pmax and/or pstd in %s.\n\
 *** Consider decreasing scf.omega=%g or (if stable) increase scf.eps=%g.",
                iter-N,N,scf.omega,scf.eps,Fn("cpi")))
@@ -49,6 +49,6 @@ if (option('v')&16) {
 	  StaMean("selffield maxerr")/muperm, StaMean("selffield stderr")/muperm,
 	  sqrt(StaMean("dEtot^2"))/Ekin, StaMean("|dEtot|")/Ekin,
 	  B,dB,dy,
-	  StaMean("no of iter")*Nsta, Nsta );
+	  StaMean("polar no of iter")*Nsta, Nsta );
   fclose(f);
 }

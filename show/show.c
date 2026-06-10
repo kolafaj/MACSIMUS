@@ -1,7 +1,7 @@
 /* make show
  */
 
-#define VERSION "2.2m"
+#define VERSION "2.2n"
 
 /* Notes on raytracing:
 

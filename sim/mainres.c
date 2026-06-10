@@ -16,7 +16,7 @@
     if (option('v')&2) StaPrintAll(NULL);
     if (option('v')&4) StaPrintAll("");
     else prt("HINT: use `staprt %s' for detailed time-series analysis",simils.simname);
-if (option('m')<2) {
+    if (option('m')<2) {
       if (option('f')) prt("WARNING: T, Ptr, enthalpy.. may be wrong in the reread mode");
       else prt("WARNING: forces and energy not calculated because -f0"); }
     prt("V = %g m3 (last value)",box.V*1e-30);
@@ -30,22 +30,26 @@ if (option('m')<2) {
     printdihhist();
 #endif /*# DIHHIST */
 
-  if (tau.P) {
-    double dV=StaStdErr("V");
-    double V=StaMean("V");
+#ifdef WL
+    saveWL(rdf.grid,init);
+#endif 
 
-    prt("rho = mass/<V> = %.3f %.3f [kg/m3]",rhounit*No.free_mass/V,rhounit*No.free_mass/Sqr(V)*dV);
-    prt("<L> = %.5f %.5f [AA] (cube%s)",cbrt(V),dV/V*cbrt(V),iscube()?"":"-equivalent"); }
+    if (tau.P) {
+      double dV=StaStdErr("V");
+      double V=StaMean("V");
+
+      prt("rho = mass/<V> = %.3f %.3f [kg/m3]",rhounit*No.free_mass/V,rhounit*No.free_mass/Sqr(V)*dV);
+      prt("<L> = %.5f %.5f [AA] (cube%s)",cbrt(V),dV/V*cbrt(V),iscube()?"":"-equivalent"); }
 
 #if 0 /* energy per molecule */
     prt("<Epot>/molecule  = %12.2f [J/mol] =%11.5f [kcal/mol] = %g [K]",
-        StaMean("Epot [*")/No.N,
-        StaMean("Epot [*")/No.N/kcal,
-        StaMean("Epot [*")/No.N/Eunit);
+      StaMean("Epot [*")/No.N,
+      StaMean("Epot [*")/No.N/kcal,
+      StaMean("Epot [*")/No.N/Eunit);
     prt("<Eintra>/molecule= %12.2f [J/mol] =%11.5f [kcal/mol] = %g [K]",
-        StaMean("Ein [*")/No.N,
-        StaMean("Ein [*")/No.N/kcal,
-        StaMean("Ein [*")/No.N/Eunit);
+      StaMean("Ein [*")/No.N,
+      StaMean("Ein [*")/No.N/kcal,
+      StaMean("Ein [*")/No.N/Eunit);
 #endif /*# 0 */
 
 #if 0 /* mean quadratic dipole moments */

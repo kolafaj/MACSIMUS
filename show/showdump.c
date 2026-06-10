@@ -69,6 +69,7 @@ void opendump(void) /********************************************** opendump */
 
       case ATM:
         fprintf(dump,"%d\n",NS);
+        fprintf(dump,"L %f %f %f\n",VARG(L));
         break;
 
       case POV:

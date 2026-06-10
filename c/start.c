@@ -46,7 +46,7 @@
 File registration:
   Use file ~/.startdata.  Associated applications are separated by TABs.
   These defaults may be overriden by optional .startdata in the working
-  directory.
+  directory; in case of start from ~/, the data are read twice.
 
 Bugs:
   Some special characters may be treated incorrectly.
@@ -86,7 +86,6 @@ void strtac(char *where,char *what) /******************************** strtac */
   memcpy(where,what,strlen(what));
 }
 
-
 int EQUAL(char *a,char *b) /****************************************** EQUAL */
 /* returns 1 if strings identical, case-insensitive */
 {
@@ -107,10 +106,11 @@ int main(int narg,char **arg) /**************************************** main */
   FILE *in;
 
   getsbufsize=N;
-  
+
   if (narg<2) {
     fprintf(stderr,"\
 Starts application associated with file extension. Call by:\n\
+  [NARG=]\n\
   start[s] [application -OPTIONS or other ARGS] FILE.EXT [more -OPTIONS]\n\
   start[s] .[EXT] : list association(s)\n\
 If there are several associated commands:\n\
@@ -123,6 +123,10 @@ See also:\n\
   xdg-open xdg-mime xdg-settings (similar system-wide tools)\n");
     exit(0); }
 
+  if (narg>10)
+    Error("The number of arguments is limited to 10.\n\
+      Set the env variable NARG if you need more.");
+  
   if (!strcmp("s",arg[0])) ask=0;
   if (!strcmp("ss",arg[0])) ask=1;
   if (strstr(arg[0],"start")) ask=0;

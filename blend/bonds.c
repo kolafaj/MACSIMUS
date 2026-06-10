@@ -12,7 +12,7 @@ struct cfg_s {
   float q;
   int at;
   int nnbr;
-  int nbr[MAXVAL]; 
+  int nbr[MAXVAL];
   char id[8];
 } *cfg;
 
@@ -22,7 +22,7 @@ int periodic=0;
 float L[3];
 double Lh[3];
 
-float dist(float *a,float *b)
+double dist(float *a,float *b) /*************************************** dist */
 {
   if (periodic) {
     double sum=0,dr;
@@ -56,7 +56,7 @@ int attype(char *c)
 /* max bond lengths from charmm21; bit less for ?; default=*1.2 */
 static float bond[NAT][NAT]={
   /*    ?     N      C     O     S      H     P    F */
-  /*?*/{3.1, -1,    -1,   -1,    -1,   -1,   -1,  -1 },                        
+  /*?*/{3.1, -1,    -1,   -1,    -1,   -1,   -1,  -1 },
   /*N*/{2.1, 1.47,  -1,   -1,    -1,   -1,   -1,  -1 },
   /*C*/{2.1, 1.51,  1.54, -1,    -1,   -1,   -1,  -1 },
   /*O*/{2.2, 1.485, 1.35, 1.415, -1,   -1,   -1,  -1 },
@@ -67,7 +67,7 @@ static float bond[NAT][NAT]={
 
 int nbonds;
 
-void add(int i,int j)
+void add(int i,int j) /************************************************* add */
 {
   if (cfg[i].nnbr>MAXVAL-1 || cfg[j].nnbr>MAXVAL-1)
     fprintf(stderr,"Cannot add bond %d-%d (max valence exceeded).\n",i,j);
@@ -77,7 +77,7 @@ void add(int i,int j)
     cfg[j].nbr[cfg[j].nnbr++]=i; }
 }
 
-int main(int narg,char **arg)
+int main(int narg,char **arg) /**************************************** main */
 {
   FILE *f;
   int i,j,n=0,ier;
@@ -86,15 +86,16 @@ int main(int narg,char **arg)
   enum type_e { XYZ,ATM,PDB,PLB } type;
   FILE *mol,*plb=NULL;
   static float hdr[2];
-  static int nsin=0,nline=0;
+  static int ns=0,nline=0,contATM=0;
 
   if (narg<2) {
     fprintf(stderr,"\
 Make MACSIMUS-compatible mol/plb files of xyz data in Angstrom. Call by:\n\
   bonds FILE{.xyz,.3dt,.plb,.atm,.pdb} [[-]DIST [VERBOSE]]\n\
 Input:\n\
-  FILE.xyz: format: x y z, also FILE.3dt\n\
+  FILE.3dt: format: x y z without header (former .xyz)\n\
   FILE.plb: plb-file\n\
+  FILE.xyz:\n\
   FILE.atm: format: 1st line: number of atoms\n\
                     2nd line: empty (=free b.c.) | [box] L (=cube) |\n\
                               [box] Lx Ly Lz (\"box\" is literal keyword)\n\
@@ -124,11 +125,11 @@ See also:\n\
   for (c=fn; *c; c++) if (*c=='.') dot=c;
   if (!dot) Error("bonds: no file extension");
   dot++;
-  if (!strcmp("3dt",dot) || !strcmp("xyz",dot) ) type=XYZ,d/=bond[attype("C")][attype("C")];
+  if (!strcmp("3dt",dot)) type=XYZ,d/=bond[attype("C")][attype("C")];
   else if (!strcmp("pdb",dot)) type=PDB;
-  else if (!strcmp("atm",dot)) type=ATM;
+  else if (!strcmp("atm",dot) || !strcmp("xyz",dot) ) type=ATM;
   else if (!strcmp("plb",dot)) type=PLB,d/=bond[attype("C")][attype("C")];
-  else Error("bonds: extension .3dt, .xyz, .pdb, .plb, or .atm expected");
+  else Error("bonds: extension .{atm,xyz,3dt,pdb,plb} expected");
 
   loop (i,0,NAT) loop (j,0,NAT)
     if (bond[i][j]<0) bond[i][j]=bond[j][i];
@@ -137,7 +138,7 @@ See also:\n\
   if (type==PLB) {
     float hdr[3];
     int i;
-    
+
     if (2!=fread(hdr,4,2,f)) Error("bonds: plb no header");
     n=hdr[0];
     if (n>=NMAX || n<1) Error("bonds: too many atoms, or this is not a plb-file");
@@ -148,16 +149,16 @@ See also:\n\
       if (d<0) periodic++; }
     loop (i,0,n) {
       cfg[i].at=attype("C");
-      nsin=i;
+      ns=i;
       if (3!=fread(cfg[i].r,4,3,f)) break; }
-    nsin=n;
+    ns=n;
     goto done; }
 
   if (!cfg) allocarrayzero(cfg,N);
 
   nline=0;
 
-  while (nline++,fgets(line,128,f)) if (strlen(line)>5 && line[0]!='#') {
+  while (nline++,fgets(line,128,f)) if (strlen(line)>1 && !strchr("!#",line[0])) {
     if (n>=N) Error("bonds: too many atoms - set environment variable MAXN");
 
     switch (type) {
@@ -172,7 +173,7 @@ See also:\n\
         int i;
 
         if (nline==1) {
-          nsin=atoi(line);
+          ns=atoi(line);
           goto cont; }
 
         if (type==ATM && nline==2) {
@@ -180,14 +181,15 @@ See also:\n\
           if (i==0 && box) i=sscanf(box+3,"%f%f%f",L,L+1,L+2);
           if (i==1) L[1]=L[2]=L[0];
           if (i==2) Error("bonds: two box sizes found (1 or 3 expected)");
-          if (d<0) periodic++; 
+          if (d<0) periodic++;
           Lh[0]=L[0]/2; Lh[1]=L[1]/2; Lh[2]=L[2]/2;
           goto cont; }
 
         ier=sscanf(line,"%s%f%f%f%f",atc,cfg[n].r,cfg[n].r+1,cfg[n].r+2,&cfg[n].q);
-       
+
         if (ier<4) goto done;
         if (ier==4) cfg[n].q=0;
+
         if (isdigit(atc[0])) {
           static char *Mendeleyev[111]={"e",
             "H",                                                                                 "He",
@@ -206,6 +208,7 @@ See also:\n\
           strcpy(atc,Mendeleyev[i]); }
         cfg[n].at=attype(atc);
         n++;
+        if (n==ns) { contATM++; goto done; }
         break; }
 
       case PDB: if (!memcmp(line,"ATOM  ",6) || !memcmp(line,"HETATM",6))
@@ -226,7 +229,7 @@ See also:\n\
   strcpy(dot,"plb");
   if (type!=PLB) plb=fopen(fn,"w");
   hdr[0]=(float)n;
-  if (nsin && n!=nsin) fprintf(stderr,"WARNING NS=%d in header, %d found\n",nsin,n);
+  if (ns && n!=ns) fprintf(stderr,"WARNING NS=%d in header, %d found\n",ns,n);
 
   if (plb) {
     hdr[1]=-3;
@@ -247,7 +250,7 @@ number_of_atoms = %d\n\natoms\n\
       if (dist(cfg[i].r,cfg[j].r)<bond[cfg[i].at][cfg[j].at]) {
         add(i,j);
         if (narg>3) printf("%d %d %g\n",i,j,dist(cfg[i].r,cfg[j].r)); }
- 
+
   loop (i,0,n) {
     char ati=ats[cfg[i].at];
     char line[64];
@@ -262,6 +265,24 @@ number_of_atoms = %d\n\natoms\n\
     fprintf(mol,"\n"); }
 
   fclose(mol);
+
+  if (contATM) { /* patch: if ATM contains more frames */
+    int il;
+    for (;;) {
+      loop (il,-2,ns)
+        if (fgets(line,128,f)) {
+          /* box size change ignored, atom type ignored */
+          if (il>=0)
+            ier=sscanf(line,"%s%f%f%f",atc,cfg[il].r,cfg[il].r+1,cfg[il].r+2);
+          if (ier<3) goto finish; }
+        else
+          goto finish;
+
+      if (plb) {
+        fwrite(L,4,3,plb); 
+        loop (il,0,ns) fwrite(cfg[il].r,4,3,plb); } } }
+
+ finish:
   if (plb) fclose(plb);
 
   printf("# %d atoms, %d bonds\n",n,nbonds);

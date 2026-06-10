@@ -1,4 +1,4 @@
-#define VERSION "3.7k"
+#define VERSION "3.7m"
 
 #if defined(LINKCELL) && defined(FREEBC)
 #  error "LINKCELL not supported for FREEBC"
@@ -575,9 +575,9 @@ NB: slab.sp (in SLAB version) sets box.center automatically",
       prt_("This version default pressure formula:");
 #if (PRESSURETENSOR&PT_ANY) == PT_ANY
       virial=3;
-#else
+#else /*# (PRESSURETENSOR&PT_ANY) == PT_ANY */
       virial=1;
-#endif
+#endif /*#!(PRESSURETENSOR&PT_ANY) == PT_ANY */
     }
     prt(" virial=%d = %s",virial,
         virial==1 ?   "Pevir = virial theorem (elst_virial = -elst_energy)"
@@ -727,12 +727,12 @@ also, [+UNIT] converts to p.u. and [-UNIT] backwards, see evu -> p(.)units.",
       if (el.corr&8) prt("\
 - only pressure tensor components and energy corrected\n\
 - trajectory without correction => energy conservation violated"); }
-# else
+#  else /*# COULOMB<0 */
     if (Eext.isE && Eext.f) WARNING(("oscillating el. field: many features not available (Ewald needed)"))
-#  endif /*#!COULOMB<=-1 */
-# else
+#  endif /*?!COULOMB<=-1 */ /*#!COULOMB<0 */
+#else /*# COULOMB */
   if (Eext.isE && Eext.f) WARNING(("oscillating el. field: many features not available (Ewald needed)",Eext.f))
-#endif /*# COULOMB */
+#endif /*#!COULOMB */
 
 #ifdef POLAR
     if ((option('p')/10)%10==0) if (tau.dip==0)
@@ -941,6 +941,10 @@ will be used for parameter setting.");
 #ifdef HARMONICS
     initharmonics(rdf.grid,rdf.cutoff,T,refrho);
 #endif /*# HARMONICS */
+#ifdef WL
+    if (!wl.cutoff) wl.cutoff=rdf.cutoff;
+    initloadWL();
+#endif /*# WL */
 
     constrd.mode=rescale+RESCALE_L; /* force box rescale */
 
@@ -1065,7 +1069,7 @@ Widom insertion or scaling requires a thermostat because\n\
     if (init==0) loadrdf(rdf.grid);
 #ifdef DIHHIST
     if (init==0) loaddih(dih.grid);
-    if (dih.dcp) dihcp=fopen(Fn("dcp"),init<2?"at":"wt");
+    if (dih.dcp) dihcp=fopen(Fn("dcp"),(init==0 || init==1)?"at":"wt");
 #endif /*# DIHHIST */
 #ifdef HARMONICS
     if (init==0) loadharmonics(rdf.grid,rdf.cutoff);
@@ -1275,7 +1279,7 @@ cleave.init bit 0 unset (not to copy next time)"); }
 
     /* init=0,1: apppend playback; init=2,3: new playback */
     if (option('y')) {
-      if (!plbopened) openplayback(option('y'),init<2&&init>=0);
+      if (!plbopened) openplayback(option('y'),init==0 || init==1);
       if (init>=2 && dt.plb>=0) writeplayback(); /* t=0: do'nt write for dt.plb<0*/ }
 
     /*    constrd.Pcorr=En.corr/Sqr(box.V)*Punit; removed in 2.7t */
@@ -1592,7 +1596,7 @@ final drift = %d = %s",DRIFT_START,drift,int2sumbin(drift)))
               StaAdd(string("EwM%c*cos",i+'x'),Q->M[i]*cos(Eext.arg[i]));
               StaAdd(string("EwM%c*sin",i+'x'),Q->M[i]*sin(Eext.arg[i])); } }
           StaAdd("EwM^2",SQR(Q->M)); }
-#  endif /*# defined(COULOMB) && COULOMB<=-1 */
+#  endif /*? defined(COULOMB) && COULOMB<=-1 */ /*# defined(COULOMB) && COULOMB<0 */
 
         nsteps++;
 

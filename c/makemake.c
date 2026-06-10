@@ -3,12 +3,13 @@
 
 #define METAMAKE "metamake.mmk" /* source file */
 
-/*** makemake.c *** (c) J.Kolafa 07/1993--2025 ***
+/*** makemake.c *** (c) J.Kolafa 07/1993--02/2026 ***
 
 Generate unix-style `makefile' from `metamake.mmk'.
 Simplified version with all DOS/EMX legacy features removed.
 
 History:
+  02/2026  space added to the header
   06/2025  help slightly updates
   02/2024: !private added because of easier GitHub compatibility
            `metamake' renamed to `metamake.mmk'
@@ -646,7 +647,7 @@ int main(int narg,char **arg) /**************************************** main */
   struct project_s *project;
 
   fprintf(stderr,"\
-MAKEMAKE 06/2025: MACSIMUS makefile generator\n");
+MAKEMAKE 02/2026: MACSIMUS makefile generator\n");
 
   if (narg<2) {
     fprintf(stderr,"\
@@ -657,8 +658,8 @@ or mmk-files files !included from `metamake.mmk'.\n\
 Special DEFs:\n\
   filelist = generate `filelist' with all needed files\n\
   linux = (legacy default)\n\
-  makefile = all modules will depend also on the makefile\n\
-             => recompile if the makefile changes\n\
+  makefile = all modules will depend also on the makefile and will get\n\
+             recompiled when `makefile' changes\n\
 Example:\n\
   makemake lj polar gcc\n\
 where the switches are treated in the mmk-files, for instance:\n\
@@ -691,7 +692,7 @@ CC := gcc # $(CC) is used as the compiler in the makefile\n\
   strcpy(objext,".o");
 
   fputs("\
-### this makefile was generated from " METAMAKE "using makemake ###\n\
+### this makefile was generated from " METAMAKE " using makemake ###\n\
 #defined: ",out);
   for (def=def0; def; def=def->next) fprintf(out," %s",def->name);
   fprintf(out,"\n");

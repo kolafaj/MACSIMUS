@@ -64,11 +64,15 @@ void loadfixa(void);
 void savefixa(void);
 void dumpall(ToIntPtr B,ToIntPtr A);
 
-
 #if defined(POLAR) && POLAR&32
 void initfqcharges(void);
-#endif
+#endif /*# defined(POLAR) && POLAR&32 */
 
 void zerocfg(int zero);
 double Lfromfile(int k,double t);
 void remove1mol(int n);
+
+#ifdef WL
+void initloadWL(void);
+void saveWL(int grid,int init);
+#endif /*# WL */

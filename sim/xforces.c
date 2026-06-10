@@ -312,7 +312,7 @@ void elstforces(ToIntPtr B, ToIntPtr A)  /********************** elstforces */
         if (si[i].qtype&32) {
           double qpol=rpol[i][0];
           VV(f[i],+=qpol*Et)
-#error this line looks as nonsense:
+#    error this line looks as nonsense:
           fpol[i][0]-=SCAL(Et,r[i]); /* doublecheck sign! */
           U-=qpol*SCAL(Et,r[i]);
         }
@@ -330,14 +330,14 @@ void elstforces(ToIntPtr B, ToIntPtr A)  /********************** elstforces */
           /* DO NOT USE -- handled by the virial theorem
              En.vir+=SCAL(r[i],q*Et)
              En.vir+=SCAL(r[i],qpol*Et) */
-#if PRESSURETENSOR&PT_VIR
+#  if PRESSURETENSOR&PT_VIR
           En.Pvir[0]+=r[i][0]*q*Et[0];
           En.Pvir[1]+=r[i][1]*q*Et[1];
           En.Pvir[2]+=r[i][2]*q*Et[2];
           En.Pvir[0]+=rpi[0]*qpol*Et[0];
           En.Pvir[1]+=rpi[1]*qpol*Et[1];
           En.Pvir[2]+=rpi[2]*qpol*Et[2];
-#endif
+#  endif /*# PRESSURETENSOR&PT_VIR */
 #  if PRESSURETENSOR&PT_OFF
           /* doublecheck symmetry */
           En.Pvir[3]+=r[i][1]*q*Et[2];
@@ -346,7 +346,7 @@ void elstforces(ToIntPtr B, ToIntPtr A)  /********************** elstforces */
           En.Pvir[3]+=rpi[1]*qpol*Et[2];
           En.Pvir[4]+=rpi[2]*qpol*Et[0];
           En.Pvir[5]+=rpi[0]*qpol*Et[1];
-#endif
+#  endif /*# PRESSURETENSOR&PT_OFF */
           /* doublecheck why not if (measure) but always */
           U-=q*SCAL(Et,r[i]);
           U-=qpol*SCAL(Et,rpi); } }
@@ -381,31 +381,31 @@ void elstforces(ToIntPtr B, ToIntPtr A)  /********************** elstforces */
 
         /* BUG: virial probably wrong*/
         VV(f[el.m.plus],+=qm*Eext.B)
-#if PRESSURETENSOR&PT_VIR
+#  if PRESSURETENSOR&PT_VIR
         En.Pvir[0]+=r[el.m.plus][0]*qm*Eext.B[0];
         En.Pvir[1]+=r[el.m.plus][1]*qm*Eext.B[1];
         En.Pvir[2]+=r[el.m.plus][2]*qm*Eext.B[2];
-#endif
+#  endif /*# PRESSURETENSOR&PT_VIR */
 #  if PRESSURETENSOR&PT_OFF
         /* doublecheck symmetry */
         En.Pvir[3]+=r[el.m.plus][1]*qm*Eext.B[2];
         En.Pvir[4]+=r[el.m.plus][2]*qm*Eext.B[0];
         En.Pvir[5]+=r[el.m.plus][0]*qm*Eext.B[1];
-#endif
+#  endif /*# PRESSURETENSOR&PT_OFF */
         U-=qm*SCAL(Eext.B,r[el.m.plus]);
 
         VV(f[el.m.minus],-=qm*Eext.B)
-#if PRESSURETENSOR&PT_VIR
+#  if PRESSURETENSOR&PT_VIR
         En.Pvir[0]+=r[el.m.minus][0]*qm*Eext.B[0];
         En.Pvir[1]+=r[el.m.minus][1]*qm*Eext.B[1];
         En.Pvir[2]+=r[el.m.minus][2]*qm*Eext.B[2];
-#endif
+#  endif /*# PRESSURETENSOR&PT_VIR */
 #  if PRESSURETENSOR&PT_OFF
         /* doublecheck symmetry */
         En.Pvir[3]+=r[el.m.minus][1]*qm*Eext.B[2];
         En.Pvir[4]+=r[el.m.minus][2]*qm*Eext.B[0];
         En.Pvir[5]+=r[el.m.minus][0]*qm*Eext.B[1];
-#endif
+#  endif /*# PRESSURETENSOR&PT_OFF */
         U+=qm*SCAL(Eext.B,r[el.m.minus]); } } }
 
   if (Eext.isE) {
@@ -422,17 +422,17 @@ void elstforces(ToIntPtr B, ToIntPtr A)  /********************** elstforces */
         double q=si[i].charge;
 
         VV(f[i],+=q*Et)
-#if PRESSURETENSOR&PT_VIR
+#  if PRESSURETENSOR&PT_VIR
         En.Pvir[0]+=r[i][0]*q*Et[0];
         En.Pvir[1]+=r[i][1]*q*Et[1];
         En.Pvir[2]+=r[i][2]*q*Et[2];
-#endif
+#  endif /*# PRESSURETENSOR&PT_VIR */
 #  if PRESSURETENSOR&PT_OFF
         /* doublecheck symmetry */
         En.Pvir[3]+=r[i][1]*q*Et[2];
         En.Pvir[4]+=r[i][2]*q*Et[0];
         En.Pvir[5]+=r[i][0]*q*Et[1];
-#endif
+#  endif /*# PRESSURETENSOR&PT_OFF */
         U-=q*SCAL(Et,r[i]); } } }
   En.el += U; /* also mag energy - will break virial check */
 }
@@ -521,9 +521,9 @@ void slabcutcor(ToIntPtr B, ToIntPtr A)  /********************** slabcutcor */
             if (measure) Resum+= ss->Skk[k].E*(rho[jst][k].re*x.re-rho[jst][k].im*x.im);
             fsum+=k*ss->Skk[k].E*(rho[jst][k].re*x.im+rho[jst][k].im*x.re); } } }
 
-#if 0 // DEBUG ONLY - see /home/jiri/projects/tests/slabcorr/
+#  if 0 // DEBUG ONLY - see /home/jiri/projects/tests/slabcorr/
       if (n==0 && i==0) prt("%.8g %.8g %.8g #f0 Df0",r[i][2],f[i][2],4*PI/box.L[2]*fsum);
-#endif
+#  endif /*# 0 */
 
       f[i][2]+=4*PI/box.L[2]*fsum; } }
 
@@ -559,5 +559,54 @@ void slabcutcor(ToIntPtr B, ToIntPtr A)  /********************** slabcutcor */
   free2Darray(rho);
 }
 #endif /*# SLAB */
+
+#ifdef WL
+void WangLandau(ToIntPtr B, ToIntPtr A) /********************** metadynamics */
+/*
+   Wang-Landau (metadynamics) between sites wl.i and wl.j (absolute numbering)
+   NB: to be extended to CM
+*/
+{
+  int i,k;
+
+  if (wl.grid) {
+    vector dr;
+    double r,f,x,U;
+
+    VVV(dr,=A->rp[wl.i],-A->rp[wl.j])
+    loop (k,0,3) {
+      while (dr[k]>box.Lh[k]) dr[k]-=box.L[k];
+      while (dr[k]<-box.Lh[k]) dr[k]+=box.L[k]; }
+
+    r=sqrt(SQR(dr));
+
+    i=(int)(r*wl.grid);
+
+    x=r-i*wl.dr;
+    if (i<wl.nA+2)
+      f=((wl.A[i]-wl.A[i+2])*x + (wl.A[i+1]-wl.A[i-1])*(x-wl.dr))/r;
+    else
+      f=0;
+
+    VV(B->rp[wl.i],+=f*dr)
+    VV(B->rp[wl.j],-=f*dr)
+
+    if (measure) {
+      if (i<wl.nA+2)
+        U = (wl.A[i-1]*Sqr(x-wl.dr)
+           + wl.A[i  ]*(2*Sqr(wl.dr)-Sqr(x))
+           + wl.A[i+1]*(2*Sqr(wl.dr)-(Sqr(x-wl.dr)))
+           + wl.A[i+2]*Sqr(x))/2;
+      else
+        U=wl.Awall;
+
+      if (i>=0 && i<=wl.nA) {
+        wl.A[i] += (wl.dr-x)/powi(r,wl.n)*wl.UPDATE;
+        if (i<wl.nA) wl.A[i+1] += x/powi(r,wl.n)*wl.UPDATE; }
+
+      En.pot += U; }
+   }
+}
+#endif /*# WL */
 
 #include "userforces.c"

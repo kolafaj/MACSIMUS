@@ -23,10 +23,6 @@
 #  include "constrd.h"
 #endif /*# POLAR */
 
-#ifdef Reverse
-#  error compile-time option Reverse no longer supported
-#endif /*# Reverse */
-
 #include <unistd.h> /* sleep */
 
 extern volatile int sig; /* defined in main.c */
@@ -1217,7 +1213,7 @@ void loadcfg(int n,double *sigvdW) /******************************* loadcfg */
       if (load.N&4) WARNING(("This disagreement for load.N=4 is unexpected and may cause a crash"));
       locnspec=nspec; }
 
-    if (init<2 && option('e')!=cfgol['e' & 31]) {
+    if ((init==0 || init==1) && option('e')!=cfgol['e' & 31]) {
       if (option('e')) ERROR(("CP record length changed (wrong option -e)"))
       else prt("-e disabled"); }
 
@@ -1464,7 +1460,7 @@ void savecfg(int n,int4 timekey,double *sigvdW) /******************* savecfg */
   to=OpenCfg(n,"w");
 
   put(n)
-  
+
   VarPut(&cfgkey,sizeof(cfgkey));
   VarPut(optionlist,sizeof(optionlist));
   VarPut(&nspec,sizeof(nspec));
@@ -1714,13 +1710,13 @@ void closeplayback(void) /************************************ closeplayback */
       prt("closing %s at position %ld\nlast frame=%ld written at t=%.14g",
           fn,ft,frame,lastt);
       prt("(this has been determined by ftell from really written data)\n\
-# SIMPLE RESTART in case of crash during the next sweep (data set ended by ;):");
+#SIMPLE RESTART in case of crash during the next sweep (data set ended by ;):");
       prt("  truncate -s %ld %s",ft,fn);
       prt("# OR more slowly with a full backup and plb file check:\n\
-# mv %s C~%s\n\
-# plbcut C~%s %s 0 1:%ld",fn,fn,fn,fn,frame);
+#mv %s C~%s\n\
+#plbcut C~%s %s 0 1:%ld",fn,fn,fn,fn,frame);
       prt("# + optional partial backup (keep the cut-off part only, remove full backup):\n\
-# plbcut C~%s C%ld-%s 0 %ld:2147483647\n\
+#plbcut C~%s C%ld-%s 0 %ld:2147483647\n\
   rm C~%s",fn,frame+1,fn,frame+1,fn);
       prt("# then, the following test in bash should pass:");
       /*      prt("  if [ `ls -lG %s | cut -d \" \" -f4` = %ld ]\n    then echo OK\n    else echo WRONG SIZE\n  fi",fn,ft);*/
@@ -1974,7 +1970,7 @@ void readplayback(int frame,int all) /************************* readplayback */
       WARNING(("readplayback: simils.Ns=%d != NS=%d (from %s)\n\
 *** Fixing and continuing with fingers crossed..",simils.Ns,NS,Fn("plb")))
     simils.Ns=NS;
-        
+
     if (!all && simils.Ns!=No.s)
       prt("Reading %s: %d sites found but %d specified (will be solved later)",
           lastFn,simils.Ns,No.s); }
@@ -2017,11 +2013,11 @@ void readplayback(int frame,int all) /************************* readplayback */
     simils.to=1;
     if (vlb) simils.to=2;
     if (NS!=simils.Ns) ERROR(("internal: simils.Ns=%d != NS(from plb)=%d",simils.Ns,NS))
-#ifdef POLAR    
+#ifdef POLAR
     simils.size=sizeof(ToInt)-sizeof(vector)+simils.Ns*2*sizeof(vector);
-#else
+#else /*# POLAR     */
     simils.size=sizeof(ToInt)-sizeof(vector)+simils.Ns*sizeof(vector);
-#endif
+#endif /*#!POLAR     */
     loop (i,0,simils.to) {
       if (simils.changecfg) sdsalloc(simils.cfg[i],simils.size)
       else simils.cfg[i]=cfg[i]; }
@@ -2397,3 +2393,143 @@ void remove1mol(int n) /***************************************** remove1mol */
 
   return;
 }
+
+#ifdef WL
+void initloadWL(void) /****************************************** initloadWL */
+{
+  if (wl.grid) {
+    int i;
+    double dummy;
+    static int wlgrid,n;
+
+    if (!wlgrid) {
+      underline("Wang-Landau (metadynamics, conformational flooding)");
+      prt("\
+grid=%d/AA  generalized coordinate r=|%d-%d|  pre-bias = 1/r^%d\n  \
+Awall=%g  r range = [%g,%g]  update=%g",
+          wl.grid, wl.i, wl.j, wl.n,
+          wl.Awall, wl.r0, wl.cutoff, wl.update); }
+    
+    if (wlgrid && wlgrid!=wl.grid) ERROR(("\
+Implementation limitation: change of wl.grid is not permitted.\n\
+(old=%d curent=%d)",wlgrid,wl.grid))
+    wlgrid=wl.grid;
+
+    wl.nA=wl.cutoff*wl.grid;
+    if (n && n!=wl.nA) ERROR(("\
+Implementation limitation: change of the size of wl.A[] is not permitted.\n\
+(old=%d curent=%d)",n,wl.nA))
+    n=wl.nA;
+
+    if (!wl.A) {
+      if (wl.cutoff<=0) ERROR(("wl.cutoff not set or wrong"))
+
+      wl.dr=1./wl.grid;
+      /* range: wl.A[-1 .. n+3] (incl.)
+         ! the array is never freed (change of params not allowed)
+         ! prepared for CM, for atom-atom, index=-1 cannot happen */
+      allocarray(wl.A,wl.nA+5);
+      wl.A++; /* A[-1] allowed */ }
+
+    if (wl.update<0) { /* indicates initialization */
+      loopto (i,1,wl.nA) wl.A[i]=(2-wl.n)*T*log(i*wl.dr/wl.cutoff);
+      prt("initial bias = %g*ln(r/%g)",(2-wl.n)*T,wl.cutoff);
+      prt("Ubias(r) plot hint: plot -kUWL %s.wl \':x:%g*ln(x/%g)\'",
+          simils.simname,(2-wl.n)*T,wl.cutoff);
+      
+      wl.update=-wl.update; }
+    else { /* wl.update>=0 => load from SIMNAME.wl */
+      FILE *f=fopen(Fn("wl"),"rt");
+      char line[128];
+
+      if (!f) ERROR(("cannot load %s: consider wl.update<0",lastFn))
+
+      /* loop over stored blocks */
+      while (fgets(line,128,f)) {
+        double Awall;
+        /* finding a header */
+        while (memcmp(line,"! WL data block",15))
+          if (!fgets(line,128,f)) goto SCALE;
+
+        prt_("reading %s: %s",lastFn,line);
+        if (!fgets(line,128,f) || line[0]!='!') ERROR(("%s: no data or bad format",lastFn))
+        if (3!=sscanf(line+2,"%d %d %lf", &wlgrid, &i, &Awall)) ERROR(("%s: grid n Awall expected",lastFn))
+
+        if (wl.grid!=wlgrid) ERROR(("%s: change of wl.grid is not permitted",lastFn))
+        if (wl.nA!=i) ERROR(("wl.nA=%d (size of array A[]) differs from the value (%i) in file %s",wl.nA, i, lastFn))
+        if (Awall!=wl.Awall) WARNING(("Awall changed %.15g->%.15g (the value from data will be used)",Awall,wl.Awall))
+
+        if (!fgets(line,128,f) || line[0]!='!')
+          ERROR(("%s: no data or bad format",lastFn))
+
+        loopto (i,-1,wl.nA+3) {
+          if (!fgets(line,128,f)) ERROR(("%s: table A[] missing",lastFn))
+          /* index range wl.A[-1 .. wl.nA+3] incl. */
+          if (2!=sscanf(line,"%lf %lf", &dummy,wl.A+i)) ERROR(("%s: A[%d] missing",lastFn,i)); }
+      } /* loop over blocks */
+      
+      fclose(f); }
+
+    /* scaling */
+  SCALE:
+    wl.A[-1]=wl.A[0]=wl.A[wl.nA+1]=wl.A[wl.nA+2]=wl.A[wl.nA+3]=wl.Awall;
+    loopto (i,-1,wl.nA+3) wl.A[i]*=Sqr(wl.grid)/2;
+    if (wl.n==1) wl.UPDATE=log(wl.cutoff/wl.r0);
+    else wl.UPDATE=(powi(wl.cutoff,1-wl.n)-powi(wl.r0,1-wl.n))/(1-wl.n);
+    wl.UPDATE=Sqr(wl.cutoff-wl.r0)*wl.update*Pow4(wl.grid)*wl.Awall/(2*wl.UPDATE);
+  }
+}
+
+void saveWL(int grid,int init) /************************************* saveWL */
+/*
+  grid: is for fine UWL(r) graph (=rdf.grid or finer)
+  init: system init (0,1 -> append, otherwise -> rewrite)
+  wl.update=0: do not (re)write
+*/
+{
+  if (wl.grid && wl.update!=0) {
+    static int count; /* count blocks */
+    int i,j;
+    FILE *f;
+    double cutoff=(double)wl.nA/wl.grid;
+
+    if (grid<wl.grid) grid=wl.grid;
+    while (grid<10) grid*=2;
+
+    if (init==0 || init==1)
+      f=fopen(Fn("wl"),"at");
+    else {
+      backup("wl");
+      f=fopen(Fn("wl"),"wt"); }
+
+    count++;
+    fprintf(f,"! WL data block %d t=%.9g\n",count,t);
+    fprintf(f,"! %d %d %g %g %g  grid n Awall update cutoff(calc.)\n",
+            wl.grid,wl.nA,wl.Awall,wl.update,cutoff);
+
+    fprintf(f,"!   r     A(r)\n");
+    loopto (i,-1,wl.nA+3)
+      fprintf(f,"%7.3f %.15g A[%i]\n", i*wl.dr, wl.A[i]*(2*Sqr(wl.dr)), i);
+
+    fprintf(f,"\n!   r     UWL(r)\n");
+    loop (j,-(int)(wl.dr*grid+1e-6),(int)((cutoff+wl.dr*2)*grid+1e-6)) {
+      double r=(j+0.5)/(double)grid,x,U;
+
+      i=(int)(r*wl.grid);
+      x=r-i*wl.dr;
+
+      if (i<wl.nA+2)
+        U = (wl.A[i-1]*Sqr(x-wl.dr)
+           + wl.A[i  ]*(2*Sqr(wl.dr)-Sqr(x))
+           + wl.A[i+1]*(2*Sqr(wl.dr)-(Sqr(x-wl.dr)))
+           + wl.A[i+2]*Sqr(x))/2;
+      else
+        U=wl.Awall;
+
+      fprintf(f,"%7.3f %.9g U%s\n", r, U, r<wl.r0?"r0":"WL"); }
+
+    fprintf(f,"! WL end of data block %d\n\n",count);
+
+    fclose(f); }
+}
+#endif /*# WL */

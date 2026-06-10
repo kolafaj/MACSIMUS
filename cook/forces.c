@@ -210,6 +210,9 @@ void forces(ToIntPtr B, ToIntPtr A) /******************************** forces */
 
   fixforces(B,A);
   centerforces(B,A);
+# ifdef WL
+  WangLandau(B,A);
+#  endif
   elstforces(B,A);
   /* NOTES:
    * En.pot += En.el is AFTER forces() and optionally selffield() is called

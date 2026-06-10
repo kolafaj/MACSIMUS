@@ -8,7 +8,8 @@ BUG AND TO-DO LIST
 KEY is priority or severity (0=unimportant, 9=important, X=critical)
 
 cook:
-  X @A1 doubled EkinP term ? (M_P scaled?)
+  ? too many allocations of M from simgc - is this needed?
+  ? @A1 doubled EkinP term ? (M_P scaled?)
   9 Langevin thermostat not sufficiently implemented, Gear only:
     with -m4 gives *** Too low virial pressure vs. tensor accuracy
     consider DOI: 10.1080/00268976.2012.760055
@@ -87,6 +88,7 @@ blend:
   3 blend: more fool-proof logic if .che changes (check time stamp?)
 
 other:
+  9 show -l -x# -y# missing bonds during playback
   9 change home-made int4.h into standard stdint.h
   7 `makepept charmm22 ace G ct1' incorrectly replaces CT2 by CT1 and charge in G
   5 showcp -c -l - blocking not needed, -c strange printout, also Cov
@@ -107,6 +109,16 @@ HISTORY
   + feature added
   * feature changed
   - feature removed
+
+cook 3.7m:
+  + metadynamics updated: pre-bias exponent wl.n -> weight = 1/r^wl.n
+
+show 2.2n:
+  ! missing 2nd line in .atm (.xyz) output added
+
+cook 3.7l:
+  + simple metadynamics (Wang-Landau, conformational flooding) added
+  ! missing "no of iter" fixed ("polar no of iter")
 
 cook 3.7k:
   ! print line to protocol if dt.prt very short
