@@ -64,6 +64,7 @@ Differences:
 #include "ground.h"
 #include "sds.h"
 #include "simglob.h"
+#include "siminit.h" // setL()
 
 #include "ewald.h"
 #include "units.h"

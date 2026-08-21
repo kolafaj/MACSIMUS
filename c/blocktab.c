@@ -43,7 +43,7 @@ Arguments:\n\
   NCOL   # of columns\n\
   FORMAT output format, default=\"%s\"\n\
 See also:\n\
-  gblock smooth mergetab tabproc sum redtab datablock sparsetab\n",fmt);
+  gblock smooth mergetab tabproc sum redtab datablock sparsetab blockanytab\n",fmt);
     exit(0); }
 
   block=atoi(arg[1]);

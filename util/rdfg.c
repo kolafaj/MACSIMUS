@@ -1,4 +1,5 @@
 /* make rdfg
+   07/2026 histogram overflow ad hoc fix, option -o added, print default formats fixed
    05/2025 option -z added
    02/2024 option -v added
    10/2022 bug (write to closed file) fixed
@@ -29,7 +30,7 @@ struct outtype_s {
   char *fmt;
 } outtype[NFILE] = {
   {0,".g","plot","radial distribution function","g(r)","%8.4f"},
-  {0,".hist","plot","histogram (per 1 measurement)","G(r)","%9.2f"},
+  {0,".hist","plot","histogram (raw)","G(r)","%11.0f"},
   {0,".cn","plot","running (cumulative) coordination number","N(r)","%9.3f"},
   {0,".kb","plot","running Kirkwood-Buff integral","K(r)","%8.4f"},
 };
@@ -83,9 +84,10 @@ int main(int narg, char **arg) /*************************************** main */
   char site0[8],site1[8];
   double rho0=1,rho1=1;
   long sumhist;
-  int first=1,nplots=0,nsel=0;
+  int first=1,nplots=0,nsel=0,nofl=0;
   int pid=getpid();
   char *geometry=getenv("RDFGGEOMETRY");
+  double OFL=-0.8;
 
   static char fn[256],fnmin[256]="(unknown)";
 
@@ -106,7 +108,7 @@ WARNING:\n\
 Options:\n\
   -c[FMT] calculate running coordination numbers SIMNAME.SITE1.SITE2.cn [%s]\n\
   -g[FMT] calculate RDFs SIMNAME.SITE1.SITE2.g [set output format, df.=%s]\n\
-  -h[FMT] print histogram SIMNAME.SITE1.SITE2.hist [%s]\n\
+  -h[FMT] print raw histogram SIMNAME.SITE1.SITE2.hist [%s]\n\
   -k[FMT] calc. running Kirkwood-Buff integrals SIMNAME.SITE1.SITE2.kb [%s]\n\
           (binary mixture: print hints to get the partial molar volumes)\n\
   -lSITE1.SITE2[,SITE1.SITE2]  select given pairs only (any order)\n\
@@ -115,6 +117,8 @@ Options:\n\
           if none of -s,-l (without -) given, the default is select all\n\
           -s-,-l- applies after -s,-l or if any (or excludes from all)\n\
           -s,-l,-s-,-l- cannot repeat (the last one applies)\n\
+  -o[OFL] fix overflow bug if hist[i]-hist[i-1]<OFL*2^32 [%g]; 0=off\n\
+          The reported Delta/2^32 shoud be close to -1 and well below OFL\n\
   -p      plot the generated files (command `plot' accepting -pPID needed:\n\
           if more than 1 plot then [KILL ALL] kills only them)\n\
   -rFMT   format for r [default=%s]\n\
@@ -129,11 +133,12 @@ Example:\n\
 See also:\n\
   plb2rdf rdfdrop rdfconv gblock\n\
   rdfgv1 (old version) smoothg (out of order)\n",
-            rfmt,
             outtype[G].fmt,
             outtype[HIST].fmt,
             outtype[CN].fmt,
-            outtype[KB].fmt);
+            outtype[KB].fmt,
+            OFL,
+            rfmt);
     exit(1); }
 
   loop (iarg,1,narg)
@@ -168,6 +173,10 @@ See also:\n\
       case 's':
         if (arg[iarg][2]=='-') xshead=getlist(arg[iarg]+2,NULL);
         else shead=getlist(arg[iarg]+1,NULL);
+        break;
+      case 'o':
+        OFL=atof(arg[iarg]+2);
+        if (fabs(OFL+0.5)>1) Error("OFL should be in [-1,0]");
         break;
       case 'p':
         plot++;
@@ -212,6 +221,7 @@ See also:\n\
 
     if (vs>8) {
       rdf=VarGetSds();
+
       if (rdf->size<sizeof(rdf_t)-2*sizeof(unsigned4) || rdf->size>8000000)
 	ERROR(("rdf->size=%d is suspicious - endian?",rdf->size))
 
@@ -219,6 +229,7 @@ See also:\n\
         WARNING(("This file file was likely obtained by an old version of cook (< V2.7f)\n\
 *** use  rdfconv  to convert it to the new version"))
 
+          
       if (!rdf->npair)
         go=0;
       else if (shead==NULL && lhead==NULL)
@@ -244,17 +255,32 @@ See also:\n\
         if (!strcmp(rdf->name[1],l->name)) go=0; }
 
       if (go) {
+        double *dhist, fixofl=0;
+        
+        allocarray(dhist,rdf->nhist);
+        
+        loop (ir,0,rdf->nhist) {
+          dhist[ir]=(double)rdf->hist[ir]+fixofl;
+          if (OFL) {
+            if (ir && dhist[ir]-dhist[ir-1]<OFL*4294967296.) {
+              nofl++;
+              fprintf(stderr,"fix overflow: %s-%s ir=%d Delta/2^32=%g\n",
+                      rdf->name[0],rdf->name[1],ir,
+                      (dhist[ir]-dhist[ir-1])/4294967296.);
+              dhist[ir]+=4294967296.;
+              fixofl+=4294967296.; } } }
+        
         nsel++;
 
-	loop (ir,0,rdf->nhist) if (rdf->hist[ir]) break;
+	loop (ir,0,rdf->nhist) if (dhist[ir]) break;
         r=(ir+0.5)/rdf->grid;
         /* 1st nonzero g(r) */
         if (r<rmin) {
           rmin=r;
-          sprintf(fnmin,"%s(%d)-%s(%d) hist[%d]=%d",
+          sprintf(fnmin,"%s(%d)-%s(%d) hist[%d]=%.0f",
                   rdf->name[0],rdf->ns[0],
                   rdf->name[1],rdf->ns[1],
-                  ir,rdf->hist[ir]); }
+                  ir,dhist[ir]); }
 
         if (outtype[KB].yes) bin++;
 
@@ -289,6 +315,7 @@ See also:\n\
               if (pass==0) WARNING(("option -v replaces <V>"))
               pass=1; } }
 
+          /* casting is DOS legacy... */
           prt("### %s ###\n# %s:%s\n\
 #%ld sites of %s[%ld]  %ld sites of %s[%ld]  %.0f pairs\n\
 #%ld measurements  <V>=%f  grid=%ld\n\
@@ -318,7 +345,7 @@ See also:\n\
 
             if (iout>=CN) {
               r=(ir+1)/rdf->grid;
-              sumhist += rdf->hist[ir];
+              sumhist += dhist[ir];
               g=(double)sumhist/rdf->nmeas;
               if (iout==CN) {
                 /* coordination number */
@@ -335,8 +362,8 @@ See also:\n\
             else {
               /* RDF */
               r=(ir+0.5)/rdf->grid;
-              if (iout==G) g=rdf->hist[ir]*q/(ir*(ir+1.0)+1.0/3);
-              else g=rdf->hist[ir]/rdf->nmeas; }
+              if (iout==G) g=dhist[ir]*q/(ir*(ir+1.0)+1.0/3);
+              else g=(double)dhist[ir] /* /(double)rdf->nmeas*/ ; }
 
             if (zero || g!=0) {
               prt_(rfmt,r);
@@ -348,7 +375,9 @@ See also:\n\
           out=stdout; }
 
         first=0;
-        free(rdf); } } }
+        free(dhist);
+        free(rdf); /* no longer needed */ }
+    } }
 
   if (nsel) fprintf(stderr,"%d functions selected\n",nsel);
   else Error("no function selected - nothing to do");
@@ -396,5 +425,7 @@ plot %s.V%s:A:'B+a*A^3' %s.V%s\n",
              fn,site1,
            fn,site0,fn,site1);
 
+  if (nofl) fprintf(stderr,"WARNING: overflow detected and fixed %d-times\n",nofl);
+  
   return 0;
 }

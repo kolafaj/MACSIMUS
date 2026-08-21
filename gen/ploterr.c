@@ -19,6 +19,7 @@ double *count; /* needed in tabinc.c */
 struct plotopt_s plotopt; /* passed from plot */
 struct _Idlist_s *id;
 
+/* draw file, optionally with error bars */
 int drawerrbar(char *fn,
                char *colx,char *coly,
                char *coldy1,char *coldy2,
@@ -128,11 +129,9 @@ int drawerrbar(char *fn,
         e=expr; /* err */
 
         if (maxcol<n) z=Calc(expr,&e); else OK=0;
-        
+
         if (e==expr) OK=0;
         if (OK) xy[i]=z; }
-      
-      // fprintf(stderr,"\n");
 
       *count+=1.0;
 
@@ -159,11 +158,13 @@ int drawerrbar(char *fn,
   return 0;
 }
 
+/* shortcut to draw file without error bars */
 int drawfile(char *fn,char *colx,char *coly,int maxcol,int color,int style)
 {
   return drawerrbar(fn,colx,coly,NULL,NULL,maxcol,color,style,0);
 }
 
+/* return ranges min..max of columns colx and coly */
 int minmaxfile(char *fn,char *colx,char *coly,int maxcol,
                double *X0,double *X1,double *Y0,double *Y1)
 {
@@ -187,8 +188,6 @@ int minmaxfile(char *fn,char *colx,char *coly,int maxcol,
     else tok=strtok(line,SEP);
 
     if (!tok || strchr("!#",tok[0])) {
-      /* comment or blank -> pen up */
-      myup();
       /* blank line resets counter n */
       if (!tok) *count=0; }
 
@@ -211,9 +210,9 @@ int minmaxfile(char *fn,char *colx,char *coly,int maxcol,
         char *expr=i?coly:colx;
 
         e=expr; /* err */
-        
+
         if (maxcol<n) z=Calc(expr,&e); else OK=0;
-        
+
         if (e==expr) OK=0;
         if (OK) xy[i]=z; }
 
@@ -226,4 +225,76 @@ int minmaxfile(char *fn,char *colx,char *coly,int maxcol,
   fclose(f);
 
   return 0;
+}
+
+/* NEW 2026: returnd the minimum distance^2 of (X,Y) from file points */
+double clickfile(char *fn,char *colx,char *coly,int maxcol,
+                 double X,double Y)
+{
+  FILE *f;
+  char line[LINELEN];
+  int i,OK;
+  double xy[2];
+  double minrr=9e99;
+
+  REAL SX=scaling.x*(X-scaling.fromx); 
+  REAL SY=scaling.y*(scaling.toy-Y);
+
+  *count=0;
+
+  if (fn==NULL || (f=fopen(fn,"rt"))==NULL) {
+    fprintf(stderr,"ploterr: `%s\': No such file\n",fn);
+    return minrr; }
+
+  while (fgets(line,LINELEN,f)) {
+    char *e,*tok;
+    int n;
+
+    /* not KEY -> blank line (even if comment) */
+    if (plotopt.key && !strstr(line,plotopt.key)) tok=NULL;
+    else tok=strtok(line,SEP);
+
+    if (!tok || strchr("!#",tok[0])) {
+      /* blank line resets counter n */
+      if (!tok) *count=0; }
+
+    else {
+      /* _Id.head->val = count, _Id.head->next->val = 1st number, etc. */
+      n=1;
+      id=_Id.head->next;
+
+      do {
+        id->val=strtod(tok,&e);
+        if (e==tok) id->val=FP_NAN;
+        id=id->next;
+        n++;
+        tok=strtok(NULL,SEP);
+      } while (tok && id);
+
+      OK=1;
+      loop (i,0,2) {
+        double z;
+        char *expr=i?coly:colx;
+
+        e=expr; /* err */
+
+        if (maxcol<n) z=Calc(expr,&e); else OK=0;
+
+        if (e==expr) OK=0;
+        if (OK) xy[i]=z; }
+
+      *count+=1.0;
+
+      if (OK) {
+
+        if (isfinite(xy[0]) && isfinite(xy[1])) {
+          /* see point() in draw.c */
+          REAL sx=scaling.x*(xy[0]-scaling.fromx); 
+          REAL sy=scaling.y*(scaling.toy-xy[1]);
+          double rr=Sqr(sx-SX)+Sqr(sy-SY);
+          Min(minrr,rr) } } } }
+
+  fclose(f);
+
+  return minrr;
 }

@@ -854,6 +854,9 @@ extern struct el_s {
                      full slab correction: corr=4
                      pressure and energy correction only: corr=4+8
                      [In-Chul Yeh and Max L. Berkowitz, JCP 111, 3155 (1999)] */
+
+  double Ezsin;   /* z-modulated elst. field *sin(z*2*PI/Lz) [V/m] */
+
   vector E;       /* elst. field [V/m], was Eelst[] in main.c before V3.4g */
   vector phase;   /* phase: E(t)=E*cos(2*PI*(f*t-phase)), x,y,z separately */
   real f;         /* frequency [Hz]; f=0 is static field */
@@ -927,6 +930,7 @@ extern struct box_s {
   real cutoff;    /* r-space cutoff */
   real cq;        /* =cutoff^2 */
   real follow;    /* max CM drift to follow the periodic b.c. */
+  real jump;      /* safety limit for fixing one molecule following the p.b.c. */
 } box;
 
 extern int cache;    /* molecules in block for r-space sum */
@@ -1096,6 +1100,9 @@ extern struct Eext_s {
   double sumM;    /* sum of molecule dipole moments passed (incl. induced)
                      = max. dipole moments of the cell, averaged value
                      cf. el.sumM (for 1 cfg) */
+  
+  double Ezsin;   /* z-modulated elst force, in p.u. */
+  
   int isB;        /* 1 if nonzero el.B */
   vector B;       /* B in the program units */
   vector Bh;      /* h*B in the program units */

@@ -327,7 +327,7 @@ void elstforces(ToIntPtr B, ToIntPtr A)  /********************** elstforces */
 
           VV(f[i],+=q*Et)
           VV(fpol[i],+=qpol*Et)
-          /* DO NOT USE -- handled by the virial theorem
+          /* DO NOT USE because handled by the virial theorem
              En.vir+=SCAL(r[i],q*Et)
              En.vir+=SCAL(r[i],qpol*Et) */
 #  if PRESSURETENSOR&PT_VIR
@@ -381,6 +381,8 @@ void elstforces(ToIntPtr B, ToIntPtr A)  /********************** elstforces */
 
         /* BUG: virial probably wrong*/
         VV(f[el.m.plus],+=qm*Eext.B)
+
+        /* the rest should be if(measure) ?! */
 #  if PRESSURETENSOR&PT_VIR
         En.Pvir[0]+=r[el.m.plus][0]*qm*Eext.B[0];
         En.Pvir[1]+=r[el.m.plus][1]*qm*Eext.B[1];
@@ -409,6 +411,7 @@ void elstforces(ToIntPtr B, ToIntPtr A)  /********************** elstforces */
         U+=qm*SCAL(Eext.B,r[el.m.minus]); } } }
 
   if (Eext.isE) {
+    /* external electric field, may be time-dependent */
     loop (i,0,DIM) {
       Eext.arg[i]=2*PI*(Eext.f*t-Eext.phase[i]);
       Et[i]=Eext.E[i]*cos(Eext.arg[i]); }
@@ -422,6 +425,8 @@ void elstforces(ToIntPtr B, ToIntPtr A)  /********************** elstforces */
         double q=si[i].charge;
 
         VV(f[i],+=q*Et)
+          
+        /* the rest should be if(measure) ?! */
 #  if PRESSURETENSOR&PT_VIR
         En.Pvir[0]+=r[i][0]*q*Et[0];
         En.Pvir[1]+=r[i][1]*q*Et[1];
@@ -434,7 +439,34 @@ void elstforces(ToIntPtr B, ToIntPtr A)  /********************** elstforces */
         En.Pvir[5]+=r[i][0]*q*Et[1];
 #  endif /*# PRESSURETENSOR&PT_OFF */
         U-=q*SCAL(Et,r[i]); } } }
-  En.el += U; /* also mag energy - will break virial check */
+
+  if (Eext.Ezsin) {
+    /* external electric field in z: f=sin(z*pi/Lz), u=cos(z*pi/Lz) */
+    double qLz=2*PI/box.L[2];
+    
+    loop (n,FROM,No.N) {
+      mn=molec+n;
+      f=rof(mn,B->rp);
+      r=rof(mn,A->rp);
+      si=spec[mn->sp]->si;
+      loop (i,0,mn->ns) {
+        double fz=si[i].charge*Eext.Ezsin*sin(r[i][2]*qLz);
+        
+        f[i][2]+=fz;
+        
+        /* the rest should be if(measure) ?! */
+#  if PRESSURETENSOR&PT_VIR
+        En.Pvir[2]+=r[i][2]*fz;
+#  endif /*# PRESSURETENSOR&PT_VIR */
+#  if PRESSURETENSOR&PT_OFF
+        /* ??? */
+        En.Pvir[3]+=r[i][1]*fz;
+#  endif /*# PRESSURETENSOR&PT_OFF */
+        U+=si[i].charge*Eext.Ezsin*cos(r[i][2]*qLz)/qLz; /* Etot checked OK */
+
+      } } }
+  
+  En.el += U; /* also magnetic energy - will break virial check */
 }
 #endif /*#!POLAR */
 

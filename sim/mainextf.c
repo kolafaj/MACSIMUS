@@ -55,7 +55,7 @@
         else
           prt("site %d is susceptible to the cleaving potential",cleave.i);
 
-        if (cleave.init&1) 
+        if (cleave.init&1)
           prt("cleaving wall position(s) will be copied from data");
 
         if (cleave.init&2) {
@@ -159,7 +159,7 @@
       prt("\
 Magnetic field = [ %g %g %g ] T,\n\
                applies to ions and magnetic dipoles (if any)",VARG(el.B));
-      /* static magnetic field transformed to p.u. and divided by h */ 
+      /* static magnetic field transformed to p.u. and divided by h */
       VV(Eext.B,=(chargeunit*timeunit/massunit)*el.B)
       VVO(Eext.Bh,=Eext.B,/h) }
 
@@ -170,4 +170,6 @@ Magnetic field = [ %g %g %g ] T,\n\
       prt("Magnetic dipoles sp=%d bond %d(+)--%d(-) m=%g A m2",
           el.m.sp,el.m.plus,el.m.minus,el.m.m); }
 
-  
+    if (el.Ezsin) {
+      Eext.Ezsin=el.Ezsin*(chargeunit/forceunit);
+      prt("Space-modulated electrostatic field %g[V/m]*sin(z*2*PI/Lz)",el.Ezsin); }

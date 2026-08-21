@@ -1,4 +1,4 @@
-#define VERSION "3.7m"
+#define VERSION "3.7o"
 
 #if defined(LINKCELL) && defined(FREEBC)
 #  error "LINKCELL not supported for FREEBC"
@@ -699,7 +699,9 @@ Selected program units (p.u.):\n\
 A quantity printed without units is in p.u. or dimensionless,\n\
 see MACSIMUS/sim/units.h for details.\n\
 Units are in [] for compatibility with the MACSIMUS calculator \'evu\';\n\
-also, [+UNIT] converts to p.u. and [-UNIT] backwards, see evu -> p(.)units.",
+also, [+UNIT] converts to p.u. and [-UNIT] backwards, see evu -> p(.)units.\n\
+Example: force 123 p.u. (as dumped using option -l1000) can be converted to\n\
+N using \'evu\' command 123[-N]\n",
         massunit,Munit,
         energyunit,Eunit,Eunit/kcal*1e3,
         Punit,
@@ -901,13 +903,10 @@ The loaded numbers of molecules differ from the specified ones\n\
 
     err=sqrt(Sqr(log(box.L[0]/L[0]))+Sqr(log(box.L[1]/L[1]))+Sqr(log(box.L[2]/L[2])));
     if (err>1e-15) {
-      prt("\
-WARNING: The actual (loaded/initial) box size differs from the reference size\n\
-         box.L=[%.12g %.12g %.12g]\n\
-         V=%.12g  rho=%.12g [kg/m3]\n\
-         (mean relative error = %g)",
-          VARG(box.L),PROD(box.L),rhounit*No.mass/PROD(box.L),
-          err);
+      prt("Loaded: box.L=[%.12g %.12g %.12g]  V=%.12g\n\
+        rho=%.12g [kg/m3] (rel.err. from ref. = %.3g)",
+          VARG(box.L), PROD(box.L),
+          rhounit*No.mass/PROD(box.L), err);
       if (err>1e-7) {
         if (tau.P) {
           if (box.L[0]/L[0]-1<0 || box.L[1]/L[1]-1<0 || box.L[2]/L[2]-1<0)

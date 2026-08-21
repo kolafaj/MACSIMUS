@@ -2,7 +2,8 @@
 
 This utility automates diffusion (D) and conductivity (kappa) calculations.
 
-07/2025: update to match new features of cook, small improvements
+08/2026: V3.2: -J (maxjumplimit) added
+07/2025: V3.1: update to match new features of cook, small improvements
 09/2019: bit of cleaning
 05/2017: V3.0 compatible with cook V3.0a and newer, viscosity removed
          env.variable PLB2DIFF removed, synopsis changed
@@ -92,7 +93,6 @@ Optimization:
    0.625    1.25066
    0.5      1.39198
    0.4      1.58114
-   1        1 (independent blocks)
 It means that coverage around 3 gives about 0.73 times smaller error
   than if the same data were generated as independent blocks (i.e.,
   almost 0.73^2~0.5 CPU time is needed).
@@ -109,8 +109,9 @@ Bugs:
 #include "sdfit.h"
 #include "cpmark.h"
 #include "statics.h"
-#include "maxjump.h"
 #include <unistd.h>
+typedef double vector[3];
+#include "maxjump.h"
 
 FILE *sh;
 
@@ -141,7 +142,7 @@ int plbno(char *fn) /************************************************* plbno */
 int main(int narg,char **arg) /**************************************** main */
 {
   int NO=0,START=0,NBLOCKS=0;
-  double MFACTOR=0,QFACTOR=0,BLOCK=0.25,OMIT=0.25,erasetemp=1,boxfollow=0;
+  double MFACTOR=0,QFACTOR=0,BLOCK=0.25,OMIT=0.25,erasetemp=1;
   int PLOT=15,NPT=0;
   int init,no,iblock,ncps[128],ncp,icp,pass,iarg,ir;
   FILE *get=NULL,**mf=NULL,**qf=NULL;
@@ -151,7 +152,7 @@ int main(int narg,char **arg) /**************************************** main */
     double s,q;
     int n;
   } *summ,*sumq,*sum;
-  double ERR;
+  double ERR,maxjumplimit=0.45,boxfollow=5e-7;
   char *COOK=NULL,*SYSNAME=NULL,*SIMNAME=NULL,*fn,*cmd,*mode;
   static char plotm[1024]="plot ",plotq[1024]="plot ";
   double av=0,err,cov,COVERAGE=0;
@@ -172,7 +173,7 @@ int main(int narg,char **arg) /**************************************** main */
 
   if (narg<2) {
     fprintf(stderr,"\
-*** plb2diff V3.1, compatible with cook V3.0a and later ***\n\
+*** plb2diff V3.2, compatible with cook V3.0a and later ***\n\
 \n\
   Difusivity and conductivity are calculated from stored SIMNAME.plb.\n\
   The trajectory is split into (generally overlapping) blocks, which are\n\
@@ -200,9 +201,10 @@ OPTIONS (#=integer or real number):\n\
   -f#  fit Mean Square (Charge) Displacements (MSD, MSCD) to [2]\n\
          2=a+b*t, incl. error estimates [default]\n\
          3=a+b*t+c/sqrt(t) (hydrodynamic tail, no error estimates)\n\
-  -F#  box.follow for cook [default=0]: try 3e-7 for small NVT boxes, 1e-7 NPT,\n\
+  -F#  box.follow for cook [5e-7]: 3e-7 (small NVT) to 1e-6 (large, NPT),\n\
        increase with caution on ERROR \"Sorry, the fixup failed.\"\n\
   -g#x# plot geometry (size without position) [800x600]\n\
+  -J#  box.jump for cook [0.45]: smaller is safer, see the MACSIMUS manual\n\
   -k   keep all temporary files [default=remove]\n\
   -m#  calculate mass diffusivity by species [0=do not calculate]\n\
        #=factor to multiply, in cook program units ps,AA,K as follows:\n\
@@ -293,6 +295,7 @@ SEE ALSO:\n\
         case 'c': COVERAGE=f; break;
         case 'B': NBLOCKS=f; break;
         case 'm': MFACTOR=f; break;
+        case 'J': maxjumplimit=f; break;
         case 'q': QFACTOR=f; break;
         case 'p': PLOT=f; break;
         case 'k': erasetemp=0; break;
@@ -317,10 +320,12 @@ SEE ALSO:\n\
     BLOCK=(int)(BLOCK*NO);
     prt("BLOCK=%g frames set",BLOCK); }
 
-  if (OMIT<0) { ERROR(("invalid option -o%g",OMIT)) OMIT=0; }
+  if (OMIT<0) {
+    ERROR(("invalid option -o%g",OMIT))
+    OMIT=0; }
   if (OMIT<1) {
     OMIT=(int)(OMIT*BLOCK);
-    prt("OMIT=%d frames set",OMIT); }
+    prt("OMIT=%g frames set",OMIT); }
 
   fprintf(stderr,"%s %s %s %s %s <SIMNAME>\n",COOK,defaultopt,extraopt,SYSNAME,SIMNAME);
 
@@ -385,11 +390,11 @@ SEE ALSO:\n\
 MSD.mode=%d\n\
 thermostat=-1\n\
 reread.from=%d reread.to=%d\n\
-box.follow=%g\n\
+box.follow=%g  box.jump=%g\n\
 %s\n\
 dt.plb=1 init=2;\n",(MFACTOR!=0)+2*(QFACTOR!=0),
             init,no,
-            boxfollow,
+            boxfollow,maxjumplimit,
             NPT?"tau.P=1 tau.rho=0":"tau.P=0 tau.rho=1");
     if (fclose(get)) ERROR(("%s write error",fn))
 
@@ -637,24 +642,27 @@ Relative error=ERR/fit slope\n");
 
     switch (*mode) {
       case 'm':
-        prt("diffusion coefficients [in m^2/s] are obtained by multiplying column\n\
+        prt("\
+Diffusion coefficients [in m^2/s] are obtained by multiplying column\n\
 D/MFACTOR by MFACTOR, which is:\n\
   1/dt.plb          for NVT simulation (tau.P=0)\n\
   <V>^(2/3)/dt.plb  for NPT simulation (tau.P>0) [??? for not-cube]\n\
 <V> = averaged volume in AA^3 (see SIMNAME.prt)\n\
 dt.plb is in ps [to be replaced by dt.cfg if SIMNAME.1,... are used and -f-1]\n\
 NOTE: the generated .dat files are in program units and the additional factor\n\
-(to get units m^2/s from the slope) is 1e-8");
+      (to get units m^2/s from the slope) is 1e-8\n\
+CHECK: difm should be numerical zero");
 	if (MFACTOR) prt("you specified MFACTOR=%g",MFACTOR);
 	break;
       case 'q':
-	prt("conductivities [in S/m] are obtained by multiplying column kappa/QFACTOR by\n\
+	prt("\
+Conductivities [in S/m] are obtained by multiplying column kappa/QFACTOR by\n \
 QFACTOR, which is:\n\
   1/(V*T*dt.plb)          for NVT simulation (tau.P=0)\n\
   1/(<V>^(1/3)*T*dt.plb)  for NPT simulation (tau.P>0) [??? for not-cube]\n\
 (T = temperature in K, V = volume in AA^3, dt.plb is in ps)\n\
 NOTE: the generated .dat files are in program units and the additional factor\n\
-(to get units S/m from the slope) is 111.26502");
+      (to get units S/m from the slope) is 111.26502");
 	if (QFACTOR) prt("you specified QFACTOR=%g",QFACTOR);
 	break; } }
 
@@ -680,19 +688,17 @@ NOTE: the generated .dat files are in program units and the additional factor\n\
       if (!fread(&m1j,sizeof(m1j),1,aux)) ERROR(("%s truncated",fn))
 
       loop (k,0,3) {
-        prt_("%10.5f %8.5f ",mj.xi[k],m1j.xi[k]);
-	if (fabs(mj.xi[k])>fabs(maxjump.xi[k])) {
-	  maxjump.xi[k]=mj.xi[k];
-	  maxjump.i[k]=mj.i[k];
+        prt_("%10.5f %8.5f ",mj.r[k],m1j.r[k]);
+	if (fabs(mj.r[k])>fabs(maxjump.r[k])) {
+	  maxjump.r[k]=mj.r[k];
 	  maxjump.n[k]=mj.n[k];
 	  maxjump.frame[k]=mj.frame[k];
-	  maxjump.no  =mj.no; }
-	if (fabs(m1j.xi[k])>fabs(max1jump.xi[k])) {
-	  max1jump.xi[k]=m1j.xi[k];
-	  max1jump.i[k]=m1j.i[k];
+	  maxjump.to  =mj.to; }
+	if (fabs(m1j.r[k])>fabs(max1jump.r[k])) {
+	  max1jump.r[k]=m1j.r[k];
 	  max1jump.n[k]=m1j.n[k];
 	  max1jump.frame[k]=m1j.frame[k];
-	  max1jump.no  =m1j.no; } }
+	  max1jump.to  =m1j.to; } }
       prt("  JUMP"); }
 
     header("");
@@ -701,28 +707,34 @@ NOTE: the generated .dat files are in program units and the additional factor\n\
 
     loop (k,0,3) {
       prt("=== %c-axis ===\n\
-max jump over periodic boxes in blocks:\n\
-  %f*L (no=%d frame=%d mol.site=%d.%d)",
+max distance traveled over periodic boxes in blocks:\n\
+  %f*L (no=%d frame=%d mol=%d)",
          k+'x',
-         maxjump.xi[k],maxjump.no,maxjump.frame[k],maxjump.n[k],maxjump.i[k]);
-     prt("max jump between consecutive frames:\n\
-  %f*L (no=%d frames=%d->%d mol.site=%d.%d)",
-     max1jump.xi[k],max1jump.no,max1jump.frame[k]-1,max1jump.frame[k],max1jump.n[k],max1jump.i[k]);
-     if (fabs(max1jump.xi[k])>0.45)
-       WARNING(("max jump between consecutive frames %.4f*L is very close to +-L/2\n\
+         maxjump.r[k],maxjump.to,maxjump.frame[k],maxjump.n[k]);
+
+      prt("max jump between consecutive frames:\n\
+  %f*L (no=%d frames=%d->%d mol=%d)",
+     max1jump.r[k],max1jump.to,max1jump.frame[k]-1,max1jump.frame[k],max1jump.n[k]);
+
+      if (fabs(max1jump.r[k])>maxjumplimit)
+       WARNING(("Maximum jump between consecutive frames %.4f*L is over limit %.4f*L\n\
 *** Program cook* (called from plb2diff) checks the center-of-mass condition\n\
 *** and may have fixed a jump of one molecule by more than half the box.\n\
-*** You should check:\n\
-    - table JUMP above\n\
-    - check difm in table DIFFUSION and the last column of %s.msd.dat\n\
-    - rerun plb2diff with -k and watch WARNING \'Center of mass has shifted\'",
-                max1jump.xi[k],SIMNAME)) }
+*** You should:\n\
+    - Check table JUMP above\n\
+    - Check that difm in table DIFFUSION\n\
+      and the last column of %s.msd.dat are tiny\n\
+    - Rerun plb2diff with -k and:\n\
+      * Watch WARNING \'Center of mass has shifted\'\n\
+      * Find lines with maxthisjump.r= and nextthisjump.r= :\n\
+        if nextthisjump.r is not small, the fixup may be wrong!",
+                max1jump.r[k],maxjumplimit,SIMNAME)) }
 
     if (fabs(MYRes("difm","B"))>3e-7)
       WARNING(("difm=%g is not tiny (up to 1e-5 acceptable for large systems)\n\
 *** possible causes:\n\
 *** - nonzero momentum (check variable  drift )\n\
-*** - nearest image problems because of too long  dt.plb\n\
+*** - nearest image problems because of too long dt.plb\n\
 ***   (see max jump between consecutive frames)",MYRes("difm","B")))
 
     fclose(aux);
@@ -753,6 +765,7 @@ max jump over periodic boxes in blocks:\n\
   Setenv("PLOTGEOMETRY",string("%s+45+45",geometry));
   Setenv("PLOTNAME",string("<MSD(t)-b*t %s %s>",arg[2],arg[3]));
   Setenv("b",string("%.9g",msdb));
+  fprintf(sh,"echo \"NB: parameter b exported and the linear part subtracted: Ctrl-b for plain view\"\n");
   sprintf(strend(plotm)," %s.msd.fit",SIMNAME);
   loop (icp,0,ncp-1) sprintf(strend(plotm),":1:\"%c-b*A:%d-\" ",'B'+icp,icp+1);
   strcat(plotm," &");
@@ -765,6 +778,7 @@ max jump over periodic boxes in blocks:\n\
   Setenv("PLOTGEOMETRY",string("%s+60+60",geometry));
   Setenv("PLOTNAME",string("<MSCD(t)-b*t %s %s>",arg[2],arg[3]));
   Setenv("b",string("%.9g",mscdb));
+  fprintf(sh,"echo \"NB: parameter b exported and the linear part subtracted: Ctrl-b for plain view\"\n");
   sprintf(strend(plotm)," %s.mscd.fit",SIMNAME);
   loop (icp,0,ncp) sprintf(strend(plotm),":1:\"%c-b*A:%d-\" ",'B'+icp,icp+1);
   strcat(plotm," &");

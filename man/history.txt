@@ -110,6 +110,19 @@ HISTORY
   * feature changed
   - feature removed
 
+cook 3.7o:
+plb2diff 3.2:
+  ! following the periodic b.c. improved and safer now
+
+rdfg 07/2026:
+  ! histogram overflow ad hoc fix, option -o added, print default formats fixed
+  
+cook 3.7n:
+  + sin-modulated elst field added
+
+plot 2.0u:
+  + on click, print file name of the nearest point
+
 cook 3.7m:
   + metadynamics updated: pre-bias exponent wl.n -> weight = 1/r^wl.n
 
@@ -136,7 +149,7 @@ cook 3.7i:
 
 blend V2.4g:
   * M-dependant new format
-  
+
 cook 3.7h:
   + C-dependants added, tested on C of CO2
   - M-dependants must have key M prepended (old format no longer supported)
@@ -153,7 +166,7 @@ cook 3.7e:
 
 cook 3.7d:
   # slab cutoff correction was wrong for more LJ sites than 1 - fixed
-  
+
 cook 3.7c:
   + box.follow added
   ! following the periodic b.c. for MSD, conductivity fixed (affects border cases)
@@ -208,7 +221,7 @@ cook 3.6s:
 cook V3.6r:
   ! enthalpy in NVT/NVE
   ! el. background in FREEBC control
- 
+
 cppak:
   ! bug in the linked-list used inernally fixed
 

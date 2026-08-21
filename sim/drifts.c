@@ -190,7 +190,7 @@ void measure1drift(int n) /*********************************** measure1drift */
   int j,k;
 
   int nx,ix;
-  int ixmin,imin,nxmin,nsx=0;
+  int ixmin=0,imin=0,nxmin=0,nsx=0;
   double rrmin=9e99;
 
   underline("evaporated molecule");

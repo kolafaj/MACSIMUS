@@ -78,7 +78,10 @@ atoms
  45 MOPC  0 0   0        0 M  OPC auxiliary site                         
  46 OOPC  0 0  15.99940  8 O  OPC oxygen                                 
  47 XE     1 0 131.29    54  Z  Xenon
- 50 OOX   0 0  15.99940  8 O oxonium, SPCE-compatible, geom.rule doi: 10.1063/1.4942771
+ 48 HEPS   0 0   1.00800  1 H  TIP4P/eps  water model hydrogen
+ 49 MEPS   0 0   0        0 M  TIP4P/eps  auxiliary site
+ 50 OEPS   0 0  15.99940  8 O  TIP4P/eps  oxygen
+ 51 OOX   0 0  15.99940  8 O oxonium, SPCE-compatible, geom.rule doi: 10.1063/1.4942771
  52 ORAD  0 0  15.99940  8 O for radical OH`
  
 Lennard-Jones
@@ -99,6 +102,10 @@ M4       1       0             1
 H4EW       0.044   0             0.800    ! no LJ
 O4EW       0.44    -0.16275     1.7759314
 M4EW       1       0             1
+! TIP4P/eps:
+HEPS       0.044   0             0.800    ! no LJ
+OEPS       0.44    -0.18481     1.7762962
+MEPS       1       0             1
 !
 ! TIP4P/2005:
 H405       0.044   0             0.800    ! no LJ
@@ -186,6 +193,9 @@ M405   O405     800         0.1546
 H4I    O4I      450         0.9572
 M4I    O4I      800         0.1577
 !
+HEPS    OEPS      450        0.9572
+MEPS    OEPS     800         0.105
+!
 HF   OF     250         1
 !
 O5   H5     450         0.9572
@@ -225,6 +235,9 @@ H405   O405   M405      55.0      52.26
 !
 H4I    O4I    H4I       55.0     104.52
 H4I    O4I    M4I       55.0      52.26
+!
+HEPS    OEPS    HEPS       55.0     104.52
+HEPS    OEPS    MEPS       55.0      52.26
 !
 HF   OF   HF      60       109.47122
 !
@@ -335,6 +348,15 @@ SPC   3 H .41   H .41   O -.82
 !    O4I-M4In1.1794
 !      \
 !       H4Ip.5897
+
+! TIP4P/eps
+! parameter_set = water
+!
+!       HEPSp.527
+!      /
+!    OEPS-MEPSn1.054
+!      \
+!       HEPSp.527
 
 ! OPC water model
 ! parameter_set = water

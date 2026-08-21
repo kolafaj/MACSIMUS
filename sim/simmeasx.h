@@ -3,7 +3,7 @@ void calculateSF(void);
 void printfSF(void);
 
 void initMSD(double dtplb);
-void calculateMSD(int n,int no);
+void calculateMSD(int frame,int to);
 void printMSD(void);
 
 #ifdef XSECTION

@@ -17,6 +17,11 @@
   14     blue  odot        -- - -- -
   15  =1, etc
 
+
+  07/2026 (2.0u) on click, print file name of the nearest point
+  
+  11/2024 (2.0t) kill all button wrong info fixed
+
   12/2023 (2.0s) ! missing column 2 filled by the prev value in plot file (w/o :)
 
   02/2023 buggy hot key U fixed
@@ -24,11 +29,11 @@
   10/2022 -n changed to NAME (ps.def -> NAME.def, plot.eps -> NAME.eps)
     active variables added to ps output
 
-  5/2020 (2.0q) bit cleaned, hotkeys [ ] 0..9 fixed, hotkey U added
+  05/2020 (2.0q) bit cleaned, hotkeys [ ] 0..9 fixed, hotkey U added
 
   11/2016 interface changed to xdraw.c, LAZYX11 removed
 
-  7/2009 interface to fit.c extended, some hot keys changes
+  07/2009 interface to fit.c extended, some hot keys changes
 
   01/2007 interface to fit.c - hot key t,T,ctrl-t
     must be called as (example):
@@ -70,7 +75,7 @@ or (sh/bash)
   export PLOTINIT="#q"
 */
 
-#define VERSION "2.0t"
+#define VERSION "2.0u"
 
 /* allows changing param a by hotkeys a A etc. */
 #include "parm.h"
@@ -527,7 +532,7 @@ int main(int narg,char **arg) /**************************************** main */
   Iopt=iarg;
   I0=iarg;
 
-  if (!xwindowhints.winname) {  
+  if (!xwindowhints.winname) {
     int l=6;
 
     loop (i,1,narg) if (arg[i][0]!='-') l+=1+strlen(arg[i]);
@@ -787,7 +792,7 @@ int main(int narg,char **arg) /**************************************** main */
   } /* iarg & @resp-file */
 
   looplist (f,head) f->colydup=dupstr(f->coly);
-  
+
   if (0) looplist (f,head) {
       fprintf(stderr,"DEBUG LIST1 %s x=%s y=%s max=%d :%p:%p\n",
               f->fn,f->colx,f->coly,f->maxcol,f->colon[0],f->colon[1]);
@@ -808,7 +813,7 @@ int main(int narg,char **arg) /**************************************** main */
   lsty=1;
   repeatprefix('`');
 
-  
+
  notify:
 
   if (display) {
@@ -870,8 +875,7 @@ int main(int narg,char **arg) /**************************************** main */
 
     looplist (f,head) if (f->fn[0]!='@') {
 
-      if (0) fprintf(stderr,"DEBUG LIST2 %s x=%s y=%s max=%d :%p:%p\n",
-                     f->fn,f->colx,f->coly,f->maxcol,f->colon[0],f->colon[1]);
+      // fprintf(stderr,"DEBUG LIST2 %s x=%s y=%s max=%d :%p:%p\n", f->fn,f->colx,f->coly,f->maxcol,f->colon[0],f->colon[1]);
 
       if (f->errbar && iserrbar)
         drawerrbar(numberedfile(f->fn),
@@ -1178,6 +1182,18 @@ int main(int narg,char **arg) /**************************************** main */
             //            prt("l %s ",clipit);
             if (col==LIGHTCYAN) col=YELLOW; else col=LIGHTCYAN;
             setcolor(col);
+
+            double minrr=9e9;
+            char minfn[256];
+            minfn[0]=0;
+
+            looplist (f,head) if (f->fn[0]!='@') {
+              char *nf=numberedfile(f->fn);
+              double rr=clickfile(nf,f->colx,f->coly,f->maxcol,x,y);
+              if (rr<minrr) {
+                minrr=rr; strcpy(minfn,nf); } }
+            if (minrr<110) prt("%% nearest point of file \'%s\' %.0f pix",minfn,sqrt(minrr));
+
             line(dosmouse.x-8,dosmouse.y,dosmouse.x+8,dosmouse.y);
             line(dosmouse.x,dosmouse.y-8,dosmouse.x,dosmouse.y+8);
             if (display) {

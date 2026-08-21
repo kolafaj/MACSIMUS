@@ -26,14 +26,12 @@
 #include "norm.h" /* int iscube(void) */
 #include "asksig.h"
 #include "simdef.h"
-
 #ifdef CLUSTERS
 #  include "intermac.h"
 #  include "cluster.c" /* updated and fixed 9/2009 */
 extern cl_t cl;
 #endif /*# CLUSTERS */
 
-static vector oldL,lastL; /* ? - probably the same */
 
 /*** structure factor ***/
 
@@ -41,6 +39,7 @@ static vector oldL,lastL; /* ? - probably the same */
 static int kk,nsf;
 static double sumw=0,sumwq=0;
 vector SFsumL;
+static vector lastL;
 #endif
 
 void initSF(void) /************************************************** initSF */
@@ -88,7 +87,7 @@ void initSF(void) /************************************************** initSF */
     allocarrayzero(el.sf3d,el.sfsize=kk*4); }
 
   if (tau.P) {
-    VV(oldL,=box.L)
+    VV(lastL,=box.L)
     /* WARNING: this will fail probably if not cube ... */
     if (iscube())
       WARNING(("initSF: el.sf=%d tau.P=%g\n\
@@ -98,7 +97,7 @@ void initSF(void) /************************************************** initSF */
 *** variable non-cubic box not supported",el.sf,tau.P))
     VO(box.L,=1) VO(box.Lh,=0.5)
     Ewald(0,NULL,NULL);
-    VV(box.L,=oldL) VV(box.Lh,=0.5*box.L) }
+    VV(box.L,=lastL) VV(box.Lh,=0.5*box.L) }
   else
     /* fixed box size */
     Ewald(0,NULL,NULL);
@@ -116,7 +115,7 @@ void calculateSF(void) /**************************************** calculateSF */
 
   if (tau.P) {
     /* WARNING: box scaled to 1-cube, structure factor = ??? */
-    VV(oldL,=box.L)
+    VV(lastL,=box.L)
     if (!iscube())
       ERROR(("calculateSF: variable non-cubic box not supported"))
     VO(box.L,=1) VO(box.Lh,=0.5)
@@ -125,7 +124,7 @@ void calculateSF(void) /**************************************** calculateSF */
     Ewald(1,NULL,cfg[0]->rp);
     Ewald(2,NULL,cfg[0]->rp);
 
-    VV(box.L,=oldL) VV(box.Lh,=0.5*box.L) }
+    VV(box.L,=lastL) VV(box.Lh,=0.5*box.L) }
   else {
     /* the structure factor - fixed box */
     Ewald(1,NULL,cfg[0]->rp);
@@ -218,16 +217,20 @@ void printfSF(void) /************************************************ printfSF *
 
 static double **charge; /* copy of charges; note that si[].charge is rewritten! */
 static ToIntPtr lastcfg,firstcfg;
-static vector lastCM;
+static vector CMcfglast;
 static vector *rcenter;
 static FILE *qcp,*mcp;
 static float *rcp;
 static int nL,ndiff,nd;
 static double sumV,sumL,sumL2,dt,firstt;
 
+/* NB: "jump" here means the displacement extended by following
+       the trajectory over periodic boundaries */
 static struct maxjump_s
-  maxjump= {{0,0,0},{-1,-1,-1},{-1,-1,-1},{-1,-1,-1}},
-  max1jump={{0,0,0},{-1,-1,-1},{-1,-1,-1},{-1,-1,-1}};
+  /* max jump over the whole trajectory: */
+maxjump= {{0,0,0},{-1,-1,-1},{-1,-1,-1},-1},
+  /* max of all 1-frame jumps: */
+  max1jump={{0,0,0},{-1,-1,-1},{-1,-1,-1},-1};
 
 void initMSD(double dtplb) /**************************************** initMSD */
 /* preparation of data structures
@@ -284,217 +287,185 @@ WARNING: box.follow=%g (plb2diff -F%g) is likely too long.\n\
                : " t-t0[ps] t[ps]       msd [AA^2]    mscd     L [AA]  ");
 }
 
-void calculateMSD(int n,int no) /****************************** calculateMSD */
+void calculateMSD(int frame,int to) /************************** calculateMSD */
 {
-  int i,j,sp,ns;
-  vector *rrow=rof(molec,cfg[0]->rp); /* r: access by No.s sites */
+  int i,n,k,sp,ns;
   vector dr,*firstr,*r=NULL; /* initialized to suppress compile warning */
 #ifndef FREEBC
   vector *lastr;
-  vector CM;
+  vector CMcfg;
+  static vector firstL;
 #endif
   struct msd_s {
     double m,q;
     int n;
   } *msd,*msp;
   vector msdm,msdq,CMshift;
-  double totm,totq,CMshiftabs;
+  double totm,totq;
   siteinfo_t *si;
-  struct maxjump_s maxthisjump= {{0,0,0},{-1,-1,-1},{-1,-1,-1},{-1,-1,-1}};
+  struct maxjump_s
+    maxthisjump= {{0,0,0},{-1,-1,-1},{-1,-1,-1},-1},
+    nextthisjump= {{0,0,0},{-1,-1,-1},{-1,-1,-1},-1};
 
-  if (tau.P) { /* rescale to box 1^3 in place in cfg[0] */
-    loop (i,0,No.s) VV(rrow[i],/=box.L)
+  if (tau.P) {
     if (!iscube()) ERROR(("not cube (2nd check)"))
 
     sumL+=box.L[0];
     sumL2+=Sqr(box.L[0]);
     sumV+=PROD(box.L);
-    nL++;
-    VV(oldL,=box.L)
-    VO(box.L,=1)
-    VO(box.Lh,=0.5) }
+    nL++; }
 
   if (!ndiff) sdscopy(firstcfg,cfg[0])
 
 #ifndef FREEBC
   /* remove nearest image jumps in the molecule moves */
-  if (!ndiff) CoM(lastCM,firstcfg);
+  if (!ndiff) {
+    CoM(CMcfglast,firstcfg);
+    VV(firstL,=box.L)
+    firstt=t;
+    VV(CMcfglast,/=box.L) }
   else {
-    loop (j,FROM,No.N) {
-      r=     rof(molec+j,cfg[0]->rp);
-      firstr=rof(molec+j,firstcfg->rp);
-      lastr= rof(molec+j,lastcfg->rp);
-      ns=molec[j].ns;
+    double D;
 
+    loop (n,FROM,No.N) {
+      vector CMmol={0,0,0},CMlast={0,0,0},CMfirst={0,0,0}; /* inefficient */
+      molecule_t *mn=molec+n;
+      siteinfo_t *si=spec[mn->sp]->si;
+
+      r=     rof(mn,cfg[0]->rp);
+      firstr=rof(mn,firstcfg->rp);
+      lastr= rof(mn,lastcfg->rp);
+      ns=molec[n].ns;
+
+      /* here we rescale to unit box */
       loop (i,0,ns) {
-        int k;
-        double D;
+        VVV(CMmol,+=si[i].mass*r[i],/box.L)
+        /* inefficient: unnecessarily recalculated, but more compact code */
+        VVV(CMlast,+=si[i].mass*lastr[i],/lastL)
+        VVV(CMfirst,+=si[i].mass*firstr[i],/firstL) }
+      VO(CMmol,/=spec[mn->sp]->mass)
+      VO(CMlast,/=spec[mn->sp]->mass)
+      VO(CMfirst,/=spec[mn->sp]->mass)
 
-        loop (k,0,3) {
-          D=r[i][k]/box.L[k]-lastr[i][k]/lastL[k];
-          while (D>0.5)  { r[i][k]-=box.L[k]; D-=1; }
-          while (D<-0.5) { r[i][k]+=box.L[k]; D+=1; }
-          /* now r (cfg[0]) moves continuously over periodic boxes */
+      loop (k,0,3) {
+        D=CMmol[k]-CMlast[k];
+        while (D>0.5)  { loop (i,0,ns) r[i][k]-=box.L[k]; D-=1; CMmol[k]-=1; }
+        while (D<-0.5) { loop (i,0,ns) r[i][k]+=box.L[k]; D+=1; CMmol[k]+=1; }
+        /* now r (cfg[0]) moves continuously over periodic boxes */
 
-          if (fabs(D)>fabs(maxthisjump.xi[k])) {
-            maxthisjump.xi[k]=D;
-            maxthisjump.frame[k]=n;
-            maxthisjump.n[k]=j;
-            maxthisjump.i[k]=i;
-            maxthisjump.no=no; }
+        /* two max jumps after 1 frame */
+        if (fabs(D)>fabs(maxthisjump.r[k])) {
+          nextthisjump.r[k]=maxthisjump.r[k];
+          maxthisjump.r[k]=D;
+          nextthisjump.frame[k]=maxthisjump.frame[k];
+          maxthisjump.frame[k]=frame;
+          nextthisjump.n[k]=maxthisjump.n[k];
+          maxthisjump.n[k]=n;
+          nextthisjump.to=maxthisjump.to;
+          maxthisjump.to=to; }
 
-          if (fabs(D)>fabs(max1jump.xi[k])) {
-            max1jump.xi[k]=D;
-            max1jump.frame[k]=n;
-            max1jump.n[k]=j;
-            max1jump.i[k]=i;
-            max1jump.no=no; }
+        /* record the absolute maximum */
+        if (fabs(D)>fabs(max1jump.r[k])) {
+          max1jump.r[k]=D;
+          max1jump.frame[k]=frame;
+          max1jump.n[k]=n;
+          max1jump.to=to; }
 
-          D=r[i][k]/box.L[k]-firstr[i][k]/lastL[k];
-          if (fabs(D)>fabs(maxjump.xi[k])) {
-            maxjump.xi[k]=D;
-            maxjump.frame[k]=n;
-            maxjump.n[k]=j;
-            maxjump.i[k]=i;
-            maxjump.no=no; } } } }
+        /* displacement from 1st configuration */
+        D=CMmol[k]-CMfirst[k];
+        if (fabs(D)>fabs(maxjump.r[k])) {
+          maxjump.r[k]=D;
+          maxjump.frame[k]=frame;
+          maxjump.n[k]=n;
+          maxjump.to=to; } } } /*n*/
 
-    CoM(CM,cfg[0]);
-    VVV(CMshift,=CM,-lastCM)
-    CMshiftabs=sqrt(SQR(CMshift));
+    CoM(CMcfg,cfg[0]);
+    VV(CMcfg,/=box.L)
+    VVV(CMshift,=CMcfg,-CMcfglast)
 
-    if (CMshiftabs>box.follow) { /* Center of mass has shifted too much */
-      double maxD=0;
-      int k,kk=-1;
+    putv(CMshift)
 
-      putv(max1jump.xi)
-      putv(max1jump.frame)
-      putv(max1jump.n)
-      putv(max1jump.i)
-      put(max1jump.no)
+    loop (k,0,3) {
 
-      putv(maxthisjump.xi)
-      putv(maxthisjump.frame)
-      putv(maxthisjump.n)
-      putv(maxthisjump.i)
-      put(maxthisjump.no)
+      if (fabs(CMshift[k])>box.follow) {
+        /* center of mass has shifted too much */
 
-      WARNING(("Center of mass has shifted by %g in frame %d\n\
-*** in the block starting from frame %d.\n\
-*** CM(prev)= %10.6f %10.6f %10.6f\n\
-*** CM(this)= %10.6f %10.6f %10.6f\n\
-*** CMshift = %10.6f %10.6f %10.6f\n\
-*** Double check box.follow (plb2diff -F)!\n\
-*** I will try to fix it assuming that a single molecule has moved by more\n\
-*** than L/2 in one direction.",
-                                              CMshiftabs,
-           no,                          n,
-               VARG(lastCM),
-               VARG(CM),
-               VARG(CMshift)))
+        WARNING(("\
+Center of mass in coordinate %c (k=%d) has shifted by %g*L[k]\n\
+*** in frame %d (t=%g) in the block starting from frame %d.\n\
+*** CM(prev)= %13.9f  CM(this)= %13.9f  CMshift = %13.9f\n\
+*** Double-check box.follow=%g (plb2diff -F%g)!\n\
+*** I'll try to fix it assuming that a single molecule has moved by > L/2.",
+                 'x'+k,k,CMshift[k],
+                 to, frame, t,
+               CMcfglast[k],CMcfg[k],CMshift[k],box.follow,box.follow))
 
-      if (box.follow<6e-7) prt("\
-WARNING: box.follow=%g (plb2diff -F%g) might be too short.\n\
-         The typical range is 2e-7 to 4e-7.",box.follow,box.follow);
+        prt("max1jump.r=%g frame=%d n=%d no=%d (max jump so far)",
+            max1jump.r[k], max1jump.frame[k],
+            max1jump.n[k], max1jump.to);
+        prt("maxthisjump.r=%g frame=%d n=%d no=%d (max jump from prev frame)",
+            maxthisjump.r[k], maxthisjump.frame[k],
+            maxthisjump.n[k], maxthisjump.to);
+        prt("nextthisjump.r=%g frame=%d n=%d no=%d (2nd max jump from prev frame)",
+            nextthisjump.r[k], nextthisjump.frame[k],
+            nextthisjump.n[k], nextthisjump.to);
+        D=fabs(maxthisjump.r[k])-fabs(nextthisjump.r[k]);
+        if (D<0.5-box.jump)
+          ERROR(("A molecule to follow is likely not unique (D=%g),\n\
+*** check box.jump (plb2diff -J).",D))
+        if (D<2*(0.5-box.jump))
+          WARNING(("A molecule to follow may not be unique (D=%g),\n\
+*** check box.jump (plb2diff -J).",D))
+        else
+          prt("The next next longest jump is short enough (D=%g).",D);
 
-      /* fix using the longest jump */
-      loop (k,0,3) if (fabs(maxthisjump.xi[k])>fabs(maxD)) {
-        j=maxthisjump.n[k];
-        maxD=maxthisjump.xi[k];
-        kk=k; }
-      if (k<0) ERROR(("internal"))
-      k=kk;
-      prt("The longest jump found for mol=%d jump[%d]=%g L\n\
-corrected CMshift:",j,k,maxD);
-      ns=molec[j].ns;
+        /* fix using the longest jump */
+        n=maxthisjump.n[k];
+        D=maxthisjump.r[k];
+        prt("The longest jump found for mol=%d jump[%d]=%g L",n,k,D);
+        ns=molec[n].ns;
 
-      r=rof(molec+j,cfg[0]->rp);
+        r=rof(molec+n,cfg[0]->rp);
+        loop (i,0,ns) r[i][k]-=sign(D)*box.L[k];
+        D-=sign(D);
+        maxjump.r[k]=D;
+        max1jump.r[k]=D;
 
-      loop (i,0,ns) r[i][k]-=sign(maxD)*box.L[k];
-      maxD-=sign(maxD);
-      maxjump.xi[k]=maxD;
-      max1jump.xi[k]=maxD;
+        CoM(CMcfg,cfg[0]);
+        VV(CMcfg,/=box.L)
+        VVV(CMshift,=CMcfg,-CMcfglast)
+        prt("Corrected CoM shift = %g",CMshift[k]);
+        if (CMshift[k]<box.follow)
+          prt("*** The fixup has been successful. ***\n");
+      else
+        ERROR(("The fixup failed.")) }
+    } /* k */
 
-      CoM(CM,cfg[0]);
-      VVV(CMshift,=CM,-lastCM)
-      CMshiftabs=sqrt(SQR(CMshift));
-      putv(CMshift)
-      if (CMshiftabs<box.follow)
-        prt("The fixup has been successful, max jump=%g!",CMshiftabs);
-      else {
-        double dm=0,d,DCM,sh,q;
-        int nhits=0,jj;
-        
-        WARNING(("The fixup using the longest jump failed.\n\
-*** I will try harder..FINGERS CROSSED, THIS CODE HAS NOT BEEN DEBUGGED"))
+    VV(CMcfglast,=CMcfg) }
 
-        /* returning the configuration before fix */
-        loop (i,0,ns) r[i][k]+=sign(maxD)*box.L[k];
-        CoM(CM,cfg[0]);
-        VVV(CMshift,=CM,-lastCM)
-
-        k=0; /* finding the coordinate with bad shift */
-        dm=fabs(CMshift[0]);
-        d=fabs(CMshift[1]);
-        if (d>dm) k=1,dm=d;
-        d=fabs(CMshift[2]);
-        if (d>dm) k=2,dm=d;        
-
-        /* trying all molecules in the k-axis */
-        loop (j,0,No.N) {
-          sp=molec[j].sp;
-          ns=molec[j].ns;
-          q=spec[sp]->mass/No.mass;
-          DCM=CMshift[k]+q*box.L[k];
-          if (fabs(DCM)<box.follow) jj=j,nhits++,sh=box.L[k];
-          DCM=CMshift[k]-q*box.L[k];
-          if (fabs(DCM)<box.follow) jj=j,nhits++,sh=-box.L[k]; }
-
-        put2(nhits,k)
-        
-        if (nhits!=1) ERROR(("The fixup failed: nhits=%d,k=%d.\n\
-*** Try to increase box.follow (but not above 1e-6)\n\
-*** Check whether tau.P in the reread mode is the same as in the simulation.\n\
-*** If called from plb2diff, check option -P.",nhits,k))
-
-      r=rof(molec+jj,cfg[0]->rp);
-      loop (i,0,ns) r[i][k]+=sh;
-      CoM(CM,cfg[0]);
-      VVV(CMshift,=CM,-lastCM)
-      putv(CMshift)
-      if (sqrt(SQR(CMshift))>box.follow) ERROR(("The fixup failed"))
-      prt("The fixup has been successful.");
-      ERROR(("THIS CODE HAS NOT BEEN DEBUGGED, double check and remove this message")) }
-    }
-
-    VV(lastCM,=CM)
-
-    if (tau.P) { /* probably not needed because cfg[0] scaled anyway */
-      VV(box.L,=oldL)
-      VV(box.Lh,=0.5*box.L) } }
 #endif /*# FREEBC */
 
   ndiff++;
-  fprintf(stderr,"\r%d %d:%d ",ndiff,n,no);
+  fprintf(stderr,"\r%d %d:%d ",ndiff,frame,to);
 
   allocarrayzero(msd,nspec);
   VVO(msdm,=msdq,=0)
 
-  loop (j,FROM,No.N) {
+  loop (n,FROM,No.N) {
     vector vm,vq;
     double summ=0;
 
     VVO(vm,=vq,=0)
-    firstr=rof(molec+j,firstcfg->rp);
-    r=rof(molec+j,cfg[0]->rp);
-    ns=molec[j].ns;
-    sp=molec[j].sp;
+    firstr=rof(molec+n,firstcfg->rp);
+    r=rof(molec+n,cfg[0]->rp);
+    ns=molec[n].ns;
+    sp=molec[n].sp;
     msp=msd+sp;
     msp->n++;
     si=spec[sp]->si;
 
     loop (i,0,ns) {
-      VVV(dr,=r[i],-firstr[i])
-
+      loop (k,0,3) dr[k]=r[i][k]/box.L[k]-firstr[i][k]/firstL[k];
       VV(vq,+=charge[sp][i]*dr)
       VV(vm,+=si[i].mass*dr)
       summ += si[i].mass; }
@@ -504,16 +475,16 @@ corrected CMshift:",j,k,maxD);
     VV(msdm,+=vm)
     VV(msdq,+=vq) } /* molecules */
 
-  if (MSD.mode&4) loop (i,0,No.s) VV(rcenter[i],+=rrow[i])
-  nd++;
+  //  putv(msdm)
 
-  putv(msdm)
+  if (MSD.mode&4) loop (i,0,No.s) VVV(rcenter[i],+=rof(molec,cfg[0]->rp)[i],/box.L)
+  nd++;
 
   totm=SQR(msdm)/6;
   totq=SQR(msdq)/6;
 
   prt("%7.3f %8.3f %12.5g %12.5g (%9.5f,%9.5f,%9.5f)",
-      (n-1)*dt,firstt,totm,totq,VARG(box.L));
+      (frame-1)*dt,firstt,totm,totq,VARG(box.L));
   loop (i,0,nspec) rcp[i]=msd[i].m/(msd[i].n+(msd[i].n==0));
   rcp[nspec]=totm;
   if (mcp) fwrite(rcp,sizeof(*rcp),nspec+1,mcp);
@@ -524,7 +495,6 @@ corrected CMshift:",j,k,maxD);
 
   sdscopy(lastcfg,cfg[0]);
   VV(lastL,=box.L)
-  if (tau.P) VO(lastL,=1)
 
   free(msd);
 }
@@ -543,18 +513,20 @@ void printMSD(void) /********************************************** printMSD */
 
   if (MSD.mode&4) fcenter=fopen("center.plb","wb");
 
-  loop (k,0,3) if (maxjump.i[k]>=0) {
+  loop (k,0,3) if (maxjump.n[k]>=0) {
     prt("%c-axis:\n\
-max jump over periodic boxes = %g*L (frames 1->%d, mol.s=%d.%d)",
-        k+'x',maxjump.xi[k],maxjump.frame[k],maxjump.n[k],maxjump.i[k]);
-    prt("max jump between consecutive frames: %g*L (frames %d->%d, mol.s=%d.%d)",
-        max1jump.xi[k],max1jump.frame[k]-1,max1jump.frame[k],max1jump.n[k],max1jump.i[k]);
-    if (fabs(max1jump.xi[k])>0.4)
+max jump over periodic boxes = %g*L (frames 1->%d, mol=%d)",
+        k+'x',maxjump.r[k],maxjump.frame[k],maxjump.n[k]);
+    prt("max jump between consecutive frames: %g*L (frames %d->%d, mol=%d)",
+        max1jump.r[k],max1jump.frame[k]-1,max1jump.frame[k],max1jump.n[k]);
+    if (fabs(max1jump.r[k])>box.jump)
       WARNING(("\
-The maximum jump between consecutive frames is too close to L/2 or over!\n\
+The max raw jump between consecutive frames in %c = %g*L ~ L/2\n\
 *** Diffusions/conductivity may be wrong!\n\
-*** Check whether MSD and column difm are tiny.\n\
-*** If wrong then simulate again with a shorter dt.plb.")) }
+*** Check MSD and column difm; if not tiny, decrease dt.plb and simulate again!\n\
+*** Current setup: box.follow=%g (plb2diff -F), box.jump=%g (plb2diff -J)",
+               'x'+k,max1jump.r[k],
+               box.follow,box.jump)) }
 
   fwrite(&maxjump,sizeof(maxjump),1,aux);
   fwrite(&max1jump,sizeof(max1jump),1,aux);

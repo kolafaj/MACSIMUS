@@ -36,6 +36,7 @@ void help(void)
   H("left click","digitize: print x y, on 2nd click also dx dy");
   H("mid click","print x,y in pt, useful in \"plot.eps\",\"ps.def\"");
   H("","left or mid: if TOCLIP then copy to the clipboard");
+  H("mid click","if < 10 pix from a point, print its file name");
   H("right click","show file and parameter info");
   H("left drag","rectangle to zoom in");
   H("mid drag","move the graph (panning)");

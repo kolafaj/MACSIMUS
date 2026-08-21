@@ -127,6 +127,7 @@
         get(center.cmn)
         getvec(el.E,,DIM) get(el.f) getvec(el.phase,,DIM)
         getvec(el.B,,DIM)
+        get(el.Ezsin)          
         get(el.m.sp) get(el.m.plus) get(el.m.minus) get(el.m.m)
         get(dV)
         getkey(init,initkey)
@@ -134,7 +135,7 @@
         getkey(sort,sortkey)
         getkey(pins,pinskey) get(initrho) getkey(MC,yesno)
         get(E) get(rho) getvec(L,,DIM)
-        get(box.follow)
+        get(box.follow) get(box.jump)
 #if 0
         getvec(box.Lx,,4) getvec(box.Ly,,4) getvec(box.Lz,,4)
         getvec(box.rho,,4)

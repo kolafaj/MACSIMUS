@@ -87,7 +87,7 @@ EXPLANATION: The standard virial pressure P is calculated assuming that\n\
 "  Both values may differ also while fixing some atoms (e.g., via option -j).\n"
           ,fabs(x)>el.Perr?"WARNING: Low p":"P",x);
       if (fabs(x)>el.Perr*10) WARNING(("Too low el. virial pressure vs. tensor accuracy (%g Pa)\n\
-*** This is normal for Guassian charges or cutoff electrostatics.\n\
+*** This is normal for Gaussian charges or cutoff electrostatics.\n\
 *** For Ewald with point charges, check el.alpha, el.kappa, el.grid!",x))
     }
 #endif /*# (PRESSURETENSOR&PT_ANY) == PT_ANY */

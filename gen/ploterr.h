@@ -10,6 +10,8 @@ int minmaxfile(char *fn,
                char *colx,char *coly,
                int maxcol,
                double *X0,double *X1,double *Y0,double *Y1);
+double clickfile(char *fn,char *colx,char *coly,int maxcol,
+                 double X,double Y);
 
 extern double *count; /* needed in tabinc.c */
 
