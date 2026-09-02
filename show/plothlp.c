@@ -112,6 +112,7 @@ COLUMNS arguments (see (i)ntro):\n\
   :Y    = shortcut for :previous_X:Y or :x:Y if no previous X given\n\
   :X:Y:STYLE = plot by given STYLE (see page (s)tyle)\n\
   :X:Y:STYLE:DY = shortcut for :X:Y:STYLE:DY:DY\n\
+  :X:Y:STYLE:+N = as above with DY=Y+N\n\
   :X:Y:STYLE:DYL:DYH = plot vertical error bars (yy style=default);\n\
                        low and high bounds may differ\n\
   :X:Y:STYLE:DXL:DXH = plot horizontal error bars (xx style)\n\
@@ -124,7 +125,6 @@ Any of parameters X,Y,DX,DY.. may be:\n\
 - x,y,z are aliases for A,B,C\n\
 - column 0 = #0 = c0 = @ = n = line count (from 0), reset by blank line in file\n\
   Example (plot 1-column data): plot data.dat:0:1\n\
-For parameter STYLE, see (s)tyle\n\
 \n\
 Missing columns are copied from previous argument, default = 1:2\n\
 ";

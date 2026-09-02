@@ -40,18 +40,17 @@ highprec.xo : $(D1)/highprec.cc $(D1)/powi.c $(D1)/highprec.h $(D1)/ground.h \
   $(D1)/func.h
 	$(CPLUS) -o highprec.xo -I$(D2) -I$(D1) $(OPT) -c $(D1)/highprec.cc
 
-qmin.xo : $(D1)/qmin.c $(D1)/qmin.h $(D1)/prec.h $(D1)/fltprec.h \
-  $(D1)/longprec.h $(D1)/highprec.h
+qmin.xo : $(D1)/qmin.c $(D1)/qmin.h $(D1)/prec.h $(D1)/highprec.h
 	$(CC) -o qmin.xo -I$(D2) -I$(D1) $(OPT) -c $(D1)/qmin.c
 
 gjlineq.xo : $(D1)/gjlineq.c $(D1)/lineq.c $(D1)/gjlineq.h $(D1)/prec.h \
-  $(D1)/fltprec.h $(D1)/longprec.h $(D1)/highprec.h $(D1)/ground.h \
+  $(D1)/highprec.h $(D1)/ground.h \
   $(D1)/calc.h $(D1)/rndgen.h $(D1)/int4.h $(D1)/loop.h $(D1)/fortran.h \
   $(D1)/func.h
 	$(CC) -o gjlineq.xo -I$(D2) -I$(D1) $(OPT) -c $(D1)/gjlineq.c
 
-minimize.xo : $(D1)/minimize.c $(D1)/gjlineq.h $(D1)/prec.h $(D1)/fltprec.h \
-  $(D1)/longprec.h $(D1)/highprec.h $(D1)/minimize.h $(D1)/rndgen.h \
+minimize.xo : $(D1)/minimize.c $(D1)/gjlineq.h $(D1)/prec.h \
+  $(D1)/highprec.h $(D1)/minimize.h $(D1)/rndgen.h \
   $(D1)/int4.h $(D1)/ground.h $(D1)/calc.h $(D1)/loop.h $(D1)/fortran.h \
   $(D1)/func.h
 	$(CC) -o minimize.xo -I$(D2) -I$(D1) $(OPT) -c $(D1)/minimize.c
@@ -63,7 +62,7 @@ ground.xo : $(D1)/ground.c $(D1)/mygets.c $(D1)/mystring.c $(D1)/rndgeni.c \
 	$(CC) -o ground.xo -I$(D2) -I$(D1) $(OPT) -c $(D1)/ground.c
 
 fit.xo : $(D2)/fit.c $(D2)/fitinc.c $(D1)/ms.h $(D1)/qmin.h $(D1)/prec.h \
-  $(D1)/fltprec.h $(D1)/longprec.h $(D1)/highprec.h $(D1)/minimize.h \
+  $(D1)/highprec.h $(D1)/minimize.h \
   $(D1)/ground.h $(D1)/calc.h $(D1)/rndgen.h $(D1)/int4.h $(D1)/loop.h \
   $(D1)/fortran.h $(D1)/func.h
 	$(CC) -o fit.xo -I$(D2) -I$(D1) $(OPT) -c $(D2)/fit.c

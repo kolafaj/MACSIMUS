@@ -511,7 +511,8 @@ static void markatom(int key,int i) /****************************** markatom */
   if (curmode>=BOND) setwritemode(0);
 }
 
-void printmarkedinfo(int i) {
+void printmarkedinfo(int i) /******************************* printmarkedinfo */
+{
   char line[128];
   FILE *edt=NULL;
   int maxfw;
@@ -525,7 +526,7 @@ void printmarkedinfo(int i) {
   newedt=0;
 
   prt("--- %d: %s %s %f",i,site[i].id,site[i].type,site[i].charge);
-  prt("    [%8.5f %8.5f %8.5f ]",cfg[i][0],cfg[i][1],cfg[i][2]);
+  prt("    [%10.7f %10.7f %10.7f ]",cfg[i][0],cfg[i][1],cfg[i][2]);
 
   maxfw=maxx/xfont.width;
   setfillstyle(0,0); /* black in both modes */
@@ -551,8 +552,8 @@ void printmarkedinfo(int i) {
     cf+=y*x;
     rr+=x*x;
     lrr+=y*y; }
-  prt_("    %d-%d=%.5f",i,lasti,sqrt(rr));
-  sprintf(line,"%d-%d=%.2f",i,lasti,sqrt(rr));
+  prt_("    %d-%d=%.7f",i,lasti,sqrt(rr));
+  sprintf(line,"%d-%d=%.3f",i,lasti,sqrt(rr));
   //                  setcolor(palcolor(YELLOW));
   outtextxy(1,1+xfont.height,line);
   

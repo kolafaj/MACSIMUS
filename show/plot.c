@@ -18,8 +18,11 @@
   15  =1, etc
 
 
+  08/2026 (2.0v)  +1, +2 for the error argument allowed
+                  (column of error bars relative to y)
+
   07/2026 (2.0u) on click, print file name of the nearest point
-  
+
   11/2024 (2.0t) kill all button wrong info fixed
 
   12/2023 (2.0s) ! missing column 2 filled by the prev value in plot file (w/o :)
@@ -75,7 +78,7 @@ or (sh/bash)
   export PLOTINIT="#q"
 */
 
-#define VERSION "2.0u"
+#define VERSION "2.0uv"
 
 /* allows changing param a by hotkeys a A etc. */
 #include "parm.h"
@@ -325,24 +328,32 @@ void roundrg(double *x,double *X,int enlarge) /********************* roundrg */
   *X=((int)(*X/q+0.5001*(Sign(*X)+enlarge)))*q;
 }
 
+int refcol;
+
 int smartcol(char **pT) /******************************************* smartcol */
 /*
-  changes column numbers 0,1,...,26 into @,A,...Z
-  new: also 27 into c27 (then, allocates a new copy)
-  01 changed into A, 1. or +1 etc. not changed (=expression)
-  returns whether T started with 0 (turns off hotkeys 1..9)
-  NB: @ is changed into n in to_colon() in tabinc.c
-  BUG: for columns >26, a string is reallocated
-       => and undo from hotkeys 1..0 does not work!
+  column numbers changed:
+  * 0,1,...,26 -> @,A,...Z
+  * 27,.. -> c27 (then, allocates a new copy)
+  * 027 -> c27
+  * returns whether T started with 0 (turns off hotkeys 1..9)
+  * +1 will replace
+  MORE: @ is changed into n in to_colon() in tabinc.c
+  BUG: if a string is reallocated, undo from hotkeys 1..0 does not work
+       and the info string is shortened
 */
 {
   char *T=*pT;
   int i=atoi(T),r=T[0]=='0';
   char *c;
 
-  for (c=T; *c; c++) if (!isdigit(*c)) return r; /* no digit => no change */
+  if (T[0]=='+' && refcol>0) i=atoi(T+1)+refcol;
+  else for (c=T; *c; c++) if (!isdigit(*c)) return r; /* no digit => no change */
+  if (refcol==0) refcol=i;
   if (i<=26) T[0]=i+'@',T[1]=0;
-  else if (r) T[0]='c';
+  else if (r) {
+    if (T[0]=='+' && refcol>0) sprintf(T+1,"%d",i);
+    T[0]='c'; }
   else {
     alloc(T,strlen(T)+2);
     strcpy(T+1,*pT);
@@ -704,6 +715,8 @@ int main(int narg,char **arg) /**************************************** main */
         smartcol(&tok1);
         to_colon(tok1); // max_column set here
         colx=tok1; }
+
+      refcol=0;
 
       if (tok2 && *tok2) {
         fixcoly=smartcol(&tok2);

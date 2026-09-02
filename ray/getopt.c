@@ -1,5 +1,6 @@
 
 #include <stdio.h>
+#include <string.h>
 
 /*
  * get option letter from argument vector
@@ -14,14 +15,10 @@ char	*opt_arg;		/* argument associated with option */
 #define tell(s)	fputs(*nargv,stderr);fputs(s,stderr); \
 		fputc(opt_opt,stderr);fputc('\n',stderr);return(BADCH);
 
-get_opt(nargc,nargv,ostr)
-int	nargc;
-char	**nargv,
-	*ostr;
+int get_opt(int nargc,char **nargv,char *ostr) /******************** get_opt */
 {
 	static char	*place = EMSG;	/* option letter processing */
 	register char	*oli;		/* option letter list index */
-	char	*index();
 
 	if(!*place) {			/* update scanning pointer */
 		if(opt_ind >= nargc || *(place = nargv[opt_ind]) != '-' || !*++place) return(EOF);
@@ -30,7 +27,7 @@ char	**nargv,
 			return(EOF);
 		}
 	}				/* option letter okay? */
-	if ((opt_opt = (int)*place++) == (int)':' || !(oli = index(ostr,opt_opt))) {
+	if ((opt_opt = (int)*place++) == (int)':' || !(oli = strchr(ostr,opt_opt))) {
 		if(!*place) ++opt_ind;
 		tell(": illegal option -- ");
 	}

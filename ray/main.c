@@ -1,50 +1,58 @@
 /***********************************************************************
 
- % changes by J.Kolafa 9/1997:
- %
- % added flags:
- %   -x x-resolution (this corresponds to `angle' parameter in the nff file)
- %   -y y-resolution
- %   -a pixel aspect ratio
- %   -s scale (effectively changes angle); scale>1 enlarges the central
- %            part of the picture and cuts borders
- %   example: to make picture for VGA screen so that `angle' is the
- %            angle of the y-size of the picture, use the following flags:
- %            -x 320 -y 200 -a 1.2 -s 0.75
- % -t prints progress in %, not dots
- % -b FILE will use FILE (in ppm format) as background
- %    BUG: works only for from = (0,0,value), as generated e.g. by show
- % -B BGMODE: 0=use background color outside picture (=when reflected)
- %            1,2=tile the background image
- %            -1,-2=mirror-tile the background image (mirror to be continuous)
- %            1,-1=for front, use the background color
- %            2,-2=for front, calc. the background color as average over
- %                 the picture
- % -X -Y = scaling for the background picture
- % -X0 -Y0 = background pixel --> pixel
- % -R shift of the BG image right, in its x-size
- % -U shift of the BG image up, in its y-size
- %    (e.g., 0.3--0.6 for the sky in the up half of the picture)
- % rnd() changed into rndcos() and made portable
- % jittering/antialiasing improved: if -j# is a square, a square pattern 
- %   is used, otherwise random
- % cone.c: bug fixed
- % small bugs and non-portabilities fixed
- % names longer than DOS standard shortened
- %
- % 1999 more improvements:
- %   -d diffuse Gaussian light, arg is Gaussian sigma of random light shift
- %      in real length units: should use jittering, e.g. -j225
- %   -l light multiplication factor (default=1, useful for more lights)
- %   -A -N ambient light added
- %   -v added (launches your favorite viewer)
- %   jittering/antialiasing improved
- % 2003 fog added, option -f/-F; old -f renamed to -u
- %   -f fog from (z coordinate)
- %   -F fog to (z coordinate)
- %      fog attenuates exponentially to the background color from -f
- %      there is 100% visibility in front of -f and 1/e at -F
- %   -u 2x2 blur (old option -f)
+changes by J.Kolafa:
+
+2026:
+  R&K changed to standard C (headers)
+  switch DUMB_CPP removed
+
+2003: fog added, option -f/-F; old -f renamed to -u:
+  -f fog from (z coordinate)
+  -F fog to (z coordinate)
+     fog attenuates exponentially to the background color from -f
+     there is 100% visibility in front of -f and 1/e at -F
+  -u 2x2 blur (old option -f)
+
+1999 more improvements:
+  -d diffuse Gaussian light, arg is Gaussian sigma of random light shift
+     in real length units: should use jittering, e.g. -j225
+  -l light multiplication factor (default=1, useful for more lights)
+  -A -N ambient light added
+  -v added (launches your favorite viewer)
+  * jittering/antialiasing improved
+
+09/1997:
+added and changed flags:
+  -x x-resolution (this corresponds to `angle' parameter in the nff file)
+  -y y-resolution
+  -a pixel aspect ratio
+  -s scale (effectively changes angle); scale>1 enlarges the central
+           part of the picture and cuts borders
+  example: to make picture for VGA screen so that `angle' is the
+           angle of the y-size of the picture, use the following flags:
+           -x 320 -y 200 -a 1.2 -s 0.75
+  -t prints progress in %, not dots
+  -b FILE will use FILE (in ppm format) as background
+     BUG: works only for from = (0,0,value), as generated e.g. by show
+  -B BGMODE: 0=use background color outside picture (=when reflected)
+             1,2=tile the background image
+             -1,-2=mirror-tile the background image (mirror to be continuous)
+             1,-1=for front, use the background color
+             2,-2=for front, calc. the background color as average over
+                the picture
+  -X -Y = scaling for the background picture
+  -X0 -Y0 = background pixel --> pixel
+  -R shift of the BG image right, in its x-size
+  -U shift of the BG image up, in its y-size
+     (e.g., 0.3--0.6 for the sky in the up half of the picture)
+technical changes:
+  * rnd() changed into rndcos() and made portable
+  * jittering/antialiasing improved: if -j# is a square, a square pattern 
+    is used, otherwise random
+bugs fixed:
+  cone.c: bug fixed
+  small bugs and non-portabilities fixed 
+  names longer than DOS standard shortened (? - probably removed later)
 
  * $Author: markv $
  * $Revision: 1.6 $
@@ -72,7 +80,9 @@
  ***********************************************************************/
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <math.h>
+#include <string.h>
 #include <sys/types.h>
 #include <sys/times.h>
 #include "defs.h"
@@ -80,17 +90,15 @@
 #include "pic.h"
 
 extern double atof(const char *);
+
 char **mainargv;
 int mainargc;
 
 extern FILE *yyin, *yyout ;
+int PrintStatistics(struct tms *pbuf, struct tms *tbuf);
 
-int
-main(argc, argv)
- int argc ;
- char * argv[] ;
+int main(int argc, char * argv[]) /************************************ main */
 {
-        extern int opt_ind ;
         extern char *opt_arg ;
         int c ;
         char * infilename = NULL ;
@@ -104,7 +112,7 @@ main(argc, argv)
 
         mainargc=argc;
         mainargv=argv;
-        if ((Progname = rindex(argv[0], '/')) == NULL) 
+        if ((Progname = strrchr(argv[0], '/')) == NULL) 
                 Progname = argv[0] ;
         else 
                 Progname ++ ;
@@ -299,9 +307,7 @@ if (viewer) {
 return 0;
 }
 
-int
-PrintStatistics(pbuf, tbuf)
- struct tms *pbuf, *tbuf ;
+int PrintStatistics(struct tms *pbuf, struct tms *tbuf) /*** PrintStatistics */
 {
 
         printf("preprocess time (user code)     %-6d seconds\n",

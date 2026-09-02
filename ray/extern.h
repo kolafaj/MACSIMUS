@@ -62,27 +62,38 @@ extern	int		nShadows ;
 extern	int		nReflected ;
 extern 	int		nRefracted ;
 
-/*.....char *          malloc() ;*/
-/*.....char *          calloc() ;*/
-char *		rindex() ;
+/* missing prototypes added 09/2026 (K&R -> ANSI C): */
+int yylex(void);
+int get_opt(int nargc,char **nargv,char *ostr);
+void InitSlabs(void);
+void ReadSceneFile(char *infilename);
+void BuildBoundingSlabs(void);
+void Screen(Viewpoint *view, char *picfile, int xres, int yres);
+int compslabs(Object **a, Object **b);
+void Shade(int level, Flt weight, Vec P, Vec N, Vec I, Isect *hit, Color col);
+void SpecularDirection(Vec I, Vec N, Vec R);
+int TransmissionDirection(Surface *m1,Surface *m2, Vec I,Vec N,Vec T);
+int Intersect(Ray *ray, Isect *hit, Flt maxdist);
+int LookupColorByName(char * name, Vec color);
+Object *MakeCone(Vec basepoint, Flt baseradius, Vec apexpoint, Flt apexradius);
+Object *MakeSphere(Vec pos, Flt radius);
+Object *MakePoly(int npoints, Vec *points);
+Object *MakeTri(Vec *point);
+int PriorityQueueInsert(Flt key, Object *obj);
+int PriorityQueueNull();
+int PriorityQueueEmpty();
+int PriorityQueueDelete(Flt * key, Object ** obj);
+void Trace(int level, Flt weight, Ray *ray, Color color);
 
-extern	Object *	MakeCone() ;
-extern	Object *	MakeSphere() ;
-extern	Object *	MakePatch() ;
-extern	Object *	MakePoly() ;
-extern	Object * 	MakeTri() ;
 
-extern 	Flt		VecNormalize() ;
-extern  Flt             rndcos() ;
-extern	Flt		critchisq() ;
-extern	Flt		pochisq() ;
+#if defined(__STDC__) || defined(__cplusplus)
+int yyparse(void);
+#else
+int yyparse();
+#endif
+
+Flt VecNormalize(Vec vec);
+Flt             rndcos(void) ;
 extern	Vec		Slab[] ;
 extern	ObjectProcs	NullProcs ;
 extern 	Object *	Root ;
-
-#ifdef DUMB_CPP
-
-extern Flt	VecDot() ;
-extern Flt 	VecLen() ;
-
-#endif /* DUMB_CPP */

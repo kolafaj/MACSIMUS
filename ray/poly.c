@@ -14,6 +14,7 @@
  ***********************************************************************/
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <math.h>
 #include "defs.h"
 #include "extern.h"
@@ -36,9 +37,7 @@ ObjectProcs PolyProcs = {
 	PolyNormal,
 } ;
 
-int 
-PolyPrint(obj)
- Object * obj ;
+int PolyPrint(Object * obj) /************************************* PolyPrint */
 {
 	int i ;
 	PolyData * pd ;
@@ -50,6 +49,7 @@ PolyPrint(obj)
 					pd -> poly_point[i][1],
 					pd -> poly_point[i][2]) ;
 	}
+return 0;
 }
 
 /***********************************************************************
@@ -63,10 +63,7 @@ PolyPrint(obj)
  *
  ***********************************************************************/
 
-PolyIntersect(obj, ray, hit)
- Object * obj ;
- Ray * ray ;
- Isect * hit ;
+int PolyIntersect(Object *obj, Ray *ray, Isect *hit) /******** PolyIntersect */
 {
 	Flt n,d,t,m,b ;
 	Point V ;
@@ -165,23 +162,19 @@ PolyIntersect(obj, ray, hit)
 	} else {
 		return(0);
 	}
+return 0;
 }
 
-PolyNormal(obj, hit, P, N)
- Object * obj ;
- Isect * hit ;
- Point P, N ;
+int PolyNormal(Object *obj, Isect *hit, Point P, Point N) /****** PolyNormal */
 {
 
 	PolyData * pd ;
 	pd = (PolyData *) obj -> o_data ;
 	VecCopy(pd -> poly_normal, N);
+return 0;
 }
 
-Object *
-MakePoly(npoints, points)
- int npoints ;
- Vec * points ;
+Object *MakePoly(int npoints, Vec *points) /*********************** MakePoly */
 {
 	Object * obj ;
 	PolyData * pd ;

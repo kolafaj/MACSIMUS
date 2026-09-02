@@ -110,13 +110,27 @@ HISTORY
   * feature changed
   - feature removed
 
+blend 2.4h:
+  ! minimization bug fixed
+  * options -G,-H changed
+
+cook 3.7q:
+  ! declaration bug (introduced in 3.7o) in simmeasx.c for FREEBC fixed
+  * ray rewritten from K&R C to ANSI C (headers added)
+
+plot 2.0v 08/2026:
+  ! +1, +2 for the error argument allowed (column of error bars relative to y)
+
+cook 3.7p:
+  ! spctcf.c fixed (not public)
+
 cook 3.7o:
 plb2diff 3.2:
   ! following the periodic b.c. improved and safer now
 
 rdfg 07/2026:
   ! histogram overflow ad hoc fix, option -o added, print default formats fixed
-  
+
 cook 3.7n:
   + sin-modulated elst field added
 

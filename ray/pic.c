@@ -6,16 +6,20 @@
  * Revision 1.2  88/10/04  14:30:44  markv
  * Changed pixel writing primitives to write individual pixels rather
  * than scanlines.  Simplifies certain loops inside Screen.
- * 
+ *
  * Revision 1.1  88/09/11  11:00:41  markv
  * Initial revision
- * 
+ *
  ***********************************************************************/
 
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include "defs.h"
 #include "pic.h"
 #include "extern.h"
+
+int PicWritePixel(Pic *pic, Color color);
 
 /*======================================================================*/
 /* PIC.C								*/
@@ -25,9 +29,7 @@
 /* Mark VandeWettering, markv@cs.uoregon.edu                            */
 /*======================================================================*/
 
-Pic *
-PicOpen(filename,x,y)
- char *filename ;
+Pic *PicOpen(char *filename,int x,int y) /************************** PicOpen */
 {
 	Pic	*tmp ;
 	int i;
@@ -52,10 +54,7 @@ PicOpen(filename,x,y)
 }
 
 #if 0
-int
-PicWritePixel(pic, color)
- Pic *pic ;
- Color color ;
+int PicWritePixel(Pic *pic, Color color)
 {
 	fputc((unsigned char) (255.0 * color[0]), pic -> filep) ;
 	fputc((unsigned char) (255.0 * color[1]), pic -> filep) ;
@@ -63,58 +62,57 @@ PicWritePixel(pic, color)
 }
 #else
 double pow(double,double);
-int
-PicWritePixel(pic, color)
- Pic *pic ;
- Color color ;
+/* JK: with gamma */
+int PicWritePixel(Pic *pic, Color color) /******************** PicWritePixel */
 {
   int i,e;
+
   for (i=0; i<3; i++) e=fputc((unsigned char) (255.0 * pow((double)color[i],(double)Gamma)+0.5), pic -> filep) ;
+
   return e;
 }
 #endif
 
-int
-PicClose(pic)
- Pic *pic ;
+int PicClose(Pic *pic) /******************************************* PicClose */
 {
         return fclose(pic -> filep) ;
 }
 
-
 /* added by JK: */
 pic_t *bg; /* background picture */
 
-pic_t *ReadPic(char *fn)
+pic_t *ReadPic(char *fn) /****************************************** ReadPic */
 {
-pic_t *pic;
-FILE *in;
-char line[256];
-int depth;
-int i;
-Vec avcol;
+  pic_t *pic;
+  FILE *in;
+  char line[256];
+  int depth;
+  int i;
+  Vec avcol;
 
-avcol[0]=avcol[1]=avcol[2]=0;
+  avcol[0]=avcol[1]=avcol[2]=0;
 
-if (!fn) return NULL;
+  if (!fn) return NULL;
 
-in=fopen(fn,"rb");
-if (!in) {
-  fprintf(stderr,
-    "no background file %s, using uniform color %f %f %f\n",
-    fn,
-    BackgroundColor[0],BackgroundColor[1],BackgroundColor[2]);
-  return NULL; }
+  in=fopen(fn,"rb");
+  if (!in) {
+    fprintf(stderr,
+            "no background file %s, using uniform color %f %f %f\n",
+            fn,
+            BackgroundColor[0],BackgroundColor[1],BackgroundColor[2]);
+    return NULL; }
 
-pic=(pic_t*)malloc(sizeof(pic_t));
-fgets(line,256,in);
-do fgets(line,256,in); while (line[0]=='#');
-sscanf(line,"%d%d",&pic->x,&pic->y);
-fgets(line,256,in);
-sscanf(line,"%d",&depth);
+  pic=(pic_t*)malloc(sizeof(pic_t));
+  if (!fgets(line,256,in)) perror("ReadPPM: missing line");
+  do
+    if (!fgets(line,256,in)) perror("ReadPPM: missing line");
+  while (line[0]=='#');
+  sscanf(line,"%d%d",&pic->x,&pic->y);
+  if (!fgets(line,256,in)) perror("ReadPPM: missing line");
+  sscanf(line,"%d",&depth);
 
-fprintf(stderr,"background file %s: %dx%d, depth=%d\n",fn,pic->x,pic->y,depth);
-if (depth!=255) perror("bad depth");
+  fprintf(stderr,"background file %s: %dx%d, depth=%d\n",fn,pic->x,pic->y,depth);
+  if (depth!=255) perror("ReadPPM: bad depth");
 
 pic->c=(void*)malloc(pic->x*pic->y*sizeof(pic->c[0]));
 if (!pic->c) perror("ReadPPM: no heap");

@@ -2107,7 +2107,7 @@ void readasc(int order,int all) /*********************************** readasc */
   fclose(asc);
 }
 
-void Maxwell(int from,int to,double prob) /************************ Maxwell */
+void Maxwell(int from,int to,double prob) /************************* Maxwell */
 /*
   assign random Maxwell-Boltzmann velocities (temperature=T) to all
     atoms in molecules from<=n<to
@@ -2115,8 +2115,8 @@ void Maxwell(int from,int to,double prob) /************************ Maxwell */
   to<0 refers to |to| sites, they are counted from molecule 0,
     but assigned only if molecule>=from
   prob>1 && init==3: always assigned + calls Scorrect
-  POLAR only: prob<0: assigns aux masses only (Car-Parrinello)
-              with temperature multiplied by -prob
+  prob<0: (POLAR only, obsolete) assigns aux masses only (Car-Parrinello)
+          with temperature multiplied by -prob
   from<0 is the same as from=FROM but silent
 */
 {
@@ -2125,8 +2125,9 @@ void Maxwell(int from,int to,double prob) /************************ Maxwell */
   int maxns=0,ins=0,verbose=prob>=1;
   double sigma, eps=0;
 
-  if (from<0) from=FROM,verbose=0;
+  if (T<0) ERROR(("MaxwellCM: T=%g<0",T))
 
+  if (from<0) from=FROM,verbose=0;
 #ifdef POLAR
   int auxonly=0;
   double aux=1;
@@ -2172,15 +2173,17 @@ void Maxwell(int from,int to,double prob) /************************ Maxwell */
   if (verbose) prt("molecules %d<=n<%d velocities assigned T=%g",from,to,T);
 }
 
-void MaxwellCM(double prob) /************************************* MaxwellCM */
+void MaxwellCM(int from,int to,double prob) /********************* MaxwellCM */
 /*
-  assign random Maxwell-Boltzmann velocities (temperature=T) to all
-    molecules from FROM (center-of-mass)
+  assign random Maxwell-Boltzmann velocities (temperature=T) to
+  molecules from..to (not incl.) with probability prob
 */
 {
   int n;
 
-  loop (n,FROM,No.N) {
+  if (T<0) ERROR(("MaxwellCM: T=%g<0",T))
+  
+  loop (n,from,to) {
     molecule_t *mn=molec+n;
     int ns=mn->ns;
     vector *r=rof(mn,cfg[1]->rp);

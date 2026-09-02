@@ -16,8 +16,8 @@ void prtsfill(char *s)
 #include "geohlp.c"
 
 static char Phelp[]="\
-More help (also F1 in GUI): (i)ntro  (b)asic-opt (f)orce-field  (r)ead   (G)eom\n\
-Molecules:                  fi(l)es  (o)ptions   e(x)tra-opt    (w)rite  (g)ui\n\
+More help:        (i)ntro  (b)asic-opt (f)orce-field  (r)ead   (G)eom\n\
+(also F1 in GUI)  fi(l)es  (o)ptions   e(x)tra-opt    (w)rite  (g)ui\n\
 ";
 
 static char Pusage[]="\n\
@@ -38,8 +38,7 @@ Environment:\n\
 
 static char Pgen_opt[]="\n\
 Basic options:\n\
- -o FILE[.EXT]\n\
-           generate force-field file readable by cook, [default EXT=ble]\n\
+ -o FILE[.EXT] generate force-field file readable by cook, [default EXT=ble]\n\
  -v#       verbosity, min=0, then sum of: [default: not -o => -v0, -o => -v3]\n\
            1=list sites and their parameters\n\
            2=list bonded terms (-v3 needed for usable FILE.ble)\n\
@@ -58,6 +57,8 @@ Basic options:\n\
  -_-#      as above and fix small charge errors to get a multiple of e\n\
  -l#       input line buffer [default=256]\n\
  -ISTRING  initial keystroke (overrides BLENDINIT)\n\
+ -[#       (with -n-1) reorder molecule of # of sites so that masses increase\n\
+           example -[3: TIP3 water = HHO\n\
 ";
 
 static char Ppar_opt[]="\n\
@@ -104,8 +105,9 @@ Molecule options:\n\
  -k#      keep (freeze) while minimizing: 0=none  1=*marked  2=all but missing\n\
           3=auto 1|2 [default]    4/8=read FILE.keep/FILE.mark\n\
  -k-#     as above + nonbonded atoms always free\n\
- -m#      minimize energy by # conjugate gradient steps\n\
- -m-#     -# steepest-descent steps, then as above [default=-m-100]\n\
+ -m#      minimize energy by # conjugate gradient steps [default=-m-100]\n\
+ -m-#     with constraints (-a0,-b0): # steepest-descent steps\n\
+          without constraints: some steepest descent, then conj.grad.\n\
  -n#      export number of molecules N (negative: split mol., abs config)\n\
  -u#/-u-# print # of pairs with max/min energy\n\
  -y#      SUM: 1=center before minimization  2=after minimization [df.=3]\n\
@@ -149,19 +151,18 @@ Write molecule options:\n\
 
 static char Pextra_mol_opt[]="\n\
 Special molecule options:\n\
- -[#       (with -n-1) reorder molecule of # of sites so that masses increase\n\
-           example -[3: TIP3 water = HHO\n\
  -A        generate FILE.ang of independent internal coordinates\n\
  -C#       reference atom for dipole, quadrupole, virial is: [-1]\n\
            -1=Z-centroid  -2=center-of-mass  -3=center\n\
  -D        generate FILE.msd of mean square displacements\n\
  -E@       essential dynamics, @=atoms: All Heavy Calpha Backbone\n\
  -F#       for -NE: # of frames in each plb file, #>0:cos, #<0:lin [9]\n\
- -G        eigenvalues of the gyration matrix\n\
- -H        eigenvalues of the inertia matrix (former -I)\n\
+ -G#       eigenvalues of 1: gyration matrix, 2: inertia matrix\n\
+ -H-#      accuracy (step) for steepest descent [1e-11]\n\
+ -H#       accuracy (step) for conjugate gradients [1e-6]\n\
  -J#       for -NE: accuracy for Jacobi method, sqrt(#)*0.2 for cfg matching\n\
  -M#       for -NE: amplitude of motion in plb [1]; -N -M-#: ns-based guess\n\
- -N#       normal mode frequencies, #=dr for num.deriv. [1e-5 AA]\n\
+ -N#       normal mode frequencies, #=dr [AA] for num.deriv. [1e-5]\n\
  -P#       for -NE: # of plb files (most significant eigenvalues) for normal\n\
            mode and ess.dyn. visualization; #<0: least significant [0]\n\
  -R#       core size (where U->infty) for the 2nd virial coefficient, from -C\n\

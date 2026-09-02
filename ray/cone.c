@@ -19,6 +19,7 @@
  * 
  ***********************************************************************/
 #include <stdio.h>
+#include <stdlib.h>
 #include <math.h>
 #include "defs.h"
 #include "extern.h"
@@ -38,9 +39,9 @@ typedef struct t_conedata {
 	Flt		cone_max_d ;
 } ConeData ;
 
-int ConePrint ();
-int ConeIntersect ();
-int ConeNormal ();
+int ConePrint(Object * obj);
+int ConeIntersect(Object *obj, Ray *ray, Isect *hit);
+int ConeNormal(Object *obj, Isect *hit, Point P, Point N);
 
 ObjectProcs ConeProcs = {
         ConePrint,
@@ -48,9 +49,7 @@ ObjectProcs ConeProcs = {
 	ConeNormal,
 } ;
 
-int 
-ConePrint(obj)
- Object *obj ;
+int ConePrint(Object * obj)
 {
 	ConeData * cp ;
 
@@ -67,11 +66,7 @@ ConePrint(obj)
 return 0;
 }
 
-int
-ConeIntersect(obj, ray, hit)
- Object * obj ;
- Ray * ray ;
- Isect * hit ;
+int ConeIntersect(Object *obj, Ray *ray, Isect *hit)
 {
 	Ray tray ;
 	ConeData * cd ;
@@ -178,11 +173,7 @@ ConeIntersect(obj, ray, hit)
         return(0) ;
 }
 
-int
-ConeNormal(obj, hit, P, N)
- Object * obj ;
- Isect * hit ;
- Point P, N ;
+int ConeNormal(Object *obj, Isect *hit, Point P, Point N)
 {
 	Flt t ;
 	Vec V ;
@@ -206,10 +197,7 @@ ConeNormal(obj, hit, P, N)
 return 0;
 }
 
-Object *
-MakeCone(basepoint, baseradius, apexpoint, apexradius) 
- Vec basepoint, apexpoint ;
- Flt baseradius, apexradius ;
+Object *MakeCone(Vec basepoint, Flt baseradius, Vec apexpoint, Flt apexradius) 
 {
 	Object * obj ;
 	ConeData * cd ;
@@ -267,14 +255,22 @@ MakeCone(basepoint, baseradius, apexpoint, apexradius)
 	for (i = 0 ; i < NSLABS ; i ++) {
 		dmin = 3.40282347e+38F ;
 		dmax = -3.40282347e+38F ;
-		d = VecDot(basepoint, Slab[i]) - baseradius ;
-		if (d < dmin) dmin = d ; if (d > dmax) dmax = d ;
-		d = VecDot(basepoint, Slab[i]) + baseradius ;
-		if (d < dmin) dmin = d ; if (d > dmax) dmax = d ;
-		d = VecDot(apexpoint, Slab[i]) - apexradius ;
-		if (d < dmin) dmin = d ; if (d > dmax) dmax = d ;
-		d = VecDot(apexpoint, Slab[i]) + apexradius ;
-		if (d < dmin) dmin = d ; if (d > dmax) dmax = d ;
+
+                d = VecDot(basepoint, Slab[i]) - baseradius ;
+		if (d < dmin) dmin = d ;
+                if (d > dmax) dmax = d ;
+
+                d = VecDot(basepoint, Slab[i]) + baseradius ;
+		if (d < dmin) dmin = d ;
+                if (d > dmax) dmax = d ;
+
+                d = VecDot(apexpoint, Slab[i]) - apexradius ;
+		if (d < dmin) dmin = d ;
+                if (d > dmax) dmax = d ;
+
+                d = VecDot(apexpoint, Slab[i]) + apexradius ;
+		if (d < dmin) dmin = d ;
+                if (d > dmax) dmax = d ;
 
 		obj -> o_dmin[i] = dmin ;
 		obj -> o_dmax[i] = dmax ;

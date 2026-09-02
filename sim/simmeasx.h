@@ -45,7 +45,3 @@ void measuredrifts(void);
 #ifdef SLAB
 void measure1drift(int n);
 #endif
-
-#ifdef SPCTCF
-void spctcf(ToIntPtr A);
-#endif

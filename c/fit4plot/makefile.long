@@ -33,18 +33,17 @@ OBJ1 = fit.lo ground.lo minimize.lo gjlineq.lo qmin.lo
 fit.long : $(OBJ1)
 	$(CC) -o fit.long $(OBJ1) $(LIBOPT)
 
-qmin.lo : $(D1)/qmin.c $(D1)/qmin.h $(D1)/prec.h $(D1)/fltprec.h \
-  $(D1)/longprec.h $(D1)/highprec.h
+qmin.lo : $(D1)/qmin.c $(D1)/qmin.h $(D1)/prec.h $(D1)/longprec.h
 	$(CC) -o qmin.lo -I$(D2) -I$(D1) $(OPT) -c $(D1)/qmin.c
 
 gjlineq.lo : $(D1)/gjlineq.c $(D1)/lineq.c $(D1)/gjlineq.h $(D1)/prec.h \
-  $(D1)/fltprec.h $(D1)/longprec.h $(D1)/highprec.h $(D1)/ground.h \
+  $(D1)/longprec.h $(D1)/ground.h \
   $(D1)/calc.h $(D1)/rndgen.h $(D1)/int4.h $(D1)/loop.h $(D1)/fortran.h \
   $(D1)/func.h
 	$(CC) -o gjlineq.lo -I$(D2) -I$(D1) $(OPT) -c $(D1)/gjlineq.c
 
-minimize.lo : $(D1)/minimize.c $(D1)/gjlineq.h $(D1)/prec.h $(D1)/fltprec.h \
-  $(D1)/longprec.h $(D1)/highprec.h $(D1)/minimize.h $(D1)/rndgen.h \
+minimize.lo : $(D1)/minimize.c $(D1)/gjlineq.h $(D1)/prec.h \
+  $(D1)/longprec.h $(D1)/minimize.h $(D1)/rndgen.h \
   $(D1)/int4.h $(D1)/ground.h $(D1)/calc.h $(D1)/loop.h $(D1)/fortran.h \
   $(D1)/func.h
 	$(CC) -o minimize.lo -I$(D2) -I$(D1) $(OPT) -c $(D1)/minimize.c
@@ -56,7 +55,7 @@ ground.lo : $(D1)/ground.c $(D1)/mygets.c $(D1)/mystring.c $(D1)/rndgeni.c \
 	$(CC) -o ground.lo -I$(D2) -I$(D1) $(OPT) -c $(D1)/ground.c
 
 fit.lo : $(D2)/fit.c $(D2)/fitinc.c $(D1)/ms.h $(D1)/qmin.h $(D1)/prec.h \
-  $(D1)/fltprec.h $(D1)/longprec.h $(D1)/highprec.h $(D1)/minimize.h \
+  $(D1)/longprec.h $(D1)/minimize.h \
   $(D1)/ground.h $(D1)/calc.h $(D1)/rndgen.h $(D1)/int4.h $(D1)/loop.h \
   $(D1)/fortran.h $(D1)/func.h
 	$(CC) -o fit.lo -I$(D2) -I$(D1) $(OPT) -c $(D2)/fit.c

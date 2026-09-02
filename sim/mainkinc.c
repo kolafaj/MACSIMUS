@@ -82,7 +82,7 @@ No.invf = %.9g for the Hoover/MTK NPT method, factor appearing\n\
 
     if (isPkincorr ^ (No.Pkinq!=1)) if ((corr&128)==0) WARNING (("\
 The kinetic pressure correction seems to be inconsistent with the chosen\n\
-*** thermostat and barostat. See the manual, Sec. Pressure tensor,\n\
+*** thermostat and barostat. See the manual, Section Pressure tensor,\n\
 *** variables corr, drift, thermostat.\n\
 *** Note that the automatic setup (corr&16):\n\
 *** - may fail in special cases as fixed atoms, modified drift etc.\n\

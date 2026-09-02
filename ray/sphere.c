@@ -9,6 +9,7 @@
  ***********************************************************************/
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <math.h>
 #include "defs.h"
 #include "extern.h"
@@ -19,9 +20,9 @@ typedef struct t_spheredata {
 	Flt 		sph_radius2 ;
 } SphereData ;
 
-int SpherePrint ();
-int SphereIntersect ();
-int SphereNormal ();
+int SpherePrint (Object *obj);
+int SphereIntersect(Object *obj, Ray *ray, Isect *hit);
+int SphereNormal(Object *obj, Isect *hit, Point P,Point N);
 
 ObjectProcs SphereProcs = {
 	SpherePrint,
@@ -29,9 +30,7 @@ ObjectProcs SphereProcs = {
 	SphereNormal,
 } ;
 
-int
-SpherePrint(obj)
- Object *obj ;
+int SpherePrint (Object *obj) /********************************* SpherePrint */
 {
 	SphereData * sp ;
 
@@ -44,11 +43,7 @@ SpherePrint(obj)
 return 0;
 }
 
-int
-SphereIntersect(obj, ray, hit)
- Object * obj ;
- Ray * ray ;
- Isect * hit ;
+int SphereIntersect(Object *obj, Ray *ray, Isect *hit) /**** SphereIntersect */
 {
 
 	Flt b, disc, t;
@@ -81,11 +76,7 @@ SphereIntersect(obj, ray, hit)
         return (1);
 }
 
-int
-SphereNormal(obj, hit, P, N)
- Object * obj ;
- Isect * hit ;
- Point P, N ;
+int SphereNormal(Object *obj, Isect *hit, Point P,Point N) /*** SphereNormal */
 {
 	SphereData * sp ;
 	sp = (SphereData *) obj -> o_data ;
@@ -95,10 +86,7 @@ SphereNormal(obj, hit, P, N)
 return 0;
 }
 
-Object *
-MakeSphere(pos, radius)
- Vec pos ;
- Flt radius ;
+Object *MakeSphere(Vec pos, Flt radius)
 {
 	Object * tmp ;
 	int i ;

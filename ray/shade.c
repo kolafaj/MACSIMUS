@@ -35,12 +35,9 @@
  * The color is returned in col.
  ***********************************************************************/
 
-Shade(level, weight, P, N, I, hit, col) 
- int level ;
- Flt weight ;
- Vec P, N, I ;
- Isect * hit;
- Color col ;
+int Shadow(Ray *ray, Isect *hit, Flt tmax);
+  
+void Shade(int level, Flt weight, Vec P, Vec N, Vec I, Isect *hit, Color col) 
 {
         Ray     tray ;
         Color   tcol ;
@@ -104,15 +101,15 @@ Shade(level, weight, P, N, I, hit, col)
 
 #if 1 /* normal */
                                 VecAddS(diff, surf -> surf_color, col, col) ;
-#else /* very special patch */
-if (surf -> surf_color[1]>1.009) {
-  Color ccc;
-  int i;
-  for (i=0; i<3; i++) ccc[i]=surf -> surf_color[i]*0;
-  ccc[0]=0.5+(cos(9.*tray.P[0])*cos(11.*tray.P[2]))*0.7;
-  VecAddS(diff, ccc, col, col) ; }
-else
-  VecAddS(diff, surf -> surf_color, col, col) ;
+#else /* JK: very special patch */
+                                if (surf -> surf_color[1]>1.009) {
+                                  Color ccc;
+                                  int i;
+                                  for (i=0; i<3; i++) ccc[i]=surf -> surf_color[i]*0;
+                                  ccc[0]=0.5+(cos(9.*tray.P[0])*cos(11.*tray.P[2]))*0.7;
+                                  VecAddS(diff, ccc, col, col) ; }
+                                else
+                                  VecAddS(diff, surf -> surf_color, col, col) ;
 #endif
 
                                 SpecularDirection(I, N, R) ;
@@ -182,7 +179,6 @@ else
                 Trace(level + 1, surf -> surf_kt * weight, &tray, tcol) ;
                 VecAddS(surf -> surf_kt, tcol, col, col) ;
         }
-return 0;
 }
 
 /***********************************************************************
@@ -192,13 +188,10 @@ return 0;
  * direction of the reflected ray R.
  ***********************************************************************/
 
-int
-SpecularDirection(I, N, R)
- Vec I, N, R;
+void SpecularDirection(Vec I, Vec N, Vec R) /************* SpecularDirection */
 {
         VecComb(1.0/fabs(VecDot(I,N)), I, 2.0, N, R);
         VecNormalize(R);
-        return 0;
 }
 
 /***********************************************************************
@@ -207,9 +200,7 @@ SpecularDirection(I, N, R)
  * calculates the direction of the transmitted ray
  ***********************************************************************/
 
-TransmissionDirection(m1, m2, I, N, T)
- Surface *m1, *m2;
- Vec I, N, T ;
+int TransmissionDirection(Surface *m1,Surface *m2, Vec I,Vec N,Vec T)
 {
         Flt n1, n2, eta, c1, cs2 ;
         n1 = m1 ? m1 -> surf_ior : 1.0 ;

@@ -196,11 +196,12 @@ int main(int narg,char **arg) /*************************************** main */
         case 'F': Xopt.F=atoi(arg[i]+2);
                   if (abs(Xopt.F)<2) ERROR(("-F%d too small",Xopt.F))
                   break;
-        case 'G': Xopt.G=1;
+        case 'G': Xopt.G=atoi(arg[i]+2);
                   zero_opt_mwp();
                   break;
-        case 'H': Xopt.I=1;
-                  zero_opt_mwp();
+        case 'H': { double x=atof(arg[i]+2);
+                    if (x<0) Xopt.SDeps=x;
+                    if (x>0) Xopt.CGeps=x; }
                   break;
         case 'I': addkbdstring((const unsigned char*)(arg[i]+2));
                   break;

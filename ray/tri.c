@@ -22,6 +22,7 @@
  ***********************************************************************/
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <math.h>
 #include "defs.h"
 #include "extern.h"
@@ -32,9 +33,10 @@ typedef struct t_spheredata {
 	Vec	tri_bb[3] ;
 } TriData ;
 
-int TriPrint ();
-int TriIntersect ();
-int TriNormal ();
+int TriPrint(Object * obj);
+int TriIntersect(Object *obj, Ray *ray, Isect *hit);
+int TriNormal(Object *obj, Isect *hit, Point P, Point N);
+void InvertMatrix(Vec in[3], Vec out[3]);
 
 ObjectProcs TriProcs = {
 	TriPrint,
@@ -42,9 +44,7 @@ ObjectProcs TriProcs = {
 	TriNormal,
 } ;
 
-int 
-TriPrint(obj)
- Object *obj ;
+int TriPrint(Object * obj) /*************************************** TriPrint */
 {
 	TriData *td ;
 	int i ;
@@ -58,17 +58,13 @@ TriPrint(obj)
 return 0;
 }
 
-int
-TriIntersect(obj, ray, hit)
- Object * obj ;
- Ray * ray ;
- Isect * hit ;
+int TriIntersect(Object *obj, Ray *ray, Isect *hit) /********** TriIntersect */
 {
 	TriData *td ;
 	Flt n, d, dist ;
 	Flt r, s, t ;
 	Flt a, b ;
-	Vec P, Q ;
+	Vec Q ;
 
 	td = (TriData *) obj -> o_data ;
 
@@ -142,23 +138,16 @@ TriIntersect(obj, ray, hit)
 	return(1) ;
 }
 
-int
-TriNormal(obj, hit, P, N)
- Object * obj ;
- Isect * hit ;
- Point P, N ;
+int TriNormal(Object *obj, Isect *hit, Point P, Point N) /******** TriNormal */
 {
 	VecCopy(hit -> isect_normal, N) ;
 return 0;
 }
 
-Object *
-MakeTri(point)
- Vec *point ;
+Object *MakeTri(Vec *point) /*************************************** MakeTri */
 {
 	Object * o ;
 	TriData * td ;
-	Vec 	N, P, Q;
 	int i, j ;
 	Flt dmin, dmax, d ;
 	Vec B[3] ;
@@ -220,13 +209,10 @@ MakeTri(point)
 	return o ;
 }
 
-int
-InvertMatrix(in, out)
- Vec in[3] ;
- Vec out[3] ;
+void InvertMatrix(Vec in[3], Vec out[3]) /********************* InvertMatrix */
 {
-	int i, j, k ;
-	Flt tmp, det, sum ;
+	int i, j ;
+	Flt det ;
 
 	out[0][0] = (in[1][1] * in[2][2] - in[1][2] * in[2][1]) ;
 	out[1][0] = -(in[0][1] * in[2][2] - in[0][2] * in[2][1]) ;
@@ -257,21 +243,4 @@ InvertMatrix(in, out)
 		}
 	}
 	
-#ifdef DEBUG
-	for (i = 0 ; i < 3 ; i++) {
-		for (j = 0 ; j < 3 ; j++) {
-			sum = 0.0 ;
-			for (k = 0 ; k < 3 ; k++) {
-				sum += in[i][k] * out[k][j] ;
-			}
-			if (fabs(sum) < rayeps) {
-				sum = 0.0 ;
-			}
-			printf(" %g") ;
-		} 
-		printf("\n") ;
-	}
-	printf("\n") ;
-#endif /* DEBUG */
-return 0;
 }

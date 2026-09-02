@@ -7,13 +7,15 @@
 #include <string.h>
 
 /* added by JK */
-char *get_txt(char *a, char *b)
+char *get_txt(char *a, char *b) /*********************************** get_txt */
 {
-static char str[256];
-strcpy(str,a);
-strcat(str," ");
-strcat(str,b);
-return str;
+  static char str[256];
+  
+  strcpy(str,a);
+  strcat(str," ");
+  strcat(str,b);
+  
+  return str;
 }
 
 extern char yytext[] ;
@@ -56,12 +58,11 @@ typedef union
 #ifdef __cplusplus
 
 #ifndef yyerror
-	void yyerror(const char *);
+void yyerror(const char *);
 #endif
 #ifndef yylex
-	extern "C" int yylex(void);
+extern "C" int yylex(void);
 #endif
-	int yyparse(void);
 
 #endif
 #define yyclearin yychar = -1
@@ -87,8 +88,7 @@ static int yymaxdepth = YYMAXDEPTH;
 /*.....# line 193 "nff.y"*/
 
 
-yyerror(str)
- char * str ;
+void yyerror(char * str) /****************************************** yyerror */
 {
 	fprintf(stderr, "%s: error at line %d\n", 
 		Progname, yylinecount) ;
@@ -96,9 +96,7 @@ yyerror(str)
 	exit(-1) ;
 }
 
-int
-ReadSceneFile(str)
- char *str ;
+void ReadSceneFile(char *str) /******************************* ReadSceneFile */
 {
 	if (str == NULL) 
 		yyin = stdin ;
@@ -118,7 +116,6 @@ ReadSceneFile(str)
 	fprintf(stderr, "%s: inputfile = \"%s\"\n", Progname, str) ;
 	fprintf(stderr, "%s: resolution %dx%d\n", Progname, Xresolution,
 		Yresolution) ;
-return 0;
 }
 
 yytabelem yyexca[] ={
@@ -373,7 +370,7 @@ int yyparse()
 		** get globals into registers.
 		** branch to here only if YYBACKUP was called.
 		*/
-	yynewstate:
+     /*	yynewstate: */
 		yy_pv = yypv;
 		yy_ps = yyps;
 		yy_state = yystate;
@@ -601,7 +598,7 @@ int yyparse()
                                 yyerror( get_txt("uxlibc:81", "Syntax error") );
 #endif
 				goto skip_init;
-			yyerrlab:
+     /*			yyerrlab: */
 				/*
 				** get globals into registers.
 				** we have a user generated syntax type error

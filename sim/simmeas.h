@@ -89,3 +89,9 @@ void dipmom(ToIntPtr A,char *info);
 /* because polarrof(mn,cfg[1]->rp) is NOT velocity */
 extern vector *lastrpols;
 #endif /*# POLAR */
+
+#ifdef SPCTCF
+/* design flaw: should not be in simmeasx because of recording in .cp */
+void spctcf(ToIntPtr A);
+extern double BEND,SSTRETCH,ASTRETCH;
+#endif

@@ -9,6 +9,7 @@
  ***********************************************************************/
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <math.h>
 #include "defs.h"
 #include "extern.h"
@@ -21,26 +22,22 @@ typedef struct t_qelem {
 static int 	Qsize ;
 static Qelem	Q[PQSIZE] ;
 
-int
-PriorityQueueNull()
+int PriorityQueueNull() /********************************* PriorityQueueNull */
 {
 	Qsize = 0 ;
 	totalQueueResets ++ ;
 #ifdef DEBUG	
 	printf("resetting\n") ;
 #endif /* DEBUG */
-return 0;
+        return 0;
 }
 
-PriorityQueueEmpty()
+int PriorityQueueEmpty() /******************************* PriorityQueueEmpty */
 {
         return (Qsize == 0) ;
 }
 
-int
-PriorityQueueInsert(key, obj)
- Flt key ;
- Object * obj ;
+int PriorityQueueInsert(Flt key, Object *obj) /********* PriorityQueueInsert */
 {
 	int i ; 
 	Qelem tmp ;
@@ -70,10 +67,7 @@ PriorityQueueInsert(key, obj)
 return 0;
 }
 
-int
-PriorityQueueDelete(key, obj)
- Flt * key ;
- Object ** obj ;
+int PriorityQueueDelete(Flt * key, Object ** obj) /***** PriorityQueueDelete */
 {
 	Qelem tmp ;
 	int i, j ;

@@ -39,8 +39,9 @@ extern cl_t cl;
 static int kk,nsf;
 static double sumw=0,sumwq=0;
 vector SFsumL;
-static vector lastL;
 #endif
+
+static vector lastL, firstL;
 
 void initSF(void) /************************************************** initSF */
 {
@@ -294,7 +295,9 @@ void calculateMSD(int frame,int to) /************************** calculateMSD */
 #ifndef FREEBC
   vector *lastr;
   vector CMcfg;
-  static vector firstL;
+  struct maxjump_s
+    maxthisjump= {{0,0,0},{-1,-1,-1},{-1,-1,-1},-1},
+    nextthisjump= {{0,0,0},{-1,-1,-1},{-1,-1,-1},-1};
 #endif
   struct msd_s {
     double m,q;
@@ -303,9 +306,6 @@ void calculateMSD(int frame,int to) /************************** calculateMSD */
   vector msdm,msdq,CMshift;
   double totm,totq;
   siteinfo_t *si;
-  struct maxjump_s
-    maxthisjump= {{0,0,0},{-1,-1,-1},{-1,-1,-1},-1},
-    nextthisjump= {{0,0,0},{-1,-1,-1},{-1,-1,-1},-1};
 
   if (tau.P) {
     if (!iscube()) ERROR(("not cube (2nd check)"))
@@ -609,7 +609,3 @@ static void mpl(vector a,matrix M,vector b) /*************************** mpl */
 #endif
 
 #include "drifts.c"
-
-#ifdef SPCTCF
-# include "spctcf.c"
-#endif

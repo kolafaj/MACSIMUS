@@ -17,12 +17,7 @@
 #include "extern.h"
 #include "pic.h"
 
-void
-Trace(level, weight, ray, color) 
- int level;
- Flt weight;
- Ray *ray ;
- Color color ;
+void Trace(int level, Flt weight, Ray *ray, Color color) /************ Trace */
 {
 	Object *prim ;
 	Vec P, N ;

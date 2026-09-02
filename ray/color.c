@@ -13,6 +13,7 @@
  ***********************************************************************/
 
 #include <stdio.h>
+#include <string.h>                                                             
 #include "defs.h"
 
 #define		NCOLORS		(142)
@@ -25,6 +26,8 @@ typedef struct t_color_entry {
 #define LESS_THAN -1
 #define GREATER_THAN 1
 #define EQUAL_TO 0
+
+int BinarySearch(char *name, int l, int h, ColorEntry array[]);
 
 /*
  * Note: These colors must be in sorted order, because we binary search
@@ -178,10 +181,7 @@ ColorEntry Colors[] = {
 	{"yellow_green", {.6, .8, .196078}}
 } ;
 
-int
-LookupColorByName(name, color)
- char * name ;
- Vec color ;
+int LookupColorByName(char * name, Vec color) /*********** LookupColorByName */
 {
 	int rc ;
 	rc = BinarySearch(name, 0, NCOLORS - 1 , Colors) ;
@@ -194,11 +194,7 @@ LookupColorByName(name, color)
 }
 
 
-int 
-BinarySearch(name, l, h, array)
- char * name ;
- int l, h ;
- ColorEntry array[] ;
+int BinarySearch(char *name, int l, int h, ColorEntry array[])
 {
 	int m, rc ;
 	if (l > h)

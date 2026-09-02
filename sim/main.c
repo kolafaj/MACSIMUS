@@ -1,4 +1,4 @@
-#define VERSION "3.7o"
+#define VERSION "3.7q"
 
 #if defined(LINKCELL) && defined(FREEBC)
 #  error "LINKCELL not supported for FREEBC"
@@ -123,13 +123,19 @@ int main(int narg,char **arg) /**************************************** main */
     CPnbit=0,     /* resolution (1/2^CPnbit) for packed convergence profiles */
     rhoreached,   /* switch to check whether rho was reached */
     *group,       /* [nspec] groups of species */
-    initvel=0,    /* # of molecules to initialize velocities */
     issta=0,      /* statistics (of "Tkin") exists */
     expectedbuffer=0, /* to check remaining disk space, see -w */
     plbopened=0,
     unsplit=0,    /* usplit periodically split molecules, in x=1,y=2,z=4 */
     isPkincorr,
     iarg,nsteps,i;
+
+  struct initvel_s {
+    int from;   /* from molecule */
+    int to;     /* to molecule (not incl.); to<0 => to=No.N */
+    double T;   /* if >0 use for atoms (set to 0 after) */
+    double TCM; /* if >0 use for CM of molecules (after T, set to 0 after) */
+  } initvel = { 0,-1,0,0};
 
   volatile int
     icyc=0,iint=0;
@@ -1202,8 +1208,17 @@ cleave.init bit 0 unset (not to copy next time)"); }
       loadfixa();
       savefixa(); }
 
-    if (initvel) Maxwell(0,initvel,1);
-    initvel=0; /* just once */
+    if (initvel.to<0) initvel.to=No.N;
+    if (initvel.T) {
+      double T0=T;
+      T=initvel.T;
+      Maxwell(initvel.from,initvel.to,1);
+      T=T0; initvel.T=0; }
+    if (initvel.TCM) {
+      double T0=T;
+      T=initvel.TCM;
+      MaxwellCM(initvel.from,initvel.to,1);
+      T=T0; initvel.TCM=0; }
 
     if (option('h')) {
       int valence=abs(option('h'));
@@ -1606,9 +1621,9 @@ final drift = %d = %s",DRIFT_START,drift,int2sumbin(drift)))
           vector *rpvel=cfg[1]->rp;
 
           if (thermostat==T_ANDERSEN) Maxwell(-1,No.N,h/tau.T);
-          if (thermostat==T_ANDERSEN_CM) MaxwellCM(h/tau.T);
+          if (thermostat==T_ANDERSEN_CM) MaxwellCM(FROM,No.N,h/tau.T);
           if (thermostat==T_MAXWELL && justnow(tau.T,h/2)) Maxwell(-1,No.N,1);
-          if (thermostat==T_MAXWELL_CM && justnow(tau.T,h/2)) MaxwellCM(1);
+          if (thermostat==T_MAXWELL_CM && justnow(tau.T,h/2)) MaxwellCM(FROM,No.N,1);
 
           if (measure && option('c')&4) {
             En.r2=constrainterror(cfg[0],cfg[1]);

@@ -1434,8 +1434,9 @@ double minimize(species_t *spec,int print,enum keep_e mask) /***** minimize */
     U=sqrt(U); /* =max force on 1 atom */
     if (U*h>0.5) h=0.5/U; /* max move in the 1st step = 0.5 AA */
     if (U*h<0.001) h=0.001/U; /* min move in the 1st step = 0.001 AA */
-
-    // put3(sd,cg,h)
+    if (h>1) h=1;
+    
+    //put3(sd,cg,h)
 
 //  #include "blendmd.c" (not finished)
 
@@ -1450,9 +1451,8 @@ double minimize(species_t *spec,int print,enum keep_e mask) /***** minimize */
         do {
           h*=0.55; /* magic value: works fine in a narrow valley */
 
-          /* converg. criterion changed from 1e-12 to 1e-11 in V 2.0o */
-          if (h<1e-11 || it>=sd) goto sddone;
-
+          if (h<Xopt.SDeps || it>=sd) goto sddone;
+          //fprintf(stderr,"h=%g Xopt.SDeps=%g\n",h,Xopt.SDeps);
           loop (i,0,ns) VVV(r[i],=r0[i],+h*f0[i])
           U=Upot(r,f,spec,0);
         } while (U>U0);
@@ -1471,7 +1471,7 @@ double minimize(species_t *spec,int print,enum keep_e mask) /***** minimize */
           if (print) prtU(it,by,U,h);
 
         h*=2.5; /* magic: h should not shrink to zero */ } }
-    put(h)
+    //    put(h)
 sddone:
 
     if (cg) {
@@ -1488,7 +1488,7 @@ sddone:
 
         for (it=1; !sig; it++) {
 
-          if (h<1e-6 || it>=cg*2) goto cgdone;
+          if (h<Xopt.CGeps || it>=cg*2) goto cgdone;
 
           loop (i,0,ns) VVO(r[i],=r0[i],+h*rndgauss())
 
@@ -1531,6 +1531,7 @@ sddone:
               in most cases close to minimum we need only two
               evaluations of forces in one step
           ***/
+          //fprintf(stderr,"h=%g CG=%g\n",h,Xopt.CGeps);
           gg=0;
           loop (i,0,ns) gg+=SQR(f0[i]);
           if (gg==0) break;

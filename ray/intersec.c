@@ -91,11 +91,7 @@ CheckAndEnqueue(obj, maxdist)
  * Returns the closest hit in the "hit" buffer.
  ***********************************************************************/
 
-int
-Intersect(ray, hit, maxdist)
- Ray * ray ;
- Isect * hit ;
- Flt maxdist ;
+int Intersect(Ray *ray, Isect *hit, Flt maxdist) /**************** Intersect */
 {
 	Isect		nhit ;
 	int		i ;
@@ -185,11 +181,7 @@ Intersect(ray, hit, maxdist)
  * as the name.  Should probably be changed.
  ***********************************************************************/
 
-int 
-Shadow(ray, hit, tmax) 
- Ray * ray ;
- Isect * hit ;
- Flt tmax ;
+int Shadow(Ray *ray, Isect *hit, Flt tmax) /************************* Shadow */
 {
 	if (Intersect(ray, hit, tmax))
 		return 0 ;

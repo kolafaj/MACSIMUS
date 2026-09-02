@@ -8,6 +8,7 @@
  * 
  ***********************************************************************/
 #include <stdio.h>
+#include <stdlib.h>
 #include <math.h>
 #include "defs.h"
 #include "extern.h"
@@ -26,20 +27,23 @@ ObjectProcs NullProcs = {
 	NullNormal
 } ;
 
-NullPrint()
+int NullPrint() /************************************************* NullPrint */
 {
 	fprintf(stderr, "%s: called (* print)(...), dying...\n", Progname) ;
 	abort() ;
+        return 0;
 }
 
-NullIntersect()
+int NullIntersect() /***************************************** NullIntersect */
 {
 	fprintf(stderr, "%s: called (* intersect)(...), dying...\n", Progname) ;
 	abort() ;
+        return 0;
 }
 
-NullNormal()
+int NullNormal() /*********************************************** NullNormal */
 {
 	fprintf(stderr, "%s: called (* normal)(...), dying...\n", Progname) ;
 	abort() ;
+        return 0;
 }

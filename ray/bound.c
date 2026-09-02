@@ -15,9 +15,12 @@
  * 
  ***********************************************************************/
 #include <stdio.h>
+#include <stdlib.h>
 #include <math.h>
 #include "defs.h"
 #include "extern.h"
+
+int SortAndSplit(int first, int last);
 
 /*
  * This function attempts to use median cut
@@ -25,11 +28,10 @@
  * code...
  */
 
-int
-BuildBoundingSlabs()
+void BuildBoundingSlabs(void) /************************** BuildBoundingSlabs */
 {
 	int low = 0 ;
-	int high, i ;
+	int high ;
 
 	high = nPrims ;
 	while (SortAndSplit(low, high) == 0) {
@@ -39,22 +41,11 @@ BuildBoundingSlabs()
 	fprintf(stderr, "%s: after adding bounding volumes, %d prims\n",
 		Progname, nPrims) ;
 	fprintf(stderr, "%s: extent of scene\n", Progname) ;
-#ifdef NOISY
-	for (i = 0 ; i < NSLABS; i++) {
-		fprintf(stderr, "%s: <%g -- %g>\n",
-				Progname,
-				Root -> o_dmin[i],
-				Root -> o_dmax[i]) ;
-	}
-#endif /* NOISY */
-return 0;
 }
 
 static int Axis ;
 
-int 
-compslabs(a, b)
- Object **a, **b ;
+int compslabs(Object **a, Object **b) /*************************** compslabs */
 {
 	Flt am, bm ;
 
@@ -102,8 +93,7 @@ FindAxis(first, last)
 	return(which) ;
 }
 
-SortAndSplit(first, last)
- int first, last ;
+int SortAndSplit(int first, int last) /************************ SortAndSplit */
 {
 	Object * cp ;
 	CompositeData * cd ;
@@ -122,7 +112,7 @@ SortAndSplit(first, last)
 	 * partition along the axis. Oh well...
 	 */
 
-	qsort((char *) (Prims + first), size, sizeof (Object *), compslabs) ;
+	qsort((char *) (Prims + first), size, sizeof (Object *), (void*)compslabs) ;
 
 	if (size <= BUNCHINGFACTOR) {
 		/* build a box to contain them */
@@ -169,13 +159,11 @@ SortAndSplit(first, last)
 }
 	
 
-int
-InitSlabs()
+void InitSlabs(void) /******************************************** InitSlabs */
 {
 	int i ;
 
 	for (i = 0 ; i < NSLABS ; i ++) {
 		VecNormalize(Slab[i]) ;
 	}
-return 0;
 }

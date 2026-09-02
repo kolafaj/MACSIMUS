@@ -366,7 +366,7 @@ done
 
 if [ "$FAILED" == "" ] ; then
    echo
-   echo "=== All cook* versions have been successfully compiled ==="
+   echo "=== All selected cook* versions have been successfully compiled ==="
    echo
 else
   echo "=== THE FOLLOWING COMPILATIONS HAVE FAILED:"

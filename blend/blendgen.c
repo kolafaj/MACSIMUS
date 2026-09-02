@@ -1785,8 +1785,8 @@ void build(species_t *spec) /***************************************** build */
   buildforcefield(spec);
   if (spec->opt_j) readjet(spec,&b0,&fd0); /* readjet() is in blendedt.c */
   if (spec->Xopt.E) essential(spec);
-  else if (spec->Xopt.G) inertiamatrix("gyration",spec);
-  else if (spec->Xopt.I) inertiamatrix("inertia",spec);
+  else if (spec->Xopt.G&1) inertiamatrix("gyration",spec);
+  else if (spec->Xopt.G&2) inertiamatrix("inertia",spec);
   else if (spec->Xopt.A||spec->Xopt.D) anglemsd(spec);
   else if (spec->Xopt.V) virial(spec0,spec0->next,spec);
   else {

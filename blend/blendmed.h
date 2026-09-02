@@ -106,11 +106,11 @@ extern int ianglemax;
 extern int PDBstyle;
 
 typedef struct Xopt_s { /* see also initialization in blendmed.c !!!!! */
-  ireal dr,Jeps,amplitude,T,core;
+  ireal dr,Jeps,SDeps,CGeps,amplitude,T,core;
   ireal bdihedral[3]; /* dihedrals (phi,psi,omega), to build the chain */
   int ropt; /* set if more than 1 param in -rX:X: (e.g., toframe,byframe) */
   int toframe,byframe;
-  int A,C,D,E,F,G,N,I,P,S,V,W; /* -Options */
+  int A,C,D,E,F,G,N,P,S,V,W; /* -Options */
   char *fn;
 } Xopt_t;
 extern Xopt_t Xopt;

@@ -114,7 +114,7 @@ static struct CPItab_s {
   {"fix", "potential energy of forces fixing sites in place (-k) [J/mol]",&En.fix},
 
 #ifdef ECC
-#  error TO BE UPDATED  
+#  error TO BE UPDATED
   {"Pvir","virial pressure except epsf(V) dependence [Pa]",&En.ECC_Pvir},
   {"PECC","ECC pressure, the same as ECC P [Pa]",&En.P},
   {"Psc","conventional pressure w/o any epsf-based ECC terms [Pa]",&En.ECC_Pscaled},
@@ -286,6 +286,11 @@ static struct CPItab_s {
   {"einf","el.epsinf, dielectric constant at infinity",&el.epsinf},
   {"xinf","1/(2*el.epsinf+1), ~ constant at M^2",&el.xinf},
 #endif /*# COULOMB */
+#ifdef SPCTCF
+  {"BEND"  ,"BEND, lag needed, see spctcf.c [AA2]",&BEND},
+  {"ASTR"  ,"ASTRETCH, lag needed, see spctcf.c [AA2]",&ASTRETCH},
+  {"SSTR"  ,"SSTRETCH, lag needed, see spctcf.c [AA2]",&SSTRETCH},
+#endif
   {"","",NULL}
 };
 
@@ -2021,3 +2026,8 @@ double XWidom(int sp,int spvirt) /********************************** XWidom */
 // #    include "slabmeas.c"
 // #  endif /*#!SLAB & 8 */
 // #endif /*# SLAB */
+
+#ifdef SPCTCF
+/* design flaw: should not be in simmeasx because of recording in .cp */
+# include "spctcf.c"
+#endif

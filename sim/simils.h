@@ -57,7 +57,7 @@ void writeasc(void);
 void readasc(int order,int cfg);
 
 void Maxwell(int from,int to,double prob);
-void MaxwellCM(double prob);
+void MaxwellCM(int from,int to,double prob);
 
 void makefixa(void);
 void loadfixa(void);

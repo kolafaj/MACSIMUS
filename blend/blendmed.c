@@ -35,10 +35,10 @@ double Uanglemax;
 int ianglemax;
 int PDBstyle=4; /* H style: 0=HCB1 1=HB1 2=1HCB 3=1HB 4=omit */
 
-           /* dr  Jeps  amplitude T   core  phi   psi omega ropt toframe byframe */
-Xopt_t Xopt={1e-5,1e-11,1.0,      300,2.0,  {-57, -47, 180}, 0,   -1,     1,
-/* -Options: A, C,D,E,F,G,N,I,P,S  ,V,W,fn */
-             0,-1,0,0,9,0,0,0,0,200,0,3,NULL};
+           /* dr  Jeps  SDeps CGeps amplitude T   core  phi   psi omega ropt toframe byframe */
+Xopt_t Xopt={1e-5,1e-11,1e-11,1e-6, -1.0,     300,2.0,  {-57, -47, 180},0,   -1,     1,
+/* -Options: A, C,D,E,F,G,N,P,S  ,V,W,fn */
+             0,-1,0,0,9,0,0,0,200,0,3,NULL};
 
 species_t *spec0;
 static species_t *spec;

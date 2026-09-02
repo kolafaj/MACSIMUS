@@ -19,29 +19,32 @@
  ***********************************************************************/
 
 #include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
 #include <math.h>
 #include <assert.h>
 #include "defs.h"
 #include "pic.h"
 #include "extern.h"
 
-Flt
-rndcos ()
-{
-/* JK/random number in (-1,1) */
-static double seed;
-long x;
+int FilterScan(Pic * pic, Vec eye, Vec viewvec, Vec upvec, Vec leftvec, int xres, int yres);
+int JitterScan(Pic * pic, Vec eye, Vec viewvec, Vec upvec, Vec leftvec, int xres, int yres);
+int Scan(Pic *pic, Vec eye, Vec viewvec, Vec upvec, Vec leftvec, int xres, int yres);
+int PicClose(Pic *pic);
+int PicWritePixel(Pic *pic, Color color);
 
-if (seed==0) seed=time(&x);
-seed=fmod(seed*78125e0,2147483647e0);
-return (Flt)(seed/1073741823.5-1.0);
+Flt rndcos (void) /************************************************** rndcos */
+{
+  /* JK/random number in (-1,1) */
+  static double seed;
+  long x;
+
+  if (seed==0) seed=time(&x);
+  seed=fmod(seed*78125e0,2147483647e0);
+  return (Flt)(seed/1073741823.5-1.0);
 }
 
-int
-Screen(view, picfile, xres, yres)
- Viewpoint *view ;
- char *picfile ;
- int xres, yres ;
+void Screen(Viewpoint *view, char *picfile, int xres, int yres) /***** Screen */
 /* JK WARNING:
  * aspect and scale are globals (should be parameters),
  * defined in data.c, declared in extern.h
@@ -56,7 +59,7 @@ Screen(view, picfile, xres, yres)
 
         Flt     frustrumwidth ;
 
-        Pic     *pic, *PicOpen();
+        Pic     *pic, *PicOpen(char *picfile, int xres, int yres);
         Point   viewvec, leftvec, upvec ;
 
         pic = PicOpen(picfile, xres, yres) ;
@@ -115,18 +118,12 @@ Screen(view, picfile, xres, yres)
         }
 
         PicClose(pic) ;
-return 0;
 }
 
 
-int
-Scan(pic, eye, viewvec, upvec, leftvec, xres, yres)
- Pic * pic ;
- Vec eye ;
- Vec viewvec ;
- Vec upvec ;
- Vec leftvec ;
- int xres, yres ;
+int Scan(Pic *pic, /*************************************************** Scan */
+         Vec eye, Vec viewvec, Vec upvec, Vec leftvec,
+         int xres, int yres)
 {
         Ray ray ;
         int x, y ;
@@ -159,15 +156,9 @@ Scan(pic, eye, viewvec, upvec, leftvec, xres, yres)
 return 0;
 }
 
-
-int
-FilterScan(pic, eye, viewvec, upvec, leftvec, xres, yres)
- Pic * pic ;
- Vec eye ;
- Vec viewvec ;
- Vec upvec ;
- Vec leftvec ;
- int xres, yres ;
+int FilterScan(Pic * pic, /************************************** FilterScan */
+               Vec eye, Vec viewvec, Vec upvec, Vec leftvec,
+               int xres, int yres)
 {
         Ray ray ;
         int x, y, i ;
@@ -223,24 +214,19 @@ FilterScan(pic, eye, viewvec, upvec, leftvec, xres, yres)
 return 0;
 }
 
-int alreadyodd(int x,int y)
+int alreadyodd(int x,int y) /************************************ alreadyodd */
 {
-return (x*y)&1;
+  return (x*y)&1;
 }
 
-int alreadyeven(int x,int y)
+int alreadyeven(int x,int y) /********************************** alreadyeven */
 {
-return (x%3==1) && (y%3==1);
+  return (x%3==1) && (y%3==1);
 }
 
-int
-JitterScan(pic, eye, viewvec, upvec, leftvec, xres, yres)
- Pic * pic ;
- Vec eye ; 
- Vec viewvec ; 
- Vec upvec ; 
- Vec leftvec ;
- int xres, yres ;
+int JitterScan(Pic * pic, /************************************** JitterScan */
+               Vec eye, Vec viewvec, Vec upvec, Vec leftvec,
+               int xres, int yres)
 {
         Ray ray ;
         int x, y, i ;
@@ -249,14 +235,14 @@ JitterScan(pic, eye, viewvec, upvec, leftvec, xres, yres)
         Color color, avg ;
 
         /* JK changes : */
-        double smartcoeff;
+        double smartcoeff=0;
         int nnest=0;
         int ms=abs(maxsamples);
         double thresholdms=threshold*ms;
         int square=(int)sqrt((double)ms);
         int smartsquare=0;
         int smartantialiasing=0;
-        int (*already)(int,int);
+        int (*already)(int,int)=NULL;
 
         if (maxsamples==-1) {
           fprintf(stderr,"-j-1 is nonsense\n");
@@ -294,93 +280,94 @@ JitterScan(pic, eye, viewvec, upvec, leftvec, xres, yres)
         ywidth = aspect / (Flt) yres / scale; /* JK */
 
         VecCopy(eye, ray.P) ;
-if (smartantialiasing) 
+        if (smartantialiasing) 
 #include "antialia.c"
-else {
-        for (y = 0 ; y < yres ; y++) {
-                ylen = ( ((Flt) (2 * y) / (Flt) yres) - 1.0 )
-                       * (aspect/scale) ;
-                for (x = 0 ; x < xres ; x++) {
-                        xlen = ( ((Flt) (2 * x) / (Flt) xres) - 1.0 ) / scale ;
+        else {
+          for (y = 0 ; y < yres ; y++) {
+            ylen = ( ((Flt) (2 * y) / (Flt) yres) - 1.0 )
+              * (aspect/scale) ;
+            for (x = 0 ; x < xres ; x++) {
+              xlen = ( ((Flt) (2 * x) / (Flt) xres) - 1.0 ) / scale ;
+              
+              avg[0] = avg[1] = avg[2] = 0.0 ;
 
-                        avg[0] = avg[1] = avg[2] = 0.0 ;
+              /* JK */
+              if (square) 
+                if (smartsquare) {
+                  /* square jitter pattern */
+                  int x,y;
+                  Vec fluct;
+                  double fl;
+                  static double w[3]={0.3,0.59,0.11};
+                  
+                  fluct[0] = fluct[1] = fluct[2] = 0.0 ;
 
-/* JK */
-if (square) 
-  if (smartsquare) {
-    /* square jitter pattern */
-    int x,y;
-    Vec fluct;
-    double fl;
-    static double w[3]={0.3,0.59,0.11};
+                  fl=0;
+                  for (x=0; x<square; x++)
+                    for (y=0; y<square; y++) {
+                      VecComb(xlen + (Flt)(2*x+1-square)/(Flt)(square) * xwidth, leftvec,
+                              ylen + (Flt)(2*y+1-square)/(Flt)(square) * ywidth, upvec, ray.D) ;
+                      VecAdd(ray.D, viewvec, ray.D) ;
+                      VecNormalize(ray.D);
+                      Trace(0, 1.0, &ray, color);
+                      fluct[0]+=color[0]*color[0];
+                      fluct[1]+=color[1]*color[1];
+                      fluct[2]+=color[2]*color[2];
+                      VecAdd(color, avg, avg) ; } 
     
-    fluct[0] = fluct[1] = fluct[2] = 0.0 ;
-
-    fl=0;
-    for (x=0; x<square; x++)
-      for (y=0; y<square; y++) {
-        VecComb(xlen + (Flt)(2*x+1-square)/(Flt)(square) * xwidth, leftvec,
-                ylen + (Flt)(2*y+1-square)/(Flt)(square) * ywidth, upvec, ray.D) ;
-        VecAdd(ray.D, viewvec, ray.D) ;
-        VecNormalize(ray.D);
-        Trace(0, 1.0, &ray, color);
-        fluct[0]+=color[0]*color[0];
-        fluct[1]+=color[1]*color[1];
-        fluct[2]+=color[2]*color[2];
-        VecAdd(color, avg, avg) ; } 
-    
-    for (x=0; x<3; x++) fl+=sqrt(fluct[x]-avg[x]*avg[x]/ms)*w[x];
-    if (fl>thresholdms) {
-      nnest++;
-      for (x=0; x<smartsquare; x++)
-        for (y=0; y<smartsquare; y++) if (!already(x,y)) {
-          VecComb(xlen + (Flt)(2*x+1-smartsquare)/(Flt)(smartsquare) * xwidth, leftvec,
-                  ylen + (Flt)(2*y+1-smartsquare)/(Flt)(smartsquare) * ywidth, upvec, ray.D) ;
-          VecAdd(ray.D, viewvec, ray.D) ;
-          VecNormalize(ray.D);
-          Trace(0, 1.0, &ray, color);
-          VecAdd(color, avg, avg) ; }
-
-      avg[0]*=smartcoeff;
-      avg[1]*=smartcoeff;
-      avg[2]*=smartcoeff;
-    }
-  }
-
-  else {
-    /* square jitter pattern */
-    int x,y;
-    for (x=0; x<square; x++)
-      for (y=0; y<square; y++) {
-        VecComb(xlen + (Flt)(2*x+1-square)/(Flt)(square) * xwidth, leftvec,
-                ylen + (Flt)(2*y+1-square)/(Flt)(square) * ywidth, upvec, ray.D) ;
-        VecAdd(ray.D, viewvec, ray.D) ;
-        VecNormalize(ray.D);
-        Trace(0, 1.0, &ray, color);
-        VecAdd(color, avg, avg) ; } }
-
-                        /* original: random jitter pattern */
-else                    for (i = 0 ; i < ms ; i++) {
-                                VecComb(xlen + rndcos() * xwidth, leftvec,
-                                        ylen + rndcos() * ywidth, upvec, ray.D) ;
-                                VecAdd(ray.D, viewvec, ray.D) ;
-                                VecNormalize(ray.D);
-                                Trace(0, 1.0, &ray, color);
-                                VecAdd(color, avg, avg) ;
-                        }
-
-                        VecScale(1.0 / (Flt) ms, avg) ;
-                        avg[0] = min(1.0, avg[0]) ;
-                        avg[1] = min(1.0, avg[1]) ;
-                        avg[2] = min(1.0, avg[2]) ;
-                        PicWritePixel(pic, avg) ;
+                  for (x=0; x<3; x++) fl+=sqrt(fluct[x]-avg[x]*avg[x]/ms)*w[x];
+                  if (fl>thresholdms) {
+                    nnest++;
+                    for (x=0; x<smartsquare; x++)
+                      for (y=0; y<smartsquare; y++) if (!already(x,y)) {
+                          VecComb(xlen + (Flt)(2*x+1-smartsquare)/(Flt)(smartsquare) * xwidth, leftvec,
+                                  ylen + (Flt)(2*y+1-smartsquare)/(Flt)(smartsquare) * ywidth, upvec, ray.D) ;
+                          VecAdd(ray.D, viewvec, ray.D) ;
+                          VecNormalize(ray.D);
+                          Trace(0, 1.0, &ray, color);
+                          VecAdd(color, avg, avg) ; }
+                    
+                    avg[0]*=smartcoeff;
+                    avg[1]*=smartcoeff;
+                    avg[2]*=smartcoeff;
+                  }
                 }
-                if (tickflag) fprintf(stderr, "%4.1f%%\r",100.0*y/yres) ;
+
+                else {
+                  /* square jitter pattern */
+                  int x,y;
+                  for (x=0; x<square; x++)
+                    for (y=0; y<square; y++) {
+                      VecComb(xlen + (Flt)(2*x+1-square)/(Flt)(square) * xwidth, leftvec,
+                              ylen + (Flt)(2*y+1-square)/(Flt)(square) * ywidth, upvec, ray.D) ;
+                      VecAdd(ray.D, viewvec, ray.D) ;
+                      VecNormalize(ray.D);
+                      Trace(0, 1.0, &ray, color);
+                      VecAdd(color, avg, avg) ; } }
+
+              /* original: random jitter pattern */
+              else
+                for (i = 0 ; i < ms ; i++) {
+                  VecComb(xlen + rndcos() * xwidth, leftvec,
+                          ylen + rndcos() * ywidth, upvec, ray.D) ;
+                  VecAdd(ray.D, viewvec, ray.D) ;
+                  VecNormalize(ray.D);
+                  Trace(0, 1.0, &ray, color);
+                  VecAdd(color, avg, avg) ;
+                }
+              
+              VecScale(1.0 / (Flt) ms, avg) ;
+              avg[0] = min(1.0, avg[0]) ;
+              avg[1] = min(1.0, avg[1]) ;
+              avg[2] = min(1.0, avg[2]) ;
+              PicWritePixel(pic, avg) ;
+            }
+            if (tickflag) fprintf(stderr, "%4.1f%%\r",100.0*y/yres) ;
+          }
+          if (tickflag) fprintf(stderr, "\a\r") ;
+          
+          if (smartsquare) printf("%.2f%% smart squares\n",100.0*nnest/(xres*yres));
         }
-        if (tickflag) fprintf(stderr, "\a\r") ;
-
-if (smartsquare) printf("%.2f%% smart squares\n",100.0*nnest/(xres*yres));
-}
-
+        
 return 0;
 }
