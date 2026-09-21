@@ -1,4 +1,4 @@
-#define VERSION "3.7q"
+#define VERSION "3.7r"
 
 #if defined(LINKCELL) && defined(FREEBC)
 #  error "LINKCELL not supported for FREEBC"
@@ -1564,8 +1564,8 @@ final drift = %d = %s",DRIFT_START,drift,int2sumbin(drift)))
 
         measure=iint==noint;
 
-        if (gear.order==2) {
-          vofdependants(0);
+        if (gear.order==2) { /* Verlet/leap-frog */
+          vofdependants(0); /* store cfg */
 
           /* Verlet + SHAKE */
           if (thermostat==T_LANGEVIN_CM || thermostat==T_LANGEVIN)
@@ -1575,12 +1575,9 @@ final drift = %d = %s",DRIFT_START,drift,int2sumbin(drift)))
                 thermostat==T_MAXWELL||thermostat==T_MAXWELL_CM ? (double)justnow(tau.T,h/2) :
                 thermostat==T_ANDERSEN||thermostat==T_ANDERSEN_CM ? h/tau.T : 0);
 
-          vofdependants(1);
+          vofdependants(1); /* calc. dep. vel. from the stored cfg */ } 
 
-        } /* Verlet/leap-frog */
-
-        else {
-          /* Gear integration */
+        else { /* Gear integration */
 #  ifdef POLAR
           Gear2pol(No.eq,No.s*DIM,(option('p')/10)%10,(option('p')/100)%10,cfg);
 #  else /*# POLAR */
@@ -1594,7 +1591,7 @@ final drift = %d = %s",DRIFT_START,drift,int2sumbin(drift)))
               WARNING(("The issue of the velocities of dependants has not been solved. Use SHAKE."))
               warning++; }
 
-            depend_r(cfg[0],0); } }
+            depend_r(cfg[0]); } }
 
 #  if defined(COULOMB) && COULOMB<0
         /*
@@ -1757,7 +1754,7 @@ final drift = %d = %s",DRIFT_START,drift,int2sumbin(drift)))
         if (En.r3) StaAdd("constr err after",En.r3); }
 
       //if (drift&DRIFT_DEPEND) /* new in 2.0b */
-      depend_r(cfg[0],0); /* always in 3.6k (for sure, perhaps not needed) */
+      depend_r(cfg[0]); /* 0 always in 3.6k (for sure, perhaps not needed), 3.7r: 1 */
 
       box.V=PROD(box.L);
 #  ifdef FREEBC
@@ -1889,8 +1886,6 @@ Explanation: The box size is variable in NPT simulation while the cutoff is\n\
 #  endif /*# !defined(FREEBC) && !defined(PERSUM) */
 
       if (sig==5) break; /* 2nd attempt */
-
-      // depend_r(cfg[0],0); moved above
 
 #  include "maincps.c"
 

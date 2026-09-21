@@ -1,3 +1,5 @@
+/* rhs() or Gear and other calculations, not SHAKE (in constrd.c) */
+
 #include "ground.h"
 #include "statics.h"
 #include "simglob.h"
@@ -104,19 +106,16 @@ void rhs(ToIntPtr B, ToIntPtr A, ToIntPtr V) /* ======================== rhs */
 
   if (measure) {
     En.r1=constrainterror(A,V);
-    En.v1=vconstrainterror;
-  }
+    En.v1=vconstrainterror; }
 
-  depend_r(A,0);
+  depend_r(A);
 
 #ifdef POLAR
   scf.nit=0;
   do { /* iterate self-field */
 #endif /*# POLAR */
-
     zeroEn();
     forces(B,A);
-
 #ifdef POLAR
   } while (!selffield(B,A,scf.eps,scf.omega,1));
   StaAdd("polar no of iter",scf.nit);

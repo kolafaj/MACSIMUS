@@ -6,8 +6,7 @@ if (scf.eps>0) {
     if (iter>N+2)
       WARNING(("ASPC and by %d more iterations than MD steps (%d)!\n\
 *** Small surplus at start, esp. if far from equilibrium, is acceptable.\n\
-*** Check variables =polar one-step maxerr=, =polar one-step stderr=\n\
-*** =polar no of iter=, and =selffield maxdr=.\n\
+*** Check variables =polar *= above.\n\
 *** To monitor, use keywords pmax and/or pstd in %s.\n\
 *** Consider decreasing scf.omega=%g or (if stable) increase scf.eps=%g.",
                iter-N,N,scf.omega,scf.eps,Fn("cpi")))

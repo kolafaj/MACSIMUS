@@ -132,7 +132,7 @@ void normalmodesc(void) /**************************************** normalmodes */
   /* forces at minimum, Drude at minimum:
      - F0 used in calc. constraints,
      - polar part of cfg[0] used in the predictor */
-  depend_r(cfg[0],1);
+  depend_r(cfg[0]);
 #ifdef POLAR
   nit=scforces(F0,cfg[0]);
   summaxerr+=scf.maxerr; summaxerrq+=Sqr(scf.maxerr);
@@ -155,7 +155,7 @@ void normalmodesc(void) /**************************************** normalmodes */
     rr=rp[j];
 
     rp[j]=rr+nm.dr;
-    depend_r(CFG,1);
+    depend_r(CFG);
 #ifdef POLAR
     /* original dipoles */
     loop (i,0,No.s*3) pp[i]=p0[i];
@@ -168,7 +168,7 @@ void normalmodesc(void) /**************************************** normalmodes */
     depend_f(CFG,FP);
 
     rp[j]=rr-nm.dr;
-    depend_r(CFG,1);
+    depend_r(CFG);
 #ifdef POLAR
     /* linear predictor */
     loop (i,0,No.s*3) pp[i]=2*p0[i]-pp[i];
@@ -190,7 +190,7 @@ void normalmodesc(void) /**************************************** normalmodes */
     else {
       /* 4th order formula */
       rp[j]=rr+nm.dr*2;
-      depend_r(CFG,1);
+      depend_r(CFG);
 #ifdef POLAR
       loop (i,0,No.s*3) pp[i]=3*p0[i]-2*pp[i];
       nitm+=scforces(FPP,CFG);
@@ -202,7 +202,7 @@ void normalmodesc(void) /**************************************** normalmodes */
       depend_f(CFG,FPP);
 
       rp[j]=rr-2*nm.dr;
-      depend_r(CFG,1);
+      depend_r(CFG);
 #ifdef POLAR
       /* predictor */
       loop (i,0,No.s*3) pp[i]=2*p0[i]-pp[i];
@@ -776,7 +776,7 @@ geometric average of vibrational temperatures Tnu = %.12g K\n",
           loop (ii,0,N) {
             i=M2S[ii/3]*3+(ii%3);
             fm[i]=rp[i]+RP[ii]*x; }
-          depend_r(FM,1);
+          depend_r(FM);
           loop (i,0,No.s) {
             loop (k,0,3) r[k]=FM->rp[i][k];
             fwrite(r,4,3,plb); } }

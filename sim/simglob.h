@@ -329,7 +329,7 @@ typedef double pot1_t(
 
 typedef struct /*SDS*/ {
   int  size;     /* whole struct in bytes */
-  int  dep;      /* set if dependants calculated, unset if cfg changes */
+  int  depvoid;  /* removed (kept for keeping the same size for compatibility) */
   real logs;     /* log of the Nose variable s */
   vector lambda; /* log(L): active for derivatives,
                     cfg[0].lambda is always derived from box.L */

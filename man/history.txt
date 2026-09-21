@@ -114,6 +114,10 @@ blend 2.4h:
   ! minimization bug fixed
   * options -G,-H changed
 
+cook 3.7r:
+  ! Bad velocities of dependants (again): code now more straightforward
+    Affected time correlation functions
+
 cook 3.7q:
   ! declaration bug (introduced in 3.7o) in simmeasx.c for FREEBC fixed
   * ray rewritten from K&R C to ANSI C (headers added)

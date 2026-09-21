@@ -7,7 +7,7 @@
 
    CALLING SCHEME (as in constrd.c, rhs.c = el.eps-controlled):
 
-   depend_r(A,0);
+   depend_r(A);
  #ifdef POLAR
    scf.nit=0;
    do {

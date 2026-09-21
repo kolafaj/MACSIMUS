@@ -267,7 +267,6 @@ int shake_r(ToIntPtr A) /* ========================================= shake_r */
   return sumit;
 } /* shake_r */
 
-
 void Lcorrect(ToIntPtr B, ToIntPtr V) /* ========================== Lcorrect */
 /***
   Positions of sites of all molecules and their velocities are corrected
@@ -842,8 +841,9 @@ void cleavescaling(double *Pscale,double tau,int noint,double factor,double maxs
 }
 
 double cleaverescale(ToIntPtr A,int mode,double q0,double q1)
+                                                          /*** cleaverescale */
 /*
-   version for cleaving with two cleaving potentials
+  version for cleaving with two cleaving potentials
    |  <-q0->  |  <-q1->  |  <-q0-> |
    0          z0         z1        Lz
 */
@@ -933,7 +933,7 @@ double rescalecfg(ToIntPtr A,int mode, double q1,double *q)
     *lower bits are ignored
 
    returns the volume
-   dependants are not recalculated
+   new in 3.7r: are recalculated
 */
 {
   int n,i;
@@ -1011,6 +1011,8 @@ double rescalecfg(ToIntPtr A,int mode, double q1,double *q)
   }
 
   VV(box.Lh,=0.5*box.L)
+
+  if (!(mode&RESCALE_CM)) depend_r(A); /* needed for Rowlinson dependants only */
 
   return PROD(box.L);
 } /* rescalecfg */
@@ -1399,11 +1401,9 @@ void sortmolecules(int sort) /******************************** sortmolecules */
 
 /*** dependants ***/
 
-void depend_r(ToIntPtr A,int always) /***************************** depend_r */
+void depend_r(ToIntPtr A) /**************************************** depend_r */
 /*
   Calculate positions of dependent sites
-  always=1 : always
-  always=0 : only if !A->dep (this is marked during simulation)
 */
 {
   molecule_t *mn;
@@ -1417,9 +1417,6 @@ void depend_r(ToIntPtr A,int always) /***************************** depend_r */
   real *depr;
 
   if (!No.ndep) return;
-  
-  if (always) A->dep=0;
-  if (A->dep) return; /* already calculated */
 
   loop (n,FROM,No.N) {
     mn=molec+n;
@@ -1474,8 +1471,26 @@ void depend_r(ToIntPtr A,int always) /***************************** depend_r */
           VV(depr,+=rr*zz) }
         default:; } }
   } /* n */
+}
 
-  A->dep=1; /* dependants calculated */
+static ToIntPtr last4vofdependants=NULL;
+
+void depend_v(void) /********************************************** depend_v */
+/* back-calculate h*velocities(t-h/2) from cfg[1] and cfg[0] */
+{
+  int n;
+
+  if (last4vofdependants==NULL) ERROR(("internal"))
+  
+  loop (n,FROM,No.N) {
+    molecule_t *mn=molec+n;
+    vector *rlast=rof(mn,last4vofdependants->rp);
+    vector *r=rof(mn,cfg[0]->rp);
+    vector *v=rof(mn,cfg[1]->rp);
+    depend_t *d;
+
+    looplist (d,spec[mn->sp]->dependants)
+      VVV(v[d->indx],=r[d->indx],-rlast[d->indx]) }
 }
 
 #if PRESSURETENSOR&PT_VIR
@@ -1632,32 +1647,20 @@ void vofdependants(int pass) /******************************** vofdependants */
   To calculate the velocities of dependants for measurements of the time
   correlation functions etc.
 
-  Called in main.c after SHAKE so that the the elocities of all sites
+  Called in main.c after SHAKE so that the the velocities of all sites
   incl. dependants at t-h/2 are available.
 */
 {
-  static ToIntPtr last=NULL;
+  if (!measure) return;
 
-  if (No.ndep && measure) {
-
-    if (pass) {
+  if (No.ndep) {
+    if (pass)
       /* calculate velocity of dependants: called after SHAKE */
-      if (measure && No.ndep) {
-        int n;
-
-        depend_r(cfg[0],0);
-        loop (n,FROM,No.N) {
-          molecule_t *mn=molec+n;
-          vector *rlast=rof(mn,last->rp);
-          vector *r=rof(mn,cfg[0]->rp);
-          vector *v=rof(mn,cfg[1]->rp);
-          depend_t *d;
-          
-          looplist (d,spec[mn->sp]->dependants)
-            VVV(v[d->indx],=r[d->indx],-rlast[d->indx]) } } }
+      // depend_r(cfg[0]): should have been calculated (ERROR if not)
+      depend_v();
     else {
       /* store the configuration (INEFFICIENCY: in full, not only dependants) */
-      if (last==NULL) sdsalloc(last,cfg[0]->size);
-      sdscopy(last,cfg[0]); }
-  }
+      if (last4vofdependants==NULL) sdsalloc(last4vofdependants,cfg[0]->size);
+      // depend_r(cfg[0]): should have been calculated (ERROR if not)
+      sdscopy(last4vofdependants,cfg[0]); } }
 }

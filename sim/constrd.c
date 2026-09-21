@@ -328,8 +328,11 @@ static void measurePconstraints(void) /***************** measurePconstraints */
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 */
 
-/*** Lagrange equations of motion *********************** constraintdynamics */
 void constraintdynamics(ToIntPtr B, ToIntPtr A, ToIntPtr V)
+/* Lagrange equations of motion ************************* constraintdynamics */
+/* B = r.h.s = forces -> accelerations (scaled as in Gear)
+   A = r (coordinates)
+   V = velocities*h */
 {
   int n,a,b,nc,ns,i,j,k;
   static int irhs=0;
@@ -606,6 +609,7 @@ void constraintdynamics(ToIntPtr B, ToIntPtr A, ToIntPtr V)
       loop (i,0,ns) VVVO(r[i],=v[i],=f[i],=0); } }
 #endif /*# POLAR */
 
+  depend_r(cfg[0]); /* forced to calculate because positions have changed */
 } /* constraintdynamics */
 
 
@@ -722,7 +726,8 @@ void Shake(double eps, double prob) /********************************* Shake */
   if (option('c')&2) {
     En.r1=constrainterror(cfg[0],cfg[1]);
     En.v1=vconstrainterror/h; }
-  depend_r(cfg[0],0);
+
+  depend_r(cfg[0]);
 
 #ifdef POLAR
   /* pred1.c is old version with -@%=A[0] -_%=A[1]: WARNING - options changed */
@@ -1001,10 +1006,7 @@ void Shake(double eps, double prob) /********************************* Shake */
   
 #include "anchork0.c"
 
-/* end of SHAKE (oth versions) incl. ANCHOR */
-
-  //prt("%d %g %g %g",n,VARG(rof(molec+1,rp)[0]));
-  cfg[0]->dep=0;
+  /* end of SHAKE (other versions) incl. ANCHOR */
 
 #ifdef POLAR
 #  include "shakecp.c"
@@ -1109,6 +1111,8 @@ void Shake(double eps, double prob) /********************************* Shake */
     fprintf(anchor.f," %g\n",t); }
 #endif /*# ANCHOR */
 
+  depend_r(cfg[0]); /* forced to calculate because positions have changed */
+  
   CPUtime("Verlet+Shake");
 } /* Shake */
 
@@ -1239,7 +1243,7 @@ void Shear(ToIntPtr B, ToIntPtr A, ToIntPtr VH,double H) /************ Shear */
 
 struct constrd_s constrd;
 
-void measureP(int pass) /***************************************** measureP */
+void measureP(int pass) /****************************************** measureP */
 /*
   Virtual volume/area method.
 
@@ -1311,7 +1315,6 @@ void measureP(int pass) /***************************************** measureP */
 
     /* enlarge box/area */
     box.V=rescalecfg(locA,constrd.mode,exp(constrd.dV/No.ncoord),NULL);
-    if (!(constrd.mode&RESCALE_CM)) depend_r(locA,1); /* meaningfull for Rowlinson only */
 #  ifdef POLAR
     scforces(locB,locA);
     StaAdd("selffieldx iter",scf.nit);
@@ -1334,7 +1337,6 @@ void measureP(int pass) /***************************************** measureP */
 
     /* shrink box/area */
     box.V=rescalecfg(locA,constrd.mode,exp(-2*constrd.dV/No.ncoord),NULL);
-    if (!(constrd.mode&RESCALE_CM)) depend_r(locA,1); /* meaningfull for Rowlinson only */
 #  ifdef POLAR
     scforces(locB,locA);
     StaAdd("measureP:scf.nit",scf.nit);

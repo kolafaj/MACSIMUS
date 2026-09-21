@@ -631,9 +631,9 @@ void initcryst(int npins,double Emax) /*************************** initcryst */
 #endif /*# SLAB */
 
   removedrifts(1);
+  depend_r(cfg[0]);
   initqf=constrainterror(cfg[0],cfg[1]);
   prt("(v)constraint error=%g (%g)",initqf,vconstrainterror);
-  cfg[0]->dep=0;
   prt("<<< cfg initialized >>>");
 } /* initcryst */
 
@@ -918,9 +918,9 @@ void initcfg(double pins,double Emax,int nplb,int slab_geom) /****** initcfg */
 
   normalize(-1);
   removedrifts(1);
+  depend_r(cfg[0]);                                                                        
   swell=constrainterror(cfg[0],cfg[1]);
   prt("(v)constraint error=%g (%g)",swell,vconstrainterror);
-  cfg[0]->dep=0;
   prt("<<< cfg initialized >>>");
 } /* initcfg */
 
@@ -1408,7 +1408,7 @@ WARNING: no species/site information found in %s\n\
     if (n<0) {
       removedrifts(1);
       prt("<<< cfg loaded >>> L=[%g %g %g]",box.L[0],box.L[1],box.L[2]); }
-    cfg[0]->dep=0;
+    depend_r(cfg[0]);
 
     loop (j,0,DIM) {
       if (box.L[j]) cfg[0]->lambda[j]=log(box.L[j]);
@@ -1442,7 +1442,7 @@ void savecfg(int n,int4 timekey,double *sigvdW) /******************* savecfg */
 /***
     Configuration and some additional information are saved to file.
     n=-1: save SIMNAME.cfg (full configuration)
-    n=-2: as above but do not call removedrifts(1) and depend_r(cfg[0],0)
+    n=-2: as above but do not call removedrifts(1) and depend_r(cfg[0])
           (good after removing a molecule because the tables are broken)
     SIMNAME.cfg (n<0:  full configuration) or
     SIMNAME.n   (n>=0: see option -r.  n = rounded t/tcfg.
@@ -1455,7 +1455,7 @@ void savecfg(int n,int4 timekey,double *sigvdW) /******************* savecfg */
 
   if (n>=-1) {
     if ((drift&DRIFT_WHEN)==DRIFT_SAVE) removedrifts(option('v')&64);
-    depend_r(cfg[0],0); }
+    depend_r(cfg[0]); }
 
   to=OpenCfg(n,"w");
 
@@ -1649,9 +1649,11 @@ void writeplayback(void) /*********************************** writeplayback */
     if (!playback.plb[iplb]) ERROR(("internal: playback.%s (iplb=%d) not opened",playback.ext[iplb],iplb))
     if (!playback.nm) ERROR(("internal"))
 
-    // if (iplb==0) depend_r(cfg[0],0);
-    depend_r(cfg[iplb],0); // also velocities (?)
-
+    depend_r(cfg[iplb]);
+    if (option('m')==2 && No.ndep && playback.nplb>=2) {
+      static int pass;
+      if (++pass<10) WARNING(("Velocities of dependants may be wrong.\n\
+*** To implement, see vofdependants() and depend_v() (>10 warnings suppressed).")) }
     waitfordiskspace(No.s/40+2);
 
 #ifdef FREEBC
@@ -2037,8 +2039,9 @@ void readplayback(int frame,int all) /************************* readplayback */
       if (vlb) {
         if (frame) ERROR(("%s: reading frame %d, site %d",Fn("vlb"),frame,i))
         else ERROR(("%s: reading next frame, site %d",Fn("vlb"),i))
-        VV(simils.cfg[1]->rp[i],=v) } }
-      cfg[0]->dep=0; }
+      VV(simils.cfg[1]->rp[i],=v) } } }
+
+  depend_r(cfg[0]);
 
   if (closeplb) {
     fclose(plb); plb=NULL;
@@ -2104,6 +2107,7 @@ void readasc(int order,int all) /*********************************** readasc */
 #endif /*# TWODIM */
                )!=DIM+2) Error("asc file: format");
     if (n!=j) ERROR(("%s: n=%d expected, %d read",lastFn,n,j)); }
+  depend_r(cfg[0]);
   fclose(asc);
 }
 
@@ -2182,7 +2186,7 @@ void MaxwellCM(int from,int to,double prob) /********************* MaxwellCM */
   int n;
 
   if (T<0) ERROR(("MaxwellCM: T=%g<0",T))
-  
+
   loop (n,from,to) {
     molecule_t *mn=molec+n;
     int ns=mn->ns;
@@ -2363,7 +2367,7 @@ void remove1mol(int n) /***************************************** remove1mol */
 
   /* this cannot be in savecfg because internal tables (as rof) are broken */
   removedrifts(1);
-  depend_r(cfg[0],0);
+  depend_r(cfg[0]);
 
   mn=molec+n;
   ns=mn->ns;
@@ -2412,7 +2416,7 @@ grid=%d/AA  generalized coordinate r=|%d-%d|  pre-bias = 1/r^%d\n  \
 Awall=%g  r range = [%g,%g]  update=%g",
           wl.grid, wl.i, wl.j, wl.n,
           wl.Awall, wl.r0, wl.cutoff, wl.update); }
-    
+
     if (wlgrid && wlgrid!=wl.grid) ERROR(("\
 Implementation limitation: change of wl.grid is not permitted.\n\
 (old=%d curent=%d)",wlgrid,wl.grid))
@@ -2439,7 +2443,7 @@ Implementation limitation: change of the size of wl.A[] is not permitted.\n\
       prt("initial bias = %g*ln(r/%g)",(2-wl.n)*T,wl.cutoff);
       prt("Ubias(r) plot hint: plot -kUWL %s.wl \':x:%g*ln(x/%g)\'",
           simils.simname,(2-wl.n)*T,wl.cutoff);
-      
+
       wl.update=-wl.update; }
     else { /* wl.update>=0 => load from SIMNAME.wl */
       FILE *f=fopen(Fn("wl"),"rt");
@@ -2470,7 +2474,7 @@ Implementation limitation: change of the size of wl.A[] is not permitted.\n\
           /* index range wl.A[-1 .. wl.nA+3] incl. */
           if (2!=sscanf(line,"%lf %lf", &dummy,wl.A+i)) ERROR(("%s: A[%d] missing",lastFn,i)); }
       } /* loop over blocks */
-      
+
       fclose(f); }
 
     /* scaling */

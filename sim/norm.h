@@ -42,7 +42,8 @@ void addEnnit(double *En_nit,int n,double add);
 void distancecheck(void);
 void zeroEn(void);
 
-void depend_r(ToIntPtr A,int always);
+void depend_r(ToIntPtr A);
+void depend_v(void); /* h*velocity of dependants from from cfg[0] and cfg[1] */
 void depend_f(ToIntPtr A,ToIntPtr B);
 
 int iscube(void);

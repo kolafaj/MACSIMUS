@@ -518,7 +518,7 @@ void testSCF(void) /************************************************ testSCF */
 
   sdscopy(locA,cfg[0]);
 
-  if (!(constrd.mode&RESCALE_CM)) depend_r(locA,1); /* meaningfull for Rowlinson only */
+  if (!(constrd.mode&RESCALE_CM)) depend_r(locA); /* meaningfull for Rowlinson only */
 
   scforces(locB,locA);
   depend_f(locA,locB); /* warning: param order ! */
